@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	backward "ldacs_sim_sgw/pkg/backward_module"
+	forward "ldacs_sim_sgw/pkg/forward_module"
 	ldacscore "ldacs_sim_sgw/pkg/ldacs_core"
 	"os"
 	"os/signal"
@@ -35,7 +36,7 @@ func main() {
 	/* run backward module */
 	go backward.ListenAndServe(":7777", ldacscore.MakeLdacsHandler())
 	/* run forward module */
-	//go forward.StartGin()
+	go forward.RunForward()
 
 	/* waiting for all go routine exit */
 	mainloop()
