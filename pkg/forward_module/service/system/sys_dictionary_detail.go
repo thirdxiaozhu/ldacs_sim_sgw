@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 )
@@ -15,7 +15,7 @@ import (
 type DictionaryDetailService struct{}
 
 func (dictionaryDetailService *DictionaryDetailService) CreateSysDictionaryDetail(sysDictionaryDetail system.SysDictionaryDetail) (err error) {
-	err = global.GVA_DB.Create(&sysDictionaryDetail).Error
+	err = forward_global.GVA_DB.Create(&sysDictionaryDetail).Error
 	return err
 }
 
@@ -26,7 +26,7 @@ func (dictionaryDetailService *DictionaryDetailService) CreateSysDictionaryDetai
 //@return: err error
 
 func (dictionaryDetailService *DictionaryDetailService) DeleteSysDictionaryDetail(sysDictionaryDetail system.SysDictionaryDetail) (err error) {
-	err = global.GVA_DB.Delete(&sysDictionaryDetail).Error
+	err = forward_global.GVA_DB.Delete(&sysDictionaryDetail).Error
 	return err
 }
 
@@ -37,7 +37,7 @@ func (dictionaryDetailService *DictionaryDetailService) DeleteSysDictionaryDetai
 //@return: err error
 
 func (dictionaryDetailService *DictionaryDetailService) UpdateSysDictionaryDetail(sysDictionaryDetail *system.SysDictionaryDetail) (err error) {
-	err = global.GVA_DB.Save(sysDictionaryDetail).Error
+	err = forward_global.GVA_DB.Save(sysDictionaryDetail).Error
 	return err
 }
 
@@ -48,7 +48,7 @@ func (dictionaryDetailService *DictionaryDetailService) UpdateSysDictionaryDetai
 //@return: sysDictionaryDetail system.SysDictionaryDetail, err error
 
 func (dictionaryDetailService *DictionaryDetailService) GetSysDictionaryDetail(id uint) (sysDictionaryDetail system.SysDictionaryDetail, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&sysDictionaryDetail).Error
+	err = forward_global.GVA_DB.Where("id = ?", id).First(&sysDictionaryDetail).Error
 	return
 }
 
@@ -62,7 +62,7 @@ func (dictionaryDetailService *DictionaryDetailService) GetSysDictionaryDetailIn
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.GVA_DB.Model(&system.SysDictionaryDetail{})
+	db := forward_global.GVA_DB.Model(&system.SysDictionaryDetail{})
 	var sysDictionaryDetails []system.SysDictionaryDetail
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.Label != "" {

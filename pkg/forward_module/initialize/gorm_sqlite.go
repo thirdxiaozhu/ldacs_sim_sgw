@@ -4,13 +4,13 @@ import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	internal "ldacs_sim_sgw/pkg/forward_module/initialize/inside"
 )
 
 // GormSqlite 初始化Sqlite数据库
 func GormSqlite() *gorm.DB {
-	s := global.GVA_CONFIG.Sqlite
+	s := forward_global.GVA_CONFIG.Sqlite
 	if s.Dbname == "" {
 		return nil
 	}

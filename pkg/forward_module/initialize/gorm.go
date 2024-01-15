@@ -5,14 +5,14 @@ import (
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/example"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
 func Gorm() *gorm.DB {
-	switch global.GVA_CONFIG.System.DbType {
+	switch forward_global.GVA_CONFIG.System.DbType {
 	case "mysql":
 		return GormMysql()
 	case "pgsql":
@@ -29,7 +29,7 @@ func Gorm() *gorm.DB {
 }
 
 func RegisterTables() {
-	db := global.GVA_DB
+	db := forward_global.GVA_DB
 	err := db.AutoMigrate(
 
 		system.SysApi{},
@@ -53,8 +53,8 @@ func RegisterTables() {
 		example.ExaFileUploadAndDownload{}, ldacs_sgw_forward.AccountPlane{}, ldacs_sgw_forward.AccountFlight{}, ldacs_sgw_forward.AccountAuthz{}, ldacs_sgw_forward.AuthzPlane{},
 	)
 	if err != nil {
-		global.GVA_LOG.Error("register table failed", zap.Error(err))
+		forward_global.GVA_LOG.Error("register table failed", zap.Error(err))
 		os.Exit(0)
 	}
-	global.GVA_LOG.Info("register table success")
+	forward_global.GVA_LOG.Info("register table success")
 }

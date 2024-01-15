@@ -8,7 +8,7 @@ import (
 	"github.com/gookit/color"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 	"path/filepath"
@@ -26,14 +26,14 @@ func (h SqliteInitHandler) WriteConfig(ctx context.Context) error {
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	global.GVA_CONFIG.System.DbType = "sqlite"
-	global.GVA_CONFIG.Sqlite = c
-	global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
-	cs := utils.StructToMap(global.GVA_CONFIG)
+	forward_global.GVA_CONFIG.System.DbType = "sqlite"
+	forward_global.GVA_CONFIG.Sqlite = c
+	forward_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
+	cs := utils.StructToMap(forward_global.GVA_CONFIG)
 	for k, v := range cs {
-		global.GVA_VP.Set(k, v)
+		forward_global.GVA_VP.Set(k, v)
 	}
-	return global.GVA_VP.WriteConfig()
+	return forward_global.GVA_VP.WriteConfig()
 }
 
 // EnsureDB 创建数据库并初始化 sqlite
@@ -56,7 +56,7 @@ func (h SqliteInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (
 	}); err != nil {
 		return ctx, err
 	}
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	forward_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	next = context.WithValue(next, "db", db)
 	return next, err
 }

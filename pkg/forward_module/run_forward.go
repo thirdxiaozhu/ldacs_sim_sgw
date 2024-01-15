@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 
 	"ldacs_sim_sgw/pkg/forward_module/core"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/initialize"
 )
 
@@ -21,17 +21,17 @@ import (
 // @name                        x-token
 // @BasePath                    /
 func RunForward() {
-	global.GVA_VP = core.Viper() // 初始化Viper
+	forward_global.GVA_VP = core.Viper() // 初始化Viper
 	initialize.OtherInit()
-	global.GVA_LOG = core.Zap() // 初始化zap日志库
-	zap.ReplaceGlobals(global.GVA_LOG)
-	global.GVA_DB = initialize.Gorm() // gorm连接数据库
+	forward_global.GVA_LOG = core.Zap() // 初始化zap日志库
+	zap.ReplaceGlobals(forward_global.GVA_LOG)
+	forward_global.GVA_DB = initialize.Gorm() // gorm连接数据库
 	initialize.Timer()
 	initialize.DBList()
-	if global.GVA_DB != nil {
+	if forward_global.GVA_DB != nil {
 		initialize.RegisterTables() // 初始化表
 		// 程序结束前关闭数据库链接
-		db, _ := global.GVA_DB.DB()
+		db, _ := forward_global.GVA_DB.DB()
 		defer db.Close()
 	}
 	core.RunWindowsServer()

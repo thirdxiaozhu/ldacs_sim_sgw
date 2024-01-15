@@ -4,7 +4,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	internal "ldacs_sim_sgw/pkg/forward_module/initialize/inside"
 )
 
@@ -12,7 +12,7 @@ import (
 // Author [piexlmax](https://github.com/piexlmax)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormPgSql() *gorm.DB {
-	p := global.GVA_CONFIG.Pgsql
+	p := forward_global.GVA_CONFIG.Pgsql
 	if p.Dbname == "" {
 		return nil
 	}

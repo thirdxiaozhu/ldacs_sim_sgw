@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 )
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -44,9 +44,9 @@ func CreateDir(dirs ...string) (err error) {
 			return err
 		}
 		if !exist {
-			global.GVA_LOG.Debug("create directory" + v)
+			forward_global.GVA_LOG.Debug("create directory" + v)
 			if err := os.MkdirAll(v, os.ModePerm); err != nil {
-				global.GVA_LOG.Error("create directory"+v, zap.Any(" error:", err))
+				forward_global.GVA_LOG.Error("create directory"+v, zap.Any(" error:", err))
 				return err
 			}
 		}

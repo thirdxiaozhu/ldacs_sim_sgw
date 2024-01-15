@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
@@ -16,11 +16,11 @@ var casbinService = service.ServiceGroupApp.SystemServiceGroup.CasbinService
 // CasbinHandler 拦截器
 func CasbinHandler() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if global.GVA_CONFIG.System.Env != "develop" {
+		if forward_global.GVA_CONFIG.System.Env != "develop" {
 			waitUse, _ := utils.GetClaims(c)
 			//获取请求的PATH
 			path := c.Request.URL.Path
-			obj := strings.TrimPrefix(path, global.GVA_CONFIG.System.RouterPrefix)
+			obj := strings.TrimPrefix(path, forward_global.GVA_CONFIG.System.RouterPrefix)
 			// 获取请求方法
 			act := c.Request.Method
 			// 获取用户的角色

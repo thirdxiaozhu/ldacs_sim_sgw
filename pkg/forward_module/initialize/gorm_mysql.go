@@ -5,7 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	internal "ldacs_sim_sgw/pkg/forward_module/initialize/inside"
 )
 
@@ -13,7 +13,7 @@ import (
 // Author [piexlmax](https://github.com/piexlmax)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormMysql() *gorm.DB {
-	m := global.GVA_CONFIG.Mysql
+	m := forward_global.GVA_CONFIG.Mysql
 	if m.Dbname == "" {
 		return nil
 	}

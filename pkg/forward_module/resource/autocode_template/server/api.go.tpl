@@ -1,7 +1,7 @@
 package {{.Package}}
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
     "ldacs_sim_sgw/pkg/forward_module/model/{{.Package}}"
     {{.Package}}Req "ldacs_sim_sgw/pkg/forward_module/model/{{.Package}}/request"
     "ldacs_sim_sgw/pkg/forward_module/model/common/response"

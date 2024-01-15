@@ -14,7 +14,7 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 )
 
@@ -30,14 +30,14 @@ func (h PgsqlInitHandler) WriteConfig(ctx context.Context) error {
 	if !ok {
 		return errors.New("postgresql config invalid")
 	}
-	global.GVA_CONFIG.System.DbType = "pgsql"
-	global.GVA_CONFIG.Pgsql = c
-	global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
-	cs := utils.StructToMap(global.GVA_CONFIG)
+	forward_global.GVA_CONFIG.System.DbType = "pgsql"
+	forward_global.GVA_CONFIG.Pgsql = c
+	forward_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
+	cs := utils.StructToMap(forward_global.GVA_CONFIG)
 	for k, v := range cs {
-		global.GVA_VP.Set(k, v)
+		forward_global.GVA_VP.Set(k, v)
 	}
-	return global.GVA_VP.WriteConfig()
+	return forward_global.GVA_VP.WriteConfig()
 }
 
 // EnsureDB 创建数据库并初始化 pg
@@ -65,7 +65,7 @@ func (h PgsqlInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (n
 	}), &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}); err != nil {
 		return ctx, err
 	}
-	global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	forward_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	next = context.WithValue(next, "db", db)
 	return next, err
 }

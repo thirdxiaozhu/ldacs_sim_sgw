@@ -1,11 +1,11 @@
 package example
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 )
 
 type ExaFileUploadAndDownload struct {
-	global.GVA_MODEL
+	forward_global.GVA_MODEL
 	Name string `json:"name" gorm:"comment:文件名"` // 文件名
 	Url  string `json:"url" gorm:"comment:文件地址"` // 文件地址
 	Tag  string `json:"tag" gorm:"comment:文件标签"` // 文件标签

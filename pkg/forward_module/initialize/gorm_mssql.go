@@ -12,14 +12,14 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	internal "ldacs_sim_sgw/pkg/forward_module/initialize/inside"
 )
 
 // GormMssql 初始化Mssql数据库
 // Author [LouisZhang](191180776@qq.com)
 func GormMssql() *gorm.DB {
-	m := global.GVA_CONFIG.Mssql
+	m := forward_global.GVA_CONFIG.Mssql
 	if m.Dbname == "" {
 		return nil
 	}

@@ -1,4 +1,4 @@
-package global
+package forward_global
 
 import (
 	"time"

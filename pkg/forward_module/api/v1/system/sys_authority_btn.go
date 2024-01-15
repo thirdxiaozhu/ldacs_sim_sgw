@@ -3,7 +3,7 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 )
@@ -28,7 +28,7 @@ func (a *AuthorityBtnApi) GetAuthorityBtn(c *gin.Context) {
 	}
 	res, err := authorityBtnService.GetAuthorityBtn(req)
 	if err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 		return
 	}
@@ -53,7 +53,7 @@ func (a *AuthorityBtnApi) SetAuthorityBtn(c *gin.Context) {
 	}
 	err = authorityBtnService.SetAuthorityBtn(req)
 	if err != nil {
-		global.GVA_LOG.Error("分配失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("分配失败!", zap.Error(err))
 		response.FailWithMessage("分配失败", c)
 		return
 	}
@@ -72,7 +72,7 @@ func (a *AuthorityBtnApi) CanRemoveAuthorityBtn(c *gin.Context) {
 	id := c.Query("id")
 	err := authorityBtnService.CanRemoveAuthorityBtn(id)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 		return
 	}

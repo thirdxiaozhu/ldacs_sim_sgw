@@ -11,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 )
@@ -53,7 +53,7 @@ func ErrorToEmail() gin.HandlerFunc {
 		if status != 200 {
 			subject := username + "" + record.Ip + "调用了" + record.Path + "报错了"
 			if err := utils.ErrorToEmail(subject, str); err != nil {
-				global.GVA_LOG.Error("ErrorToEmail Failed, err:", zap.Error(err))
+				forward_global.GVA_LOG.Error("ErrorToEmail Failed, err:", zap.Error(err))
 			}
 		}
 	}

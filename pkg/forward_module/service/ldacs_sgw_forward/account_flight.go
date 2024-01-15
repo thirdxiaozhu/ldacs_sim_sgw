@@ -1,7 +1,7 @@
 package ldacs_sgw_forward
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 )
@@ -12,35 +12,35 @@ type AccontFlightService struct {
 // CreateAccontFlight 创建航班记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountFlightService *AccontFlightService) CreateAccontFlight(accountFlight *ldacs_sgw_forward.AccountFlight) (err error) {
-	err = global.GVA_DB.Create(accountFlight).Error
+	err = forward_global.GVA_DB.Create(accountFlight).Error
 	return err
 }
 
 // DeleteAccontFlight 删除航班记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountFlightService *AccontFlightService) DeleteAccontFlight(id string) (err error) {
-	err = global.GVA_DB.Delete(&ldacs_sgw_forward.AccountFlight{}, "id = ?", id).Error
+	err = forward_global.GVA_DB.Delete(&ldacs_sgw_forward.AccountFlight{}, "id = ?", id).Error
 	return err
 }
 
 // DeleteAccontFlightByIds 批量删除航班记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountFlightService *AccontFlightService) DeleteAccontFlightByIds(ids []string) (err error) {
-	err = global.GVA_DB.Delete(&[]ldacs_sgw_forward.AccountFlight{}, "id in ?", ids).Error
+	err = forward_global.GVA_DB.Delete(&[]ldacs_sgw_forward.AccountFlight{}, "id in ?", ids).Error
 	return err
 }
 
 // UpdateAccontFlight 更新航班记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountFlightService *AccontFlightService) UpdateAccontFlight(accountFlight ldacs_sgw_forward.AccountFlight) (err error) {
-	err = global.GVA_DB.Save(&accountFlight).Error
+	err = forward_global.GVA_DB.Save(&accountFlight).Error
 	return err
 }
 
 // GetAccontFlight 根据id获取航班记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountFlightService *AccontFlightService) GetAccontFlight(id string) (accountFlight ldacs_sgw_forward.AccountFlight, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&accountFlight).Error
+	err = forward_global.GVA_DB.Where("id = ?", id).First(&accountFlight).Error
 	return
 }
 
@@ -50,7 +50,7 @@ func (accountFlightService *AccontFlightService) GetAccontFlightInfoList(info ld
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.GVA_DB.Model(&ldacs_sgw_forward.AccountFlight{})
+	db := forward_global.GVA_DB.Model(&ldacs_sgw_forward.AccountFlight{})
 	var accountFlights []ldacs_sgw_forward.AccountFlight
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {

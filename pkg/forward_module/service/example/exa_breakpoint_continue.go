@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/example"
 )
 
@@ -22,13 +22,13 @@ func (e *FileUploadAndDownloadService) FindOrCreateFile(fileMd5 string, fileName
 	cfile.FileName = fileName
 	cfile.ChunkTotal = chunkTotal
 
-	if errors.Is(global.GVA_DB.Where("file_md5 = ? AND is_finish = ?", fileMd5, true).First(&file).Error, gorm.ErrRecordNotFound) {
-		err = global.GVA_DB.Where("file_md5 = ? AND file_name = ?", fileMd5, fileName).Preload("ExaFileChunk").FirstOrCreate(&file, cfile).Error
+	if errors.Is(forward_global.GVA_DB.Where("file_md5 = ? AND is_finish = ?", fileMd5, true).First(&file).Error, gorm.ErrRecordNotFound) {
+		err = forward_global.GVA_DB.Where("file_md5 = ? AND file_name = ?", fileMd5, fileName).Preload("ExaFileChunk").FirstOrCreate(&file, cfile).Error
 		return file, err
 	}
 	cfile.IsFinish = true
 	cfile.FilePath = file.FilePath
-	err = global.GVA_DB.Create(&cfile).Error
+	err = forward_global.GVA_DB.Create(&cfile).Error
 	return cfile, err
 }
 
@@ -43,7 +43,7 @@ func (e *FileUploadAndDownloadService) CreateFileChunk(id uint, fileChunkPath st
 	chunk.FileChunkPath = fileChunkPath
 	chunk.ExaFileID = id
 	chunk.FileChunkNumber = fileChunkNumber
-	err := global.GVA_DB.Create(&chunk).Error
+	err := forward_global.GVA_DB.Create(&chunk).Error
 	return err
 }
 
@@ -56,7 +56,7 @@ func (e *FileUploadAndDownloadService) CreateFileChunk(id uint, fileChunkPath st
 func (e *FileUploadAndDownloadService) DeleteFileChunk(fileMd5 string, filePath string) error {
 	var chunks []example.ExaFileChunk
 	var file example.ExaFile
-	err := global.GVA_DB.Where("file_md5 = ? ", fileMd5).First(&file).
+	err := forward_global.GVA_DB.Where("file_md5 = ? ", fileMd5).First(&file).
 		Updates(map[string]interface{}{
 			"IsFinish":  true,
 			"file_path": filePath,
@@ -64,6 +64,6 @@ func (e *FileUploadAndDownloadService) DeleteFileChunk(fileMd5 string, filePath 
 	if err != nil {
 		return err
 	}
-	err = global.GVA_DB.Where("exa_file_id = ?", file.ID).Delete(&chunks).Unscoped().Error
+	err = forward_global.GVA_DB.Where("exa_file_id = ?", file.ID).Delete(&chunks).Unscoped().Error
 	return err
 }

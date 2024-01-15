@@ -2,7 +2,7 @@
 package {{.Package}}
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	{{ if .HasTimer }}"time"{{ end }}
 	{{ if .NeedJSON }}"gorm.io/datatypes"{{ end }}
 )

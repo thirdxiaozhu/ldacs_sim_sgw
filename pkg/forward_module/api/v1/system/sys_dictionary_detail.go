@@ -3,7 +3,7 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
@@ -30,7 +30,7 @@ func (s *DictionaryDetailApi) CreateSysDictionaryDetail(c *gin.Context) {
 	}
 	err = dictionaryDetailService.CreateSysDictionaryDetail(detail)
 	if err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 		return
 	}
@@ -55,7 +55,7 @@ func (s *DictionaryDetailApi) DeleteSysDictionaryDetail(c *gin.Context) {
 	}
 	err = dictionaryDetailService.DeleteSysDictionaryDetail(detail)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -80,7 +80,7 @@ func (s *DictionaryDetailApi) UpdateSysDictionaryDetail(c *gin.Context) {
 	}
 	err = dictionaryDetailService.UpdateSysDictionaryDetail(&detail)
 	if err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 		return
 	}
@@ -110,7 +110,7 @@ func (s *DictionaryDetailApi) FindSysDictionaryDetail(c *gin.Context) {
 	}
 	reSysDictionaryDetail, err := dictionaryDetailService.GetSysDictionaryDetail(detail.ID)
 	if err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 		return
 	}
@@ -135,7 +135,7 @@ func (s *DictionaryDetailApi) GetSysDictionaryDetailList(c *gin.Context) {
 	}
 	list, total, err := dictionaryDetailService.GetSysDictionaryDetailInfoList(pageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}

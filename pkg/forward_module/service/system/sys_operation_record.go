@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	systemReq "ldacs_sim_sgw/pkg/forward_module/model/system/request"
@@ -16,7 +16,7 @@ import (
 type OperationRecordService struct{}
 
 func (operationRecordService *OperationRecordService) CreateSysOperationRecord(sysOperationRecord system.SysOperationRecord) (err error) {
-	err = global.GVA_DB.Create(&sysOperationRecord).Error
+	err = forward_global.GVA_DB.Create(&sysOperationRecord).Error
 	return err
 }
 
@@ -28,7 +28,7 @@ func (operationRecordService *OperationRecordService) CreateSysOperationRecord(s
 //@return: err error
 
 func (operationRecordService *OperationRecordService) DeleteSysOperationRecordByIds(ids request.IdsReq) (err error) {
-	err = global.GVA_DB.Delete(&[]system.SysOperationRecord{}, "id in (?)", ids.Ids).Error
+	err = forward_global.GVA_DB.Delete(&[]system.SysOperationRecord{}, "id in (?)", ids.Ids).Error
 	return err
 }
 
@@ -39,7 +39,7 @@ func (operationRecordService *OperationRecordService) DeleteSysOperationRecordBy
 //@return: err error
 
 func (operationRecordService *OperationRecordService) DeleteSysOperationRecord(sysOperationRecord system.SysOperationRecord) (err error) {
-	err = global.GVA_DB.Delete(&sysOperationRecord).Error
+	err = forward_global.GVA_DB.Delete(&sysOperationRecord).Error
 	return err
 }
 
@@ -50,7 +50,7 @@ func (operationRecordService *OperationRecordService) DeleteSysOperationRecord(s
 //@return: sysOperationRecord system.SysOperationRecord, err error
 
 func (operationRecordService *OperationRecordService) GetSysOperationRecord(id uint) (sysOperationRecord system.SysOperationRecord, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&sysOperationRecord).Error
+	err = forward_global.GVA_DB.Where("id = ?", id).First(&sysOperationRecord).Error
 	return
 }
 
@@ -65,7 +65,7 @@ func (operationRecordService *OperationRecordService) GetSysOperationRecordInfoL
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.GVA_DB.Model(&system.SysOperationRecord{})
+	db := forward_global.GVA_DB.Model(&system.SysOperationRecord{})
 	var sysOperationRecords []system.SysOperationRecord
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.Method != "" {

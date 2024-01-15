@@ -3,7 +3,7 @@ package initialize
 import (
 	//"github.com/dzwvip/oracle"
 	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	internal "ldacs_sim_sgw/pkg/forward_module/initialize/inside"
 
 	//_ "github.com/godror/godror"
@@ -14,7 +14,7 @@ import (
 // GormOracle 初始化oracle数据库
 // 如果需要Oracle库 放开import里的注释 把下方 mysql.Config 改为 oracle.Config ;  mysql.New 改为 oracle.New
 func GormOracle() *gorm.DB {
-	m := global.GVA_CONFIG.Oracle
+	m := forward_global.GVA_CONFIG.Oracle
 	if m.Dbname == "" {
 		return nil
 	}

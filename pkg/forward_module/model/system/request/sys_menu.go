@@ -1,7 +1,7 @@
 package request
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
@@ -13,7 +13,7 @@ type AddMenuAuthorityInfo struct {
 
 func DefaultMenu() []system.SysBaseMenu {
 	return []system.SysBaseMenu{{
-		GVA_MODEL: global.GVA_MODEL{ID: 1},
+		GVA_MODEL: forward_global.GVA_MODEL{ID: 1},
 		ParentId:  "0",
 		Path:      "dashboard",
 		Name:      "dashboard",

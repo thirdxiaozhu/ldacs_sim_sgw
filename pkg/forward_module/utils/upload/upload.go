@@ -3,7 +3,7 @@ package upload
 import (
 	"mime/multipart"
 
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 )
 
 // OSS 对象存储接口
@@ -18,7 +18,7 @@ type OSS interface {
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [ccfish86](https://github.com/ccfish86)
 func NewOss() OSS {
-	switch global.GVA_CONFIG.System.OssType {
+	switch forward_global.GVA_CONFIG.System.OssType {
 	case "local":
 		return &Local{}
 	case "qiniu":

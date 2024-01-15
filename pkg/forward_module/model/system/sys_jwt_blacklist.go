@@ -1,10 +1,10 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 )
 
 type JwtBlacklist struct {
-	global.GVA_MODEL
+	forward_global.GVA_MODEL
 	Jwt string `gorm:"type:text;comment:jwt"`
 }

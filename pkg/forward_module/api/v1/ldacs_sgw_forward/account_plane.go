@@ -3,7 +3,7 @@ package ldacs_sgw_forward
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
@@ -33,7 +33,7 @@ func (accountplaneApi *AccountPlaneApi) CreateAccountPlane(c *gin.Context) {
 	}
 
 	if err := accountplaneService.CreateAccountPlane(&accountplane); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -52,7 +52,7 @@ func (accountplaneApi *AccountPlaneApi) CreateAccountPlane(c *gin.Context) {
 func (accountplaneApi *AccountPlaneApi) DeleteAccountPlane(c *gin.Context) {
 	id := c.Query("ID")
 	if err := accountplaneService.DeleteAccountPlane(id); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -71,7 +71,7 @@ func (accountplaneApi *AccountPlaneApi) DeleteAccountPlane(c *gin.Context) {
 func (accountplaneApi *AccountPlaneApi) DeleteAccountPlaneByIds(c *gin.Context) {
 	ids := c.QueryArray("ids[]")
 	if err := accountplaneService.DeleteAccountPlaneByIds(ids); err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -96,7 +96,7 @@ func (accountplaneApi *AccountPlaneApi) UpdateAccountPlane(c *gin.Context) {
 	}
 
 	if err := accountplaneService.UpdateAccountPlane(accountplane); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -115,7 +115,7 @@ func (accountplaneApi *AccountPlaneApi) UpdateAccountPlane(c *gin.Context) {
 func (accountplaneApi *AccountPlaneApi) FindAccountPlane(c *gin.Context) {
 	id := c.Query("ID")
 	if reaccountplane, err := accountplaneService.GetAccountPlane(id); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reaccountplane": reaccountplane}, c)
@@ -139,7 +139,7 @@ func (accountplaneApi *AccountPlaneApi) GetAccountPlaneList(c *gin.Context) {
 		return
 	}
 	if list, total, err := accountplaneService.GetAccountPlaneInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{

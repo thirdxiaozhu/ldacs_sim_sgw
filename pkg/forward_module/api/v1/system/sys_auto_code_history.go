@@ -3,7 +3,7 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/global"
+	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	systemReq "ldacs_sim_sgw/pkg/forward_module/model/system/request"
@@ -53,7 +53,7 @@ func (a *AutoCodeHistoryApi) Delete(c *gin.Context) {
 	}
 	err = autoCodeHistoryService.Delete(&info)
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -102,7 +102,7 @@ func (a *AutoCodeHistoryApi) GetList(c *gin.Context) {
 	}
 	list, total, err := autoCodeHistoryService.GetList(search.PageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
