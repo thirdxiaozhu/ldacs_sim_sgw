@@ -2,6 +2,7 @@ package f_init
 
 import (
 	"fmt"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/task"
 
 	"github.com/robfig/cron/v3"
@@ -15,7 +16,7 @@ func Timer() {
 		option = append(option, cron.WithSeconds())
 		// 清理DB定时任务
 		_, err := f_global.GVA_Timer.AddTaskByFunc("ClearDB", "@daily", func() {
-			err := task.ClearTable(f_global.GVA_DB) // 定时任务方法定在task文件包中
+			err := task.ClearTable(global.DB) // 定时任务方法定在task文件包中
 			if err != nil {
 				fmt.Println("timer error:", err)
 			}

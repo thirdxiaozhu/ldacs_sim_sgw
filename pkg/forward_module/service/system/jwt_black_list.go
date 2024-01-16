@@ -20,7 +20,7 @@ type JwtService struct{}
 //@return: err error
 
 func (jwtService *JwtService) JsonInBlacklist(jwtList system.JwtBlacklist) (err error) {
-	err = f_global.GVA_DB.Create(&jwtList).Error
+	err = global.DB.Create(&jwtList).Error
 	if err != nil {
 		return
 	}
@@ -72,7 +72,7 @@ func (jwtService *JwtService) SetRedisJWT(jwt string, userName string) (err erro
 
 func LoadAll() {
 	var data []string
-	err := f_global.GVA_DB.Model(&system.JwtBlacklist{}).Select("jwt").Find(&data).Error
+	err := global.DB.Model(&system.JwtBlacklist{}).Select("jwt").Find(&data).Error
 	if err != nil {
 		global.LOGGER.Error("加载数据库jwt黑名单失败!", zap.Error(err))
 		return

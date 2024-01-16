@@ -6,8 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	"sort"
 )
@@ -117,7 +116,7 @@ func (initDBService *InitDBService) InitDB(conf request.InitDB) (err error) {
 	}
 
 	db := ctx.Value("db").(*gorm.DB)
-	f_global.GVA_DB = db
+	global.DB = db
 
 	if err = initHandler.InitTables(ctx, initializers); err != nil {
 		return err

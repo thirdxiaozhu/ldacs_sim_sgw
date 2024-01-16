@@ -2,10 +2,9 @@ package example
 
 import (
 	"errors"
+	"ldacs_sim_sgw/internal/global"
 	"mime/multipart"
 	"strings"
-
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/example"
@@ -19,7 +18,7 @@ import (
 //@return: error
 
 func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownload) error {
-	return f_global.GVA_DB.Create(&file).Error
+	return global.DB.Create(&file).Error
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -30,7 +29,7 @@ func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownl
 
 func (e *FileUploadAndDownloadService) FindFile(id uint) (example.ExaFileUploadAndDownload, error) {
 	var file example.ExaFileUploadAndDownload
-	err := f_global.GVA_DB.Where("id = ?", id).First(&file).Error
+	err := global.DB.Where("id = ?", id).First(&file).Error
 	return file, err
 }
 
@@ -50,14 +49,14 @@ func (e *FileUploadAndDownloadService) DeleteFile(file example.ExaFileUploadAndD
 	if err = oss.DeleteFile(fileFromDb.Key); err != nil {
 		return errors.New("文件删除失败")
 	}
-	err = f_global.GVA_DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
+	err = global.DB.Where("id = ?", file.ID).Unscoped().Delete(&file).Error
 	return err
 }
 
 // EditFileName 编辑文件名或者备注
 func (e *FileUploadAndDownloadService) EditFileName(file example.ExaFileUploadAndDownload) (err error) {
 	var fileFromDb example.ExaFileUploadAndDownload
-	return f_global.GVA_DB.Where("id = ?", file.ID).First(&fileFromDb).Update("name", file.Name).Error
+	return global.DB.Where("id = ?", file.ID).First(&fileFromDb).Update("name", file.Name).Error
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
@@ -70,7 +69,7 @@ func (e *FileUploadAndDownloadService) GetFileRecordInfoList(info request.PageIn
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	keyword := info.Keyword
-	db := f_global.GVA_DB.Model(&example.ExaFileUploadAndDownload{})
+	db := global.DB.Model(&example.ExaFileUploadAndDownload{})
 	var fileLists []example.ExaFileUploadAndDownload
 	if len(keyword) > 0 {
 		db = db.Where("name LIKE ?", "%"+keyword+"%")

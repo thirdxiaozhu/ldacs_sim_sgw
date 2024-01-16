@@ -1,12 +1,11 @@
-package f_init
+package initialize
 
 import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
+	internal "ldacs_sim_sgw/internal/initialize/inside"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	internal "ldacs_sim_sgw/pkg/forward_module/f_init/inside"
 )
 
 // GormSqlite 初始化Sqlite数据库

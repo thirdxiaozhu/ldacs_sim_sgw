@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
@@ -15,12 +14,12 @@ func RegisterApis(apis ...system.SysApi) {
 	for i := range apis {
 		apiPaths = append(apiPaths, apis[i].Path)
 	}
-	f_global.GVA_DB.Find(&[]system.SysApi{}, "path in (?)", apiPaths).Count(&count)
+	global.DB.Find(&[]system.SysApi{}, "path in (?)", apiPaths).Count(&count)
 	if count > 0 {
 		fmt.Println("插件已安装或存在同名路由")
 		return
 	}
-	err := f_global.GVA_DB.Create(&apis).Error
+	err := global.DB.Create(&apis).Error
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -34,13 +33,13 @@ func RegisterMenus(menus ...system.SysBaseMenu) {
 	for i := range menus {
 		menuNames = append(menuNames, menus[i].Name)
 	}
-	f_global.GVA_DB.Find(&[]system.SysBaseMenu{}, "name in (?)", menuNames).Count(&count)
+	global.DB.Find(&[]system.SysBaseMenu{}, "name in (?)", menuNames).Count(&count)
 	if count > 0 {
 		fmt.Println("插件已安装或存在同名菜单")
 		return
 	}
 	parentMenu.ParentId = "0"
-	err := f_global.GVA_DB.Create(&parentMenu).Error
+	err := global.DB.Create(&parentMenu).Error
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -48,7 +47,7 @@ func RegisterMenus(menus ...system.SysBaseMenu) {
 		pid := strconv.Itoa(int(parentMenu.ID))
 		otherMenus[i].ParentId = pid
 	}
-	err = f_global.GVA_DB.Create(&otherMenus).Error
+	err = global.DB.Create(&otherMenus).Error
 	if err != nil {
 		fmt.Println(err)
 	}

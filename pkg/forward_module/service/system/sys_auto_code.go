@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"mime/multipart"
 	"os"
@@ -423,9 +424,9 @@ func (autoCodeService *AutoCodeService) GetAllTplFile(pathName string, fileList 
 
 func (autoCodeService *AutoCodeService) DropTable(BusinessDb, tableName string) error {
 	if BusinessDb != "" {
-		return f_global.MustGetGlobalDBByDBName(BusinessDb).Exec("DROP TABLE " + tableName).Error
+		return global.MustGetGlobalDBByDBName(BusinessDb).Exec("DROP TABLE " + tableName).Error
 	} else {
-		return f_global.GVA_DB.Exec("DROP TABLE " + tableName).Error
+		return global.DB.Exec("DROP TABLE " + tableName).Error
 	}
 }
 
@@ -520,7 +521,7 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 			Method:      "GET",
 		},
 	}
-	err = f_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		for _, v := range apiList {
 			var api system.SysApi
 			if errors.Is(tx.Where("path = ? AND method = ?", v.Path, v.Method).First(&api).Error, gorm.ErrRecordNotFound) {
@@ -611,22 +612,22 @@ func (autoCodeService *AutoCodeService) CreateAutoCode(s *system.SysAutoCode) er
 	if s.PackageName == "autocode" || s.PackageName == "system" || s.PackageName == "example" || s.PackageName == "" {
 		return errors.New("不能使用已保留的package name")
 	}
-	if !errors.Is(f_global.GVA_DB.Where("package_name = ?", s.PackageName).First(&system.SysAutoCode{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(global.DB.Where("package_name = ?", s.PackageName).First(&system.SysAutoCode{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同PackageName")
 	}
 	if e := autoCodeService.CreatePackageTemp(s.PackageName); e != nil {
 		return e
 	}
-	return f_global.GVA_DB.Create(&s).Error
+	return global.DB.Create(&s).Error
 }
 
 func (autoCodeService *AutoCodeService) GetPackage() (pkgList []system.SysAutoCode, err error) {
-	err = f_global.GVA_DB.Find(&pkgList).Error
+	err = global.DB.Find(&pkgList).Error
 	return pkgList, err
 }
 
 func (autoCodeService *AutoCodeService) DelPackage(a system.SysAutoCode) error {
-	return f_global.GVA_DB.Delete(&a).Error
+	return global.DB.Delete(&a).Error
 }
 
 func (autoCodeService *AutoCodeService) CreatePackageTemp(packageName string) error {

@@ -21,8 +21,8 @@ func NewOss() OSS {
 	switch f_global.GVA_CONFIG.System.OssType {
 	case "local":
 		return &Local{}
-	case "qiniu":
-		return &Qiniu{}
+	//case "qiniu":
+	//	return &Qiniu{}
 	case "tencent-cos":
 		return &TencentCOS{}
 	case "aliyun-oss":

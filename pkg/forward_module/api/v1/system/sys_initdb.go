@@ -3,7 +3,6 @@ package system
 import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
@@ -21,7 +20,7 @@ type DBApi struct{}
 // @Success  200   {object}  response.Response{data=string}  "初始化用户数据库"
 // @Router   /init/initdb [post]
 func (i *DBApi) InitDB(c *gin.Context) {
-	if f_global.GVA_DB != nil {
+	if global.DB != nil {
 		global.LOGGER.Error("已存在数据库配置!")
 		response.FailWithMessage("已存在数据库配置", c)
 		return
@@ -52,7 +51,7 @@ func (i *DBApi) CheckDB(c *gin.Context) {
 		needInit = true
 	)
 
-	if f_global.GVA_DB != nil {
+	if global.DB != nil {
 		message = "数据库无需初始化"
 		needInit = false
 	}

@@ -34,7 +34,7 @@ var AutoCodeHistoryServiceApp = new(AutoCodeHistoryService)
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (autoCodeHistoryService *AutoCodeHistoryService) CreateAutoCodeHistory(meta, structName, structCNName, autoCodePath string, injectionMeta string, tableName string, apiIds string, Package string, BusinessDB string) error {
-	return f_global.GVA_DB.Create(&system.SysAutoCodeHistory{
+	return global.DB.Create(&system.SysAutoCodeHistory{
 		Package:       Package,
 		RequestMeta:   meta,
 		AutoCodePath:  autoCodePath,
@@ -52,7 +52,7 @@ func (autoCodeHistoryService *AutoCodeHistoryService) CreateAutoCodeHistory(meta
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (autoCodeHistoryService *AutoCodeHistoryService) First(info *request.GetById) (string, error) {
 	var meta string
-	return meta, f_global.GVA_DB.Model(system.SysAutoCodeHistory{}).Select("request_meta").Where("id = ?", info.Uint()).First(&meta).Error
+	return meta, global.DB.Model(system.SysAutoCodeHistory{}).Select("request_meta").Where("id = ?", info.Uint()).First(&meta).Error
 }
 
 // Repeat 检测重复
@@ -60,7 +60,7 @@ func (autoCodeHistoryService *AutoCodeHistoryService) First(info *request.GetByI
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (autoCodeHistoryService *AutoCodeHistoryService) Repeat(businessDB, structName, Package string) bool {
 	var count int64
-	f_global.GVA_DB.Model(&system.SysAutoCodeHistory{}).Where("business_db = ? and struct_name = ? and package = ? and flag = 0", businessDB, structName, Package).Count(&count)
+	global.DB.Model(&system.SysAutoCodeHistory{}).Where("business_db = ? and struct_name = ? and package = ? and flag = 0", businessDB, structName, Package).Count(&count)
 	return count > 0
 }
 
@@ -69,7 +69,7 @@ func (autoCodeHistoryService *AutoCodeHistoryService) Repeat(businessDB, structN
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (autoCodeHistoryService *AutoCodeHistoryService) RollBack(info *systemReq.RollBack) error {
 	md := system.SysAutoCodeHistory{}
-	if err := f_global.GVA_DB.Where("id = ?", info.ID).First(&md).Error; err != nil {
+	if err := global.DB.Where("id = ?", info.ID).First(&md).Error; err != nil {
 		return err
 	}
 	// 清除API表
@@ -129,14 +129,14 @@ func (autoCodeHistoryService *AutoCodeHistoryService) RollBack(info *systemReq.R
 	ast.RollBackAst(md.Package, md.StructName)
 
 	md.Flag = 1
-	return f_global.GVA_DB.Save(&md).Error
+	return global.DB.Save(&md).Error
 }
 
 // Delete 删除历史数据
 // Author [SliverHorn](https://github.com/SliverHorn)
 // Author [songzhibin97](https://github.com/songzhibin97)
 func (autoCodeHistoryService *AutoCodeHistoryService) Delete(info *request.GetById) error {
-	return f_global.GVA_DB.Where("id = ?", info.Uint()).Delete(&system.SysAutoCodeHistory{}).Error
+	return global.DB.Where("id = ?", info.Uint()).Delete(&system.SysAutoCodeHistory{}).Error
 }
 
 // GetList 获取系统历史数据
@@ -145,7 +145,7 @@ func (autoCodeHistoryService *AutoCodeHistoryService) Delete(info *request.GetBy
 func (autoCodeHistoryService *AutoCodeHistoryService) GetList(info request.PageInfo) (list []response.AutoCodeHistory, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
-	db := f_global.GVA_DB.Model(&system.SysAutoCodeHistory{})
+	db := global.DB.Model(&system.SysAutoCodeHistory{})
 	var entities []response.AutoCodeHistory
 	err = db.Count(&total).Error
 	if err != nil {

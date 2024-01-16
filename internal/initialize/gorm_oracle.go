@@ -1,11 +1,10 @@
-package f_init
+package initialize
 
 import (
+	internal "ldacs_sim_sgw/internal/initialize/inside"
 	//"github.com/dzwvip/oracle"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	internal "ldacs_sim_sgw/pkg/forward_module/f_init/inside"
 
 	//_ "github.com/godror/godror"
 	"gorm.io/driver/mysql"

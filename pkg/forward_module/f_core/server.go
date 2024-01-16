@@ -28,7 +28,7 @@ func RunWindowsServer() {
 		}
 	}
 	// 从db加载jwt数据
-	if f_global.GVA_DB != nil {
+	if global.DB != nil {
 		system.LoadAll()
 	}
 

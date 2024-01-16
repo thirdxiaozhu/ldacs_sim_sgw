@@ -1,12 +1,11 @@
-package f_init
+package initialize
 
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	internal "ldacs_sim_sgw/internal/initialize/inside"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	internal "ldacs_sim_sgw/pkg/forward_module/f_init/inside"
 )
 
 // GormPgSql 初始化 Postgresql 数据库

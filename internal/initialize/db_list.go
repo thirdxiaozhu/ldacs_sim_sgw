@@ -1,7 +1,8 @@
-package f_init
+package initialize
 
 import (
 	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
@@ -30,7 +31,7 @@ func DBList() {
 	// 做特殊判断,是否有迁移
 	// 适配低版本迁移多数据库版本
 	if sysDB, ok := dbMap[sys]; ok {
-		f_global.GVA_DB = sysDB
+		global.DB = sysDB
 	}
-	f_global.GVA_DBList = dbMap
+	global.DBList = dbMap
 }

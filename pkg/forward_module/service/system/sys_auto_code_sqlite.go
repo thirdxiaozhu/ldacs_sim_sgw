@@ -2,8 +2,7 @@ package system
 
 import (
 	"fmt"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/response"
 	"path/filepath"
 	"strings"
@@ -23,9 +22,9 @@ func (a *autoCodeSqlite) GetDB(businessDB string) (data []response.Db, err error
 		File string `gorm:"column:file"`
 	}
 	if businessDB == "" {
-		err = f_global.GVA_DB.Raw(sql).Find(&databaseList).Error
+		err = global.DB.Raw(sql).Find(&databaseList).Error
 	} else {
-		err = f_global.GVA_DBList[businessDB].Raw(sql).Find(&databaseList).Error
+		err = global.DBList[businessDB].Raw(sql).Find(&databaseList).Error
 	}
 	for _, database := range databaseList {
 		if database.File != "" {
@@ -48,9 +47,9 @@ func (a *autoCodeSqlite) GetTables(businessDB string, dbName string) (data []res
 	sql := `SELECT name FROM sqlite_master WHERE type='table'`
 	tabelNames := []string{}
 	if businessDB == "" {
-		err = f_global.GVA_DB.Raw(sql).Find(&tabelNames).Error
+		err = global.DB.Raw(sql).Find(&tabelNames).Error
 	} else {
-		err = f_global.GVA_DBList[businessDB].Raw(sql).Find(&tabelNames).Error
+		err = global.DBList[businessDB].Raw(sql).Find(&tabelNames).Error
 	}
 	for _, tabelName := range tabelNames {
 		entities = append(entities, response.Table{tabelName})
@@ -69,9 +68,9 @@ func (a *autoCodeSqlite) GetColumn(businessDB string, tableName string, dbName s
 		Type string `gorm:"column:type"`
 	}
 	if businessDB == "" {
-		err = f_global.GVA_DB.Raw(sql).Scan(&columnInfos).Error
+		err = global.DB.Raw(sql).Scan(&columnInfos).Error
 	} else {
-		err = f_global.GVA_DBList[businessDB].Raw(sql).Scan(&columnInfos).Error
+		err = global.DBList[businessDB].Raw(sql).Scan(&columnInfos).Error
 	}
 	for _, columnInfo := range columnInfos {
 		entities = append(entities, response.Column{

@@ -1,13 +1,12 @@
-package f_init
+package initialize
 
 import (
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	internal "ldacs_sim_sgw/internal/initialize/inside"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	internal "ldacs_sim_sgw/pkg/forward_module/f_init/inside"
 )
 
 // GormMysql 初始化Mysql数据库

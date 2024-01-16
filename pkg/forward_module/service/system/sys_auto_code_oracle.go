@@ -1,8 +1,7 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/response"
 )
 
@@ -16,7 +15,7 @@ type autoCodeOracle struct{}
 func (s *autoCodeOracle) GetDB(businessDB string) (data []response.Db, err error) {
 	var entities []response.Db
 	sql := `SELECT lower(username) AS "database" FROM all_users`
-	err = f_global.GVA_DBList[businessDB].Raw(sql).Scan(&entities).Error
+	err = global.DBList[businessDB].Raw(sql).Scan(&entities).Error
 	return entities, err
 }
 
@@ -27,7 +26,7 @@ func (s *autoCodeOracle) GetTables(businessDB string, dbName string) (data []res
 	var entities []response.Table
 	sql := `select lower(table_name) as "table_name" from all_tables where lower(owner) = ?`
 
-	err = f_global.GVA_DBList[businessDB].Raw(sql, dbName).Scan(&entities).Error
+	err = global.DBList[businessDB].Raw(sql, dbName).Scan(&entities).Error
 	return entities, err
 }
 
@@ -49,6 +48,6 @@ func (s *autoCodeOracle) GetColumn(businessDB string, tableName string, dbName s
 		 and lower(a.OWNER) = ?		 
 `
 
-	err = f_global.GVA_DBList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
+	err = global.DBList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
 	return entities, err
 }

@@ -1,13 +1,34 @@
-package f_init
+package initialize
 
 import (
-	"go.uber.org/zap"
-	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/pkg/forward_module/model/example"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"os"
+
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
+	"ldacs_sim_sgw/pkg/forward_module/model/example"
+	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
+
+func Gorm() *gorm.DB {
+	switch f_global.GVA_CONFIG.System.DbType {
+	case "mysql":
+		return GormMysql()
+	case "pgsql":
+		return GormPgSql()
+	case "oracle":
+		return GormOracle()
+	case "mssql":
+		return GormMssql()
+	case "sqlite":
+		return GormSqlite()
+	default:
+		return GormMysql()
+	}
+}
 
 func RegisterTables() {
 	db := global.DB

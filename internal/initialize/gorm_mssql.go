@@ -6,15 +6,14 @@
  * @FilePath: \server\initialize\gorm_mssql.go
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-package f_init
+package initialize
 
 import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
+	internal "ldacs_sim_sgw/internal/initialize/inside"
 	"ldacs_sim_sgw/pkg/forward_module/f_config"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	internal "ldacs_sim_sgw/pkg/forward_module/f_init/inside"
 )
 
 // GormMssql 初始化Mssql数据库
