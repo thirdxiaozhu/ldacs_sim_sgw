@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"ldacs_sim_sgw/internal/core"
+	"ldacs_sim_sgw/internal/global"
 	backward "ldacs_sim_sgw/pkg/backward_module"
 	forward "ldacs_sim_sgw/pkg/forward_module"
 	ldacscore "ldacs_sim_sgw/pkg/ldacs_core"
@@ -32,6 +34,9 @@ func main() {
 	//para := make([]uint8, 4)
 	//C.generate_rand((*C.uchar)(unsafe.Pointer(&para[0])))
 	//fmt.Println(para, binary.BigEndian.Uint32(para))
+
+	global.VP = core.InitViper()   // 初始化Viper
+	global.LOGGER = core.InitZap() // 初始化zap日志库
 
 	/* run backward module */
 	go backward.ListenAndServe(":7777", ldacscore.MakeLdacsHandler())

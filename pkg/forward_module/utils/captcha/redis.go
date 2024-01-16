@@ -6,7 +6,8 @@ import (
 
 	"github.com/mojocn/base64Captcha"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 func NewDefaultRedisStore() *RedisStore {
@@ -29,24 +30,24 @@ func (rs *RedisStore) UseWithCtx(ctx context.Context) base64Captcha.Store {
 }
 
 func (rs *RedisStore) Set(id string, value string) error {
-	err := forward_global.GVA_REDIS.Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
+	err := f_global.GVA_REDIS.Set(rs.Context, rs.PreKey+id, value, rs.Expiration).Err()
 	if err != nil {
-		forward_global.GVA_LOG.Error("RedisStoreSetError!", zap.Error(err))
+		global.LOGGER.Error("RedisStoreSetError!", zap.Error(err))
 		return err
 	}
 	return nil
 }
 
 func (rs *RedisStore) Get(key string, clear bool) string {
-	val, err := forward_global.GVA_REDIS.Get(rs.Context, key).Result()
+	val, err := f_global.GVA_REDIS.Get(rs.Context, key).Result()
 	if err != nil {
-		forward_global.GVA_LOG.Error("RedisStoreGetError!", zap.Error(err))
+		global.LOGGER.Error("RedisStoreGetError!", zap.Error(err))
 		return ""
 	}
 	if clear {
-		err := forward_global.GVA_REDIS.Del(rs.Context, key).Err()
+		err := f_global.GVA_REDIS.Del(rs.Context, key).Err()
 		if err != nil {
-			forward_global.GVA_LOG.Error("RedisStoreClearError!", zap.Error(err))
+			global.LOGGER.Error("RedisStoreClearError!", zap.Error(err))
 			return ""
 		}
 	}

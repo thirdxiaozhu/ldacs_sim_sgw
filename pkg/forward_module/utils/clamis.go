@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gofrs/uuid/v5"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
 	systemReq "ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	"net"
 )
@@ -39,7 +39,7 @@ func GetClaims(c *gin.Context) (*systemReq.CustomClaims, error) {
 	j := NewJWT()
 	claims, err := j.ParseToken(token)
 	if err != nil {
-		forward_global.GVA_LOG.Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
+		global.LOGGER.Error("从Gin的Context中获取从jwt解析信息失败, 请检查请求头是否存在x-token且claims是否为规定结构")
 	}
 	return claims, err
 }

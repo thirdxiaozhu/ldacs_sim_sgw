@@ -3,7 +3,8 @@ package system
 import (
 	"errors"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/response"
@@ -13,7 +14,7 @@ type AuthorityBtnService struct{}
 
 func (a *AuthorityBtnService) GetAuthorityBtn(req request.SysAuthorityBtnReq) (res response.SysAuthorityBtnRes, err error) {
 	var authorityBtn []system.SysAuthorityBtn
-	err = forward_global.GVA_DB.Find(&authorityBtn, "authority_id = ? and sys_menu_id = ?", req.AuthorityId, req.MenuID).Error
+	err = f_global.GVA_DB.Find(&authorityBtn, "authority_id = ? and sys_menu_id = ?", req.AuthorityId, req.MenuID).Error
 	if err != nil {
 		return
 	}
@@ -26,7 +27,7 @@ func (a *AuthorityBtnService) GetAuthorityBtn(req request.SysAuthorityBtnReq) (r
 }
 
 func (a *AuthorityBtnService) SetAuthorityBtn(req request.SysAuthorityBtnReq) (err error) {
-	return forward_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	return f_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		var authorityBtn []system.SysAuthorityBtn
 		err = tx.Delete(&[]system.SysAuthorityBtn{}, "authority_id = ? and sys_menu_id = ?", req.AuthorityId, req.MenuID).Error
 		if err != nil {
@@ -50,7 +51,7 @@ func (a *AuthorityBtnService) SetAuthorityBtn(req request.SysAuthorityBtnReq) (e
 }
 
 func (a *AuthorityBtnService) CanRemoveAuthorityBtn(ID string) (err error) {
-	fErr := forward_global.GVA_DB.First(&system.SysAuthorityBtn{}, "sys_base_menu_btn_id = ?", ID).Error
+	fErr := f_global.GVA_DB.First(&system.SysAuthorityBtn{}, "sys_base_menu_btn_id = ?", ID).Error
 	if errors.Is(fErr, gorm.ErrRecordNotFound) {
 		return nil
 	}

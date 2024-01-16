@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 	"strconv"
@@ -60,17 +62,17 @@ func JWTAuth() gin.HandlerFunc {
 		c.Set("claims", claims)
 		c.Next()
 		if claims.ExpiresAt.Unix()-time.Now().Unix() < claims.BufferTime {
-			dr, _ := utils.ParseDuration(forward_global.GVA_CONFIG.JWT.ExpiresTime)
+			dr, _ := utils.ParseDuration(f_global.GVA_CONFIG.JWT.ExpiresTime)
 			claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(dr))
 			newToken, _ := j.CreateTokenByOldToken(token, *claims)
 			newClaims, _ := j.ParseToken(newToken)
 			c.Header("new-token", newToken)
 			c.Header("new-expires-at", strconv.FormatInt(newClaims.ExpiresAt.Unix(), 10))
 			utils.SetToken(c, newToken, int(dr.Seconds()))
-			if forward_global.GVA_CONFIG.System.UseMultipoint {
+			if f_global.GVA_CONFIG.System.UseMultipoint {
 				RedisJwtToken, err := jwtService.GetRedisJWT(newClaims.Username)
 				if err != nil {
-					forward_global.GVA_LOG.Error("get redis jwt failed", zap.Error(err))
+					global.LOGGER.Error("get redis jwt failed", zap.Error(err))
 				} else { // 当之前的取成功时才进行拉黑操作
 					_ = jwtService.JsonInBlacklist(system.JwtBlacklist{Jwt: RedisJwtToken})
 				}

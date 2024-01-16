@@ -16,7 +16,7 @@ const (
 	GB = 1024 * MB
 )
 
-type Server struct {
+type ServerInfo struct {
 	Os   Os   `json:"os"`
 	Cpu  Cpu  `json:"cpu"`
 	Ram  Ram  `json:"ram"`

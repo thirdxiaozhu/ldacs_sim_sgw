@@ -3,7 +3,7 @@ package api
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	email_response "ldacs_sim_sgw/pkg/forward_module/plugin/email/model/response"
 	"ldacs_sim_sgw/pkg/forward_module/plugin/email/service"
@@ -21,7 +21,7 @@ type EmailApi struct{}
 func (s *EmailApi) EmailTest(c *gin.Context) {
 	err := service.ServiceGroupApp.EmailTest()
 	if err != nil {
-		forward_global.GVA_LOG.Error("发送失败!", zap.Error(err))
+		global.LOGGER.Error("发送失败!", zap.Error(err))
 		response.FailWithMessage("发送失败", c)
 		return
 	}
@@ -45,7 +45,7 @@ func (s *EmailApi) SendEmail(c *gin.Context) {
 	}
 	err = service.ServiceGroupApp.SendEmail(email.To, email.Subject, email.Body)
 	if err != nil {
-		forward_global.GVA_LOG.Error("发送失败!", zap.Error(err))
+		global.LOGGER.Error("发送失败!", zap.Error(err))
 		response.FailWithMessage("发送失败", c)
 		return
 	}

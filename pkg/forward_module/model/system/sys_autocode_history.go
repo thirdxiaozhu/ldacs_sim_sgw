@@ -4,13 +4,14 @@ import (
 	"strconv"
 	"strings"
 
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 )
 
 // SysAutoCodeHistory 自动迁移代码记录,用于回滚,重放使用
 type SysAutoCodeHistory struct {
-	forward_global.GVA_MODEL
+	f_global.GVA_MODEL
 	Package       string `json:"package"`
 	BusinessDB    string `json:"businessDB"`
 	TableName     string `json:"tableName"`

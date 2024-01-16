@@ -6,7 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	systemRes "ldacs_sim_sgw/pkg/forward_module/model/system/response"
 )
@@ -27,12 +29,12 @@ type BaseApi struct{}
 // @Router    /base/captcha [post]
 func (b *BaseApi) Captcha(c *gin.Context) {
 	// 判断验证码是否开启
-	openCaptcha := forward_global.GVA_CONFIG.Captcha.OpenCaptcha               // 是否开启防爆次数
-	openCaptchaTimeOut := forward_global.GVA_CONFIG.Captcha.OpenCaptchaTimeOut // 缓存超时时间
+	openCaptcha := f_global.GVA_CONFIG.Captcha.OpenCaptcha               // 是否开启防爆次数
+	openCaptchaTimeOut := f_global.GVA_CONFIG.Captcha.OpenCaptchaTimeOut // 缓存超时时间
 	key := c.ClientIP()
-	v, ok := forward_global.BlackCache.Get(key)
+	v, ok := f_global.BlackCache.Get(key)
 	if !ok {
-		forward_global.BlackCache.Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
+		f_global.BlackCache.Set(key, 1, time.Second*time.Duration(openCaptchaTimeOut))
 	}
 
 	var oc bool
@@ -41,19 +43,19 @@ func (b *BaseApi) Captcha(c *gin.Context) {
 	}
 	// 字符,公式,验证码配置
 	// 生成默认数字的driver
-	driver := base64Captcha.NewDriverDigit(forward_global.GVA_CONFIG.Captcha.ImgHeight, forward_global.GVA_CONFIG.Captcha.ImgWidth, forward_global.GVA_CONFIG.Captcha.KeyLong, 0.7, 80)
+	driver := base64Captcha.NewDriverDigit(f_global.GVA_CONFIG.Captcha.ImgHeight, f_global.GVA_CONFIG.Captcha.ImgWidth, f_global.GVA_CONFIG.Captcha.KeyLong, 0.7, 80)
 	// cp := base64Captcha.NewCaptcha(driver, store.UseWithCtx(c))   // v8下使用redis
 	cp := base64Captcha.NewCaptcha(driver, store)
 	id, b64s, err := cp.Generate()
 	if err != nil {
-		forward_global.GVA_LOG.Error("验证码获取失败!", zap.Error(err))
+		global.LOGGER.Error("验证码获取失败!", zap.Error(err))
 		response.FailWithMessage("验证码获取失败", c)
 		return
 	}
 	response.OkWithDetailed(systemRes.SysCaptchaResponse{
 		CaptchaId:     id,
 		PicPath:       b64s,
-		CaptchaLength: forward_global.GVA_CONFIG.Captcha.KeyLong,
+		CaptchaLength: f_global.GVA_CONFIG.Captcha.KeyLong,
 		OpenCaptcha:   oc,
 	}, "验证码获取成功", c)
 }

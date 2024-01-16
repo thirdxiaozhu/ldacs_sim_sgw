@@ -1,7 +1,8 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system/response"
 )
 
@@ -14,7 +15,7 @@ type Database interface {
 func (autoCodeService *AutoCodeService) Database(businessDB string) Database {
 
 	if businessDB == "" {
-		switch forward_global.GVA_CONFIG.System.DbType {
+		switch f_global.GVA_CONFIG.System.DbType {
 		case "mysql":
 			return AutoCodeMysql
 		case "pgsql":
@@ -25,7 +26,7 @@ func (autoCodeService *AutoCodeService) Database(businessDB string) Database {
 			return AutoCodeMysql
 		}
 	} else {
-		for _, info := range forward_global.GVA_CONFIG.DBList {
+		for _, info := range f_global.GVA_CONFIG.DBList {
 			if info.AliasName == businessDB {
 				switch info.Type {
 				case "mysql":

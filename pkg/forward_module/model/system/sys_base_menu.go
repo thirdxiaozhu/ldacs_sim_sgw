@@ -1,11 +1,11 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 type SysBaseMenu struct {
-	forward_global.GVA_MODEL
+	f_global.GVA_MODEL
 	MenuLevel     uint                                       `json:"-"`
 	ParentId      string                                     `json:"parentId" gorm:"comment:父菜单ID"`     // 父菜单ID
 	Path          string                                     `json:"path" gorm:"comment:路由path"`        // 路由path
@@ -30,7 +30,7 @@ type Meta struct {
 }
 
 type SysBaseMenuParameter struct {
-	forward_global.GVA_MODEL
+	f_global.GVA_MODEL
 	SysBaseMenuID uint
 	Type          string `json:"type" gorm:"comment:地址栏携带参数为params还是query"` // 地址栏携带参数为params还是query
 	Key           string `json:"key" gorm:"comment:地址栏携带参数的key"`            // 地址栏携带参数的key

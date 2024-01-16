@@ -3,7 +3,8 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
@@ -31,7 +32,7 @@ func (s *OperationRecordApi) CreateSysOperationRecord(c *gin.Context) {
 	}
 	err = operationRecordService.CreateSysOperationRecord(sysOperationRecord)
 	if err != nil {
-		forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.LOGGER.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 		return
 	}
@@ -56,7 +57,7 @@ func (s *OperationRecordApi) DeleteSysOperationRecord(c *gin.Context) {
 	}
 	err = operationRecordService.DeleteSysOperationRecord(sysOperationRecord)
 	if err != nil {
-		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -81,7 +82,7 @@ func (s *OperationRecordApi) DeleteSysOperationRecordByIds(c *gin.Context) {
 	}
 	err = operationRecordService.DeleteSysOperationRecordByIds(IDS)
 	if err != nil {
-		forward_global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.LOGGER.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 		return
 	}
@@ -111,7 +112,7 @@ func (s *OperationRecordApi) FindSysOperationRecord(c *gin.Context) {
 	}
 	reSysOperationRecord, err := operationRecordService.GetSysOperationRecord(sysOperationRecord.ID)
 	if err != nil {
-		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.LOGGER.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 		return
 	}
@@ -136,7 +137,7 @@ func (s *OperationRecordApi) GetSysOperationRecordList(c *gin.Context) {
 	}
 	list, total, err := operationRecordService.GetSysOperationRecordInfoList(pageInfo)
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}

@@ -3,7 +3,8 @@ package system
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	systemRes "ldacs_sim_sgw/pkg/forward_module/model/system/response"
@@ -35,7 +36,7 @@ func (cas *CasbinApi) UpdateCasbin(c *gin.Context) {
 	}
 	err = casbinService.UpdateCasbin(cmr.AuthorityId, cmr.CasbinInfos)
 	if err != nil {
-		forward_global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.LOGGER.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 		return
 	}

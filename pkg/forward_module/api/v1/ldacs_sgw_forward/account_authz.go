@@ -3,7 +3,7 @@ package ldacs_sgw_forward
 import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
@@ -33,7 +33,7 @@ func (accountAuthzApi *AccountAuthzApi) CreateAccountAuthz(c *gin.Context) {
 	}
 
 	if err := accountAuthzService.CreateAccountAuthz(&accountAuthz); err != nil {
-		forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.LOGGER.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 	} else {
 		response.OkWithMessage("创建成功", c)
@@ -52,7 +52,7 @@ func (accountAuthzApi *AccountAuthzApi) CreateAccountAuthz(c *gin.Context) {
 func (accountAuthzApi *AccountAuthzApi) DeleteAccountAuthz(c *gin.Context) {
 	id := c.Query("ID")
 	if err := accountAuthzService.DeleteAccountAuthz(id); err != nil {
-		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -71,7 +71,7 @@ func (accountAuthzApi *AccountAuthzApi) DeleteAccountAuthz(c *gin.Context) {
 func (accountAuthzApi *AccountAuthzApi) DeleteAccountAuthzByIds(c *gin.Context) {
 	ids := c.QueryArray("ids[]")
 	if err := accountAuthzService.DeleteAccountAuthzByIds(ids); err != nil {
-		forward_global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.LOGGER.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -96,7 +96,7 @@ func (accountAuthzApi *AccountAuthzApi) UpdateAccountAuthz(c *gin.Context) {
 	}
 
 	if err := accountAuthzService.UpdateAccountAuthz(accountAuthz); err != nil {
-		forward_global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.LOGGER.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -115,7 +115,7 @@ func (accountAuthzApi *AccountAuthzApi) UpdateAccountAuthz(c *gin.Context) {
 func (accountAuthzApi *AccountAuthzApi) FindAccountAuthz(c *gin.Context) {
 	id := c.Query("ID")
 	if reaccountAuthz, err := accountAuthzService.GetAccountAuthz(id); err != nil {
-		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.LOGGER.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reaccountAuthz": reaccountAuthz}, c)
@@ -139,7 +139,7 @@ func (accountAuthzApi *AccountAuthzApi) GetAccountAuthzList(c *gin.Context) {
 		return
 	}
 	if list, total, err := accountAuthzService.GetAccountAuthzInfoList(pageInfo); err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{

@@ -7,14 +7,15 @@ import (
 	"path/filepath"
 
 	"github.com/gookit/color"
-	"ldacs_sim_sgw/pkg/forward_module/config"
+	"ldacs_sim_sgw/pkg/forward_module/f_config"
 
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 
 	"github.com/gofrs/uuid/v5"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 )
 
@@ -26,18 +27,18 @@ func NewMysqlInitHandler() *MysqlInitHandler {
 
 // WriteConfig mysql回写配置
 func (h MysqlInitHandler) WriteConfig(ctx context.Context) error {
-	c, ok := ctx.Value("config").(config.Mysql)
+	c, ok := ctx.Value("config").(f_config.Mysql)
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	forward_global.GVA_CONFIG.System.DbType = "mysql"
-	forward_global.GVA_CONFIG.Mysql = c
-	forward_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
-	cs := utils.StructToMap(forward_global.GVA_CONFIG)
+	f_global.GVA_CONFIG.System.DbType = "mysql"
+	f_global.GVA_CONFIG.Mysql = c
+	f_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
+	cs := utils.StructToMap(f_global.GVA_CONFIG)
 	for k, v := range cs {
-		forward_global.GVA_VP.Set(k, v)
+		f_global.GVA_VP.Set(k, v)
 	}
-	return forward_global.GVA_VP.WriteConfig()
+	return f_global.GVA_VP.WriteConfig()
 }
 
 // EnsureDB 创建数据库并初始化 mysql
@@ -66,7 +67,7 @@ func (h MysqlInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (n
 	}), &gorm.Config{DisableForeignKeyConstraintWhenMigrating: true}); err != nil {
 		return ctx, err
 	}
-	forward_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	f_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	next = context.WithValue(next, "db", db)
 	return next, err
 }

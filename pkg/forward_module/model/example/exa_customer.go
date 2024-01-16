@@ -1,12 +1,13 @@
 package example
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
 type ExaCustomer struct {
-	forward_global.GVA_MODEL
+	f_global.GVA_MODEL
 	CustomerName       string         `json:"customerName" form:"customerName" gorm:"comment:客户名"`                // 客户名
 	CustomerPhoneData  string         `json:"customerPhoneData" form:"customerPhoneData" gorm:"comment:客户手机号"`    // 客户手机号
 	SysUserID          uint           `json:"sysUserId" form:"sysUserId" gorm:"comment:管理ID"`                     // 管理ID

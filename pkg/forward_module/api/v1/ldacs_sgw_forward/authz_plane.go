@@ -5,7 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
@@ -45,7 +46,7 @@ func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 
 		fmt.Println(authzPlaneSingal.AuthzPlaneId)
 		if err := authzPlaneService.CreateAuthzPlane(&authzPlaneSingal); err != nil {
-			forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
+			global.LOGGER.Error("创建失败!", zap.Error(err))
 			response.FailWithMessage("创建失败", c)
 		}
 	}
@@ -64,7 +65,7 @@ func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 func (authzPlaneApi *AuthzPlaneApi) DeleteAuthzPlane(c *gin.Context) {
 	id := c.Query("ID")
 	if err := authzPlaneService.DeleteAuthzPlane(id); err != nil {
-		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
 		response.OkWithMessage("删除成功", c)
@@ -83,7 +84,7 @@ func (authzPlaneApi *AuthzPlaneApi) DeleteAuthzPlane(c *gin.Context) {
 func (authzPlaneApi *AuthzPlaneApi) DeleteAuthzPlaneByIds(c *gin.Context) {
 	ids := c.QueryArray("ids[]")
 	if err := authzPlaneService.DeleteAuthzPlaneByIds(ids); err != nil {
-		forward_global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
+		global.LOGGER.Error("批量删除失败!", zap.Error(err))
 		response.FailWithMessage("批量删除失败", c)
 	} else {
 		response.OkWithMessage("批量删除成功", c)
@@ -108,7 +109,7 @@ func (authzPlaneApi *AuthzPlaneApi) UpdateAuthzPlane(c *gin.Context) {
 	}
 
 	if err := authzPlaneService.UpdateAuthzPlane(authzPlane); err != nil {
-		forward_global.GVA_LOG.Error("更新失败!", zap.Error(err))
+		global.LOGGER.Error("更新失败!", zap.Error(err))
 		response.FailWithMessage("更新失败", c)
 	} else {
 		response.OkWithMessage("更新成功", c)
@@ -127,7 +128,7 @@ func (authzPlaneApi *AuthzPlaneApi) UpdateAuthzPlane(c *gin.Context) {
 func (authzPlaneApi *AuthzPlaneApi) FindAuthzPlane(c *gin.Context) {
 	id := c.Query("ID")
 	if reauthzPlane, err := authzPlaneService.GetAuthzPlane(id); err != nil {
-		forward_global.GVA_LOG.Error("查询失败!", zap.Error(err))
+		global.LOGGER.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {
 		response.OkWithData(gin.H{"reauthzPlane": reauthzPlane}, c)
@@ -151,7 +152,7 @@ func (authzPlaneApi *AuthzPlaneApi) GetAuthzPlaneList(c *gin.Context) {
 		return
 	}
 	if list, total, err := authzPlaneService.GetAuthzPlaneInfoList(pageInfo); err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
@@ -171,7 +172,7 @@ func (authzPlaneApi *AuthzPlaneApi) GetOptions(c *gin.Context) {
 	//}
 
 	if opts, err := authzPlaneService.GetOptions(); err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 	} else {
 		response.OkWithData(gin.H{"options": opts}, c)
@@ -189,7 +190,7 @@ func (authzPlaneApi *AuthzPlaneApi) SetStateChange(c *gin.Context) {
 	fmt.Printf("STATE %d\n", authzPlane.AuthzState)
 
 	if err := authzPlaneService.StateChange(&authzPlane); err != nil {
-		forward_global.GVA_LOG.Error("授权启动失败!", zap.Error(err))
+		global.LOGGER.Error("授权启动失败!", zap.Error(err))
 		response.FailWithMessage("授权启动失败", c)
 	} else {
 		retMap := gin.H{}

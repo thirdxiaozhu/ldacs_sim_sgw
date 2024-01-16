@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"ldacs_sim_sgw/internal/global"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 )
 
 // GinRecovery recover掉项目可能出现的panic，并使用zap记录相关日志
@@ -31,7 +31,7 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					forward_global.GVA_LOG.Error(c.Request.URL.Path,
+					global.LOGGER.Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -42,13 +42,13 @@ func GinRecovery(stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					forward_global.GVA_LOG.Error("[Recovery from panic]",
+					global.LOGGER.Error("[Recovery from panic]",
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 						zap.String("stack", string(debug.Stack())),
 					)
 				} else {
-					forward_global.GVA_LOG.Error("[Recovery from panic]",
+					global.LOGGER.Error("[Recovery from panic]",
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)

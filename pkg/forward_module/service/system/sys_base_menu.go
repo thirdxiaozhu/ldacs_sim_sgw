@@ -4,7 +4,9 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
@@ -17,18 +19,18 @@ type BaseMenuService struct{}
 //@return: err error
 
 func (baseMenuService *BaseMenuService) DeleteBaseMenu(id int) (err error) {
-	err = forward_global.GVA_DB.Preload("MenuBtn").Preload("Parameters").Where("parent_id = ?", id).First(&system.SysBaseMenu{}).Error
+	err = f_global.GVA_DB.Preload("MenuBtn").Preload("Parameters").Where("parent_id = ?", id).First(&system.SysBaseMenu{}).Error
 	if err != nil {
 		var menu system.SysBaseMenu
-		db := forward_global.GVA_DB.Preload("SysAuthoritys").Where("id = ?", id).First(&menu).Delete(&menu)
-		err = forward_global.GVA_DB.Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", id).Error
-		err = forward_global.GVA_DB.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
-		err = forward_global.GVA_DB.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ?", id).Error
+		db := f_global.GVA_DB.Preload("SysAuthoritys").Where("id = ?", id).First(&menu).Delete(&menu)
+		err = f_global.GVA_DB.Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", id).Error
+		err = f_global.GVA_DB.Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", id).Error
+		err = f_global.GVA_DB.Delete(&system.SysAuthorityBtn{}, "sys_menu_id = ?", id).Error
 		if err != nil {
 			return err
 		}
 		if len(menu.SysAuthoritys) > 0 {
-			err = forward_global.GVA_DB.Model(&menu).Association("SysAuthoritys").Delete(&menu.SysAuthoritys)
+			err = f_global.GVA_DB.Model(&menu).Association("SysAuthoritys").Delete(&menu.SysAuthoritys)
 		} else {
 			err = db.Error
 			if err != nil {
@@ -63,22 +65,22 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 	upDateMap["icon"] = menu.Icon
 	upDateMap["sort"] = menu.Sort
 
-	err = forward_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err = f_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		db := tx.Where("id = ?", menu.ID).Find(&oldMenu)
 		if oldMenu.Name != menu.Name {
 			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&system.SysBaseMenu{}).Error, gorm.ErrRecordNotFound) {
-				forward_global.GVA_LOG.Debug("存在相同name修改失败")
+				global.LOGGER.Debug("存在相同name修改失败")
 				return errors.New("存在相同name修改失败")
 			}
 		}
 		txErr := tx.Unscoped().Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", menu.ID).Error
 		if txErr != nil {
-			forward_global.GVA_LOG.Debug(txErr.Error())
+			global.LOGGER.Debug(txErr.Error())
 			return txErr
 		}
 		txErr = tx.Unscoped().Delete(&system.SysBaseMenuBtn{}, "sys_base_menu_id = ?", menu.ID).Error
 		if txErr != nil {
-			forward_global.GVA_LOG.Debug(txErr.Error())
+			global.LOGGER.Debug(txErr.Error())
 			return txErr
 		}
 		if len(menu.Parameters) > 0 {
@@ -87,7 +89,7 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 			}
 			txErr = tx.Create(&menu.Parameters).Error
 			if txErr != nil {
-				forward_global.GVA_LOG.Debug(txErr.Error())
+				global.LOGGER.Debug(txErr.Error())
 				return txErr
 			}
 		}
@@ -98,14 +100,14 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 			}
 			txErr = tx.Create(&menu.MenuBtn).Error
 			if txErr != nil {
-				forward_global.GVA_LOG.Debug(txErr.Error())
+				global.LOGGER.Debug(txErr.Error())
 				return txErr
 			}
 		}
 
 		txErr = db.Updates(upDateMap).Error
 		if txErr != nil {
-			forward_global.GVA_LOG.Debug(txErr.Error())
+			global.LOGGER.Debug(txErr.Error())
 			return txErr
 		}
 		return nil
@@ -120,6 +122,6 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 //@return: menu system.SysBaseMenu, err error
 
 func (baseMenuService *BaseMenuService) GetBaseMenuById(id int) (menu system.SysBaseMenu, err error) {
-	err = forward_global.GVA_DB.Preload("MenuBtn").Preload("Parameters").Where("id = ?", id).First(&menu).Error
+	err = f_global.GVA_DB.Preload("MenuBtn").Preload("Parameters").Where("id = ?", id).First(&menu).Error
 	return
 }

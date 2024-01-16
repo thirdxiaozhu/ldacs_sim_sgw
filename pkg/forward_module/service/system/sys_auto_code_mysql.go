@@ -1,7 +1,8 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system/response"
 )
 
@@ -16,9 +17,9 @@ func (s *autoCodeMysql) GetDB(businessDB string) (data []response.Db, err error)
 	var entities []response.Db
 	sql := "SELECT SCHEMA_NAME AS `database` FROM INFORMATION_SCHEMA.SCHEMATA;"
 	if businessDB == "" {
-		err = forward_global.GVA_DB.Raw(sql).Scan(&entities).Error
+		err = f_global.GVA_DB.Raw(sql).Scan(&entities).Error
 	} else {
-		err = forward_global.GVA_DBList[businessDB].Raw(sql).Scan(&entities).Error
+		err = f_global.GVA_DBList[businessDB].Raw(sql).Scan(&entities).Error
 	}
 	return entities, err
 }
@@ -30,9 +31,9 @@ func (s *autoCodeMysql) GetTables(businessDB string, dbName string) (data []resp
 	var entities []response.Table
 	sql := `select table_name as table_name from information_schema.tables where table_schema = ?`
 	if businessDB == "" {
-		err = forward_global.GVA_DB.Raw(sql, dbName).Scan(&entities).Error
+		err = f_global.GVA_DB.Raw(sql, dbName).Scan(&entities).Error
 	} else {
-		err = forward_global.GVA_DBList[businessDB].Raw(sql, dbName).Scan(&entities).Error
+		err = f_global.GVA_DBList[businessDB].Raw(sql, dbName).Scan(&entities).Error
 	}
 
 	return entities, err
@@ -60,9 +61,9 @@ func (s *autoCodeMysql) GetColumn(businessDB string, tableName string, dbName st
 	  AND table_schema = ?
 	`
 	if businessDB == "" {
-		err = forward_global.GVA_DB.Raw(sql, tableName, dbName).Scan(&entities).Error
+		err = f_global.GVA_DB.Raw(sql, tableName, dbName).Scan(&entities).Error
 	} else {
-		err = forward_global.GVA_DBList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
+		err = f_global.GVA_DBList[businessDB].Raw(sql, tableName, dbName).Scan(&entities).Error
 	}
 
 	return entities, err

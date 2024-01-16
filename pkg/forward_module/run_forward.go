@@ -2,10 +2,10 @@ package forward_module
 
 import (
 	"go.uber.org/zap"
-
-	"ldacs_sim_sgw/pkg/forward_module/core"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
-	"ldacs_sim_sgw/pkg/forward_module/initialize"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_core"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_init"
 )
 
 //go:generate go env -w GO111MODULE=on
@@ -21,18 +21,17 @@ import (
 // @name                        x-token
 // @BasePath                    /
 func RunForward() {
-	forward_global.GVA_VP = core.Viper() // 初始化Viper
-	initialize.OtherInit()
-	forward_global.GVA_LOG = core.Zap() // 初始化zap日志库
-	zap.ReplaceGlobals(forward_global.GVA_LOG)
-	forward_global.GVA_DB = initialize.Gorm() // gorm连接数据库
-	initialize.Timer()
-	initialize.DBList()
-	if forward_global.GVA_DB != nil {
-		initialize.RegisterTables() // 初始化表
+	f_global.GVA_VP = f_core.ForwardViper() // 初始化Viper
+	f_init.OtherInit()
+	zap.ReplaceGlobals(global.LOGGER)
+	f_global.GVA_DB = f_init.Gorm() // gorm连接数据库
+	f_init.Timer()
+	f_init.DBList()
+	if f_global.GVA_DB != nil {
+		f_init.RegisterTables() // 初始化表
 		// 程序结束前关闭数据库链接
-		db, _ := forward_global.GVA_DB.DB()
+		db, _ := f_global.GVA_DB.DB()
 		defer db.Close()
 	}
-	core.RunWindowsServer()
+	f_core.RunWindowsServer()
 }

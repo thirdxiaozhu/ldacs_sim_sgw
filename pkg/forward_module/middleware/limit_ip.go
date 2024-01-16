@@ -3,13 +3,15 @@ package middleware
 import (
 	"context"
 	"errors"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 	"net/http"
 	"time"
 
 	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 )
 
@@ -43,11 +45,11 @@ func DefaultGenerationKey(c *gin.Context) string {
 
 func DefaultCheckOrMark(key string, expire int, limit int) (err error) {
 	// 判断是否开启redis
-	if forward_global.GVA_REDIS == nil {
+	if f_global.GVA_REDIS == nil {
 		return err
 	}
 	if err = SetLimitWithTime(key, limit, time.Duration(expire)*time.Second); err != nil {
-		forward_global.GVA_LOG.Error("limit", zap.Error(err))
+		global.LOGGER.Error("limit", zap.Error(err))
 	}
 	return err
 }
@@ -56,36 +58,36 @@ func DefaultLimit() gin.HandlerFunc {
 	return LimitConfig{
 		GenerationKey: DefaultGenerationKey,
 		CheckOrMark:   DefaultCheckOrMark,
-		Expire:        forward_global.GVA_CONFIG.System.LimitTimeIP,
-		Limit:         forward_global.GVA_CONFIG.System.LimitCountIP,
+		Expire:        f_global.GVA_CONFIG.System.LimitTimeIP,
+		Limit:         f_global.GVA_CONFIG.System.LimitCountIP,
 	}.LimitWithTime()
 }
 
 // SetLimitWithTime 设置访问次数
 func SetLimitWithTime(key string, limit int, expiration time.Duration) error {
-	count, err := forward_global.GVA_REDIS.Exists(context.Background(), key).Result()
+	count, err := f_global.GVA_REDIS.Exists(context.Background(), key).Result()
 	if err != nil {
 		return err
 	}
 	if count == 0 {
-		pipe := forward_global.GVA_REDIS.TxPipeline()
+		pipe := f_global.GVA_REDIS.TxPipeline()
 		pipe.Incr(context.Background(), key)
 		pipe.Expire(context.Background(), key, expiration)
 		_, err = pipe.Exec(context.Background())
 		return err
 	} else {
 		// 次数
-		if times, err := forward_global.GVA_REDIS.Get(context.Background(), key).Int(); err != nil {
+		if times, err := f_global.GVA_REDIS.Get(context.Background(), key).Int(); err != nil {
 			return err
 		} else {
 			if times >= limit {
-				if t, err := forward_global.GVA_REDIS.PTTL(context.Background(), key).Result(); err != nil {
+				if t, err := f_global.GVA_REDIS.PTTL(context.Background(), key).Result(); err != nil {
 					return errors.New("请求太过频繁，请稍后再试")
 				} else {
 					return errors.New("请求太过频繁, 请 " + t.String() + " 秒后尝试")
 				}
 			} else {
-				return forward_global.GVA_REDIS.Incr(context.Background(), key).Err()
+				return f_global.GVA_REDIS.Incr(context.Background(), key).Err()
 			}
 		}
 	}

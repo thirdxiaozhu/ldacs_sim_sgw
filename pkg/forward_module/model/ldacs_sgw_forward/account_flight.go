@@ -2,12 +2,12 @@
 package ldacs_sgw_forward
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 // 航班 结构体  AccountFlight
 type AccountFlight struct {
-	forward_global.GVA_MODEL
+	f_global.GVA_MODEL
 	Flight string `json:"flight" form:"flight" gorm:"column:flight;comment:;"binding:"required"` //航班号
 }
 

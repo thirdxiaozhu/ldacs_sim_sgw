@@ -4,7 +4,8 @@ import (
 	"errors"
 
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
@@ -17,10 +18,10 @@ import (
 type DictionaryService struct{}
 
 func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary system.SysDictionary) (err error) {
-	if (!errors.Is(forward_global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound)) {
+	if (!errors.Is(f_global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound)) {
 		return errors.New("存在相同的type，不允许创建")
 	}
-	err = forward_global.GVA_DB.Create(&sysDictionary).Error
+	err = f_global.GVA_DB.Create(&sysDictionary).Error
 	return err
 }
 
@@ -31,20 +32,20 @@ func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary sy
 //@return: err error
 
 func (dictionaryService *DictionaryService) DeleteSysDictionary(sysDictionary system.SysDictionary) (err error) {
-	err = forward_global.GVA_DB.Where("id = ?", sysDictionary.ID).Preload("SysDictionaryDetails").First(&sysDictionary).Error
+	err = f_global.GVA_DB.Where("id = ?", sysDictionary.ID).Preload("SysDictionaryDetails").First(&sysDictionary).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("请不要搞事")
 	}
 	if err != nil {
 		return err
 	}
-	err = forward_global.GVA_DB.Delete(&sysDictionary).Error
+	err = f_global.GVA_DB.Delete(&sysDictionary).Error
 	if err != nil {
 		return err
 	}
 
 	if sysDictionary.SysDictionaryDetails != nil {
-		return forward_global.GVA_DB.Where("sys_dictionary_id=?", sysDictionary.ID).Delete(sysDictionary.SysDictionaryDetails).Error
+		return f_global.GVA_DB.Where("sys_dictionary_id=?", sysDictionary.ID).Delete(sysDictionary.SysDictionaryDetails).Error
 	}
 	return
 }
@@ -63,9 +64,9 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 		"Status": sysDictionary.Status,
 		"Desc":   sysDictionary.Desc,
 	}
-	db := forward_global.GVA_DB.Where("id = ?", sysDictionary.ID).First(&dict)
+	db := f_global.GVA_DB.Where("id = ?", sysDictionary.ID).First(&dict)
 	if dict.Type != sysDictionary.Type {
-		if !errors.Is(forward_global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound) {
+		if !errors.Is(f_global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound) {
 			return errors.New("存在相同的type，不允许创建")
 		}
 	}
@@ -86,7 +87,7 @@ func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uin
 	} else {
 		flag = *status
 	}
-	err = forward_global.GVA_DB.Where("(type = ? OR id = ?) and status = ?", Type, Id, flag).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
+	err = f_global.GVA_DB.Where("(type = ? OR id = ?) and status = ?", Type, Id, flag).Preload("SysDictionaryDetails", func(db *gorm.DB) *gorm.DB {
 		return db.Where("status = ?", true).Order("sort")
 	}).First(&sysDictionary).Error
 	return
@@ -101,6 +102,6 @@ func (dictionaryService *DictionaryService) GetSysDictionary(Type string, Id uin
 
 func (dictionaryService *DictionaryService) GetSysDictionaryInfoList() (list interface{}, err error) {
 	var sysDictionarys []system.SysDictionary
-	err = forward_global.GVA_DB.Find(&sysDictionarys).Error
+	err = f_global.GVA_DB.Find(&sysDictionarys).Error
 	return sysDictionarys, err
 }

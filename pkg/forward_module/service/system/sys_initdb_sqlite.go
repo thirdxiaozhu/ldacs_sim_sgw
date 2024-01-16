@@ -7,8 +7,9 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/gookit/color"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/config"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_config"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 	"path/filepath"
@@ -22,18 +23,18 @@ func NewSqliteInitHandler() *SqliteInitHandler {
 
 // WriteConfig mysql回写配置
 func (h SqliteInitHandler) WriteConfig(ctx context.Context) error {
-	c, ok := ctx.Value("config").(config.Sqlite)
+	c, ok := ctx.Value("config").(f_config.Sqlite)
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	forward_global.GVA_CONFIG.System.DbType = "sqlite"
-	forward_global.GVA_CONFIG.Sqlite = c
-	forward_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
-	cs := utils.StructToMap(forward_global.GVA_CONFIG)
+	f_global.GVA_CONFIG.System.DbType = "sqlite"
+	f_global.GVA_CONFIG.Sqlite = c
+	f_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
+	cs := utils.StructToMap(f_global.GVA_CONFIG)
 	for k, v := range cs {
-		forward_global.GVA_VP.Set(k, v)
+		f_global.GVA_VP.Set(k, v)
 	}
-	return forward_global.GVA_VP.WriteConfig()
+	return f_global.GVA_VP.WriteConfig()
 }
 
 // EnsureDB 创建数据库并初始化 sqlite
@@ -56,7 +57,7 @@ func (h SqliteInitHandler) EnsureDB(ctx context.Context, conf *request.InitDB) (
 	}); err != nil {
 		return ctx, err
 	}
-	forward_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
+	f_global.GVA_CONFIG.AutoCode.Root, _ = filepath.Abs("..")
 	next = context.WithValue(next, "db", db)
 	return next, err
 }

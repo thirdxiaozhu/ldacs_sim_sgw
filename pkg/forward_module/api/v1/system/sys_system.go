@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	systemRes "ldacs_sim_sgw/pkg/forward_module/model/system/response"
@@ -23,7 +23,7 @@ type SystemApi struct{}
 func (s *SystemApi) GetSystemConfig(c *gin.Context) {
 	config, err := systemConfigService.GetSystemConfig()
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -47,7 +47,7 @@ func (s *SystemApi) SetSystemConfig(c *gin.Context) {
 	}
 	err = systemConfigService.SetSystemConfig(sys)
 	if err != nil {
-		forward_global.GVA_LOG.Error("设置失败!", zap.Error(err))
+		global.LOGGER.Error("设置失败!", zap.Error(err))
 		response.FailWithMessage("设置失败", c)
 		return
 	}
@@ -64,7 +64,7 @@ func (s *SystemApi) SetSystemConfig(c *gin.Context) {
 func (s *SystemApi) ReloadSystem(c *gin.Context) {
 	err := utils.Reload()
 	if err != nil {
-		forward_global.GVA_LOG.Error("重启系统失败!", zap.Error(err))
+		global.LOGGER.Error("重启系统失败!", zap.Error(err))
 		response.FailWithMessage("重启系统失败", c)
 		return
 	}
@@ -81,7 +81,7 @@ func (s *SystemApi) ReloadSystem(c *gin.Context) {
 func (s *SystemApi) GetServerInfo(c *gin.Context) {
 	server, err := systemConfigService.GetServerInfo()
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}

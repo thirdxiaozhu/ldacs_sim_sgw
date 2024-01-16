@@ -1,7 +1,9 @@
 package api
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+"ldacs_sim_sgw/internal/global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 {{ if .NeedModel }}	"ldacs_sim_sgw/pkg/forward_module/plugin/{{ .Snake}}/model" {{ end }}
 	"ldacs_sim_sgw/pkg/forward_module/plugin/{{ .Snake}}/service"

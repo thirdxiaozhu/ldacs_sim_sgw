@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/request"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
@@ -38,7 +38,7 @@ func (s *SystemApiApi) CreateApi(c *gin.Context) {
 	}
 	err = apiService.CreateApi(api)
 	if err != nil {
-		forward_global.GVA_LOG.Error("创建失败!", zap.Error(err))
+		global.LOGGER.Error("创建失败!", zap.Error(err))
 		response.FailWithMessage("创建失败", c)
 		return
 	}
@@ -68,7 +68,7 @@ func (s *SystemApiApi) DeleteApi(c *gin.Context) {
 	}
 	err = apiService.DeleteApi(api)
 	if err != nil {
-		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -98,7 +98,7 @@ func (s *SystemApiApi) GetApiList(c *gin.Context) {
 	}
 	list, total, err := apiService.GetAPIInfoList(pageInfo.SysApi, pageInfo.PageInfo, pageInfo.OrderKey, pageInfo.Desc)
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -133,7 +133,7 @@ func (s *SystemApiApi) GetApiById(c *gin.Context) {
 	}
 	api, err := apiService.GetApiById(idInfo.ID)
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -163,7 +163,7 @@ func (s *SystemApiApi) UpdateApi(c *gin.Context) {
 	}
 	err = apiService.UpdateApi(api)
 	if err != nil {
-		forward_global.GVA_LOG.Error("修改失败!", zap.Error(err))
+		global.LOGGER.Error("修改失败!", zap.Error(err))
 		response.FailWithMessage("修改失败", c)
 		return
 	}
@@ -181,7 +181,7 @@ func (s *SystemApiApi) UpdateApi(c *gin.Context) {
 func (s *SystemApiApi) GetAllApis(c *gin.Context) {
 	apis, err := apiService.GetAllApis()
 	if err != nil {
-		forward_global.GVA_LOG.Error("获取失败!", zap.Error(err))
+		global.LOGGER.Error("获取失败!", zap.Error(err))
 		response.FailWithMessage("获取失败", c)
 		return
 	}
@@ -206,7 +206,7 @@ func (s *SystemApiApi) DeleteApisByIds(c *gin.Context) {
 	}
 	err = apiService.DeleteApisByIds(ids)
 	if err != nil {
-		forward_global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 		return
 	}
@@ -223,7 +223,7 @@ func (s *SystemApiApi) DeleteApisByIds(c *gin.Context) {
 func (s *SystemApiApi) FreshCasbin(c *gin.Context) {
 	err := casbinService.FreshCasbin()
 	if err != nil {
-		forward_global.GVA_LOG.Error("刷新失败!", zap.Error(err))
+		global.LOGGER.Error("刷新失败!", zap.Error(err))
 		response.FailWithMessage("刷新失败", c)
 		return
 	}

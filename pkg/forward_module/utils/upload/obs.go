@@ -5,7 +5,7 @@ import (
 
 	"github.com/huaweicloud/huaweicloud-sdk-go-obs/obs"
 	"github.com/pkg/errors"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 var HuaWeiObs = new(Obs)
@@ -13,7 +13,7 @@ var HuaWeiObs = new(Obs)
 type Obs struct{}
 
 func NewHuaWeiObsClient() (client *obs.ObsClient, err error) {
-	return obs.New(forward_global.GVA_CONFIG.HuaWeiObs.AccessKey, forward_global.GVA_CONFIG.HuaWeiObs.SecretKey, forward_global.GVA_CONFIG.HuaWeiObs.Endpoint)
+	return obs.New(f_global.GVA_CONFIG.HuaWeiObs.AccessKey, f_global.GVA_CONFIG.HuaWeiObs.SecretKey, f_global.GVA_CONFIG.HuaWeiObs.Endpoint)
 }
 
 func (o *Obs) UploadFile(file *multipart.FileHeader) (string, string, error) {
@@ -27,7 +27,7 @@ func (o *Obs) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	input := &obs.PutObjectInput{
 		PutObjectBasicInput: obs.PutObjectBasicInput{
 			ObjectOperationInput: obs.ObjectOperationInput{
-				Bucket: forward_global.GVA_CONFIG.HuaWeiObs.Bucket,
+				Bucket: f_global.GVA_CONFIG.HuaWeiObs.Bucket,
 				Key:    filename,
 			},
 			ContentType: file.Header.Get("content-type"),
@@ -45,7 +45,7 @@ func (o *Obs) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Wrap(err, "文件上传失败!")
 	}
-	filepath := forward_global.GVA_CONFIG.HuaWeiObs.Path + "/" + filename
+	filepath := f_global.GVA_CONFIG.HuaWeiObs.Path + "/" + filename
 	return filepath, filename, err
 }
 
@@ -55,7 +55,7 @@ func (o *Obs) DeleteFile(key string) error {
 		return errors.Wrap(err, "获取华为对象存储对象失败!")
 	}
 	input := &obs.DeleteObjectInput{
-		Bucket: forward_global.GVA_CONFIG.HuaWeiObs.Bucket,
+		Bucket: f_global.GVA_CONFIG.HuaWeiObs.Bucket,
 		Key:    key,
 	}
 	var output *obs.DeleteObjectOutput

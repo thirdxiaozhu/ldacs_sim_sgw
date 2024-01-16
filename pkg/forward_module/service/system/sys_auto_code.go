@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"ldacs_sim_sgw/internal/util"
 	"mime/multipart"
 	"os"
 	"path/filepath"
@@ -19,7 +20,8 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/pkg/forward_module/resource/autocode_template/subcontract"
 
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
+
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 
@@ -52,20 +54,20 @@ var (
 func Init(Package string) {
 	injectionPaths = []injectionMeta{
 		{
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SApi, Package), "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SApi, Package), "enter.go"),
 			funcName:    "ApiGroup",
 			structNameF: "%sApi",
 		},
 		{
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SRouter, Package), "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SRouter, Package), "enter.go"),
 			funcName:    "RouterGroup",
 			structNameF: "%sRouter",
 		},
 		{
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SService, Package), "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SService, Package), "enter.go"),
 			funcName:    "ServiceGroup",
 			structNameF: "%sService",
 		},
@@ -73,24 +75,24 @@ func Init(Package string) {
 
 	packageInjectionMap = map[string]astInjectionMeta{
 		packageServiceName: {
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, "service", "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, "service", "enter.go"),
 			importCodeF:  "ldacs_sim_sgw/pkg/forward_module/%s/%s",
 			packageNameF: "%s",
 			groupName:    "ServiceGroup",
 			structNameF:  "%sServiceGroup",
 		},
 		packageRouterName: {
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, "router", "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, "router", "enter.go"),
 			importCodeF:  "ldacs_sim_sgw/pkg/forward_module/%s/%s",
 			packageNameF: "%s",
 			groupName:    "RouterGroup",
 			structNameF:  "%s",
 		},
 		packageAPIName: {
-			path: filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, "api/v1", "enter.go"),
+			path: filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, "api/v1", "enter.go"),
 			importCodeF:  "ldacs_sim_sgw/pkg/forward_module/%s/%s",
 			packageNameF: "%s",
 			groupName:    "ApiGroup",
@@ -164,7 +166,7 @@ func (autoCodeService *AutoCodeService) PreviewTemp(autoCode system.AutoCodeStru
 	}
 
 	// 写入文件前，先创建文件夹
-	if err = utils.CreateDir(needMkdir...); err != nil {
+	if err = util.CreateDir(needMkdir...); err != nil {
 		return nil, err
 	}
 
@@ -278,7 +280,7 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 	}
 
 	// 写入文件前，先创建文件夹
-	if err = utils.CreateDir(needMkdir...); err != nil {
+	if err = util.CreateDir(needMkdir...); err != nil {
 		return err
 	}
 
@@ -313,28 +315,28 @@ func (autoCodeService *AutoCodeService) CreateTemp(autoCode system.AutoCodeStruc
 		}
 		// 判断目标文件是否都可以移动
 		for _, value := range dataList {
-			if utils.FileExist(value.autoMoveFilePath) {
+			if util.FileExist(value.autoMoveFilePath) {
 				return errors.New(fmt.Sprintf("目标文件已存在:%s\n", value.autoMoveFilePath))
 			}
 		}
 		for _, value := range dataList { // 移动文件
-			if err := utils.FileMove(value.autoCodePath, value.autoMoveFilePath); err != nil {
+			if err := util.FileMove(value.autoCodePath, value.autoMoveFilePath); err != nil {
 				return err
 			}
 		}
 
 		{
 			// 在gorm.go 注入 自动迁移
-			path := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, forward_global.GVA_CONFIG.AutoCode.SInitialize, "gorm.go")
+			path := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, f_global.GVA_CONFIG.AutoCode.SInitialize, "gorm.go")
 			varDB := utils.MaheHump(autoCode.BusinessDB)
 			ast2.AddRegisterTablesAst(path, "RegisterTables", autoCode.Package, varDB, autoCode.BusinessDB, autoCode.StructName)
 		}
 
 		{
 			// router.go 注入 自动迁移
-			path := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, forward_global.GVA_CONFIG.AutoCode.SInitialize, "router.go")
+			path := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, f_global.GVA_CONFIG.AutoCode.SInitialize, "router.go")
 			ast2.AddRouterCode(path, "Routers", autoCode.Package, autoCode.StructName)
 		}
 		// 给各个enter进行注入
@@ -421,9 +423,9 @@ func (autoCodeService *AutoCodeService) GetAllTplFile(pathName string, fileList 
 
 func (autoCodeService *AutoCodeService) DropTable(BusinessDb, tableName string) error {
 	if BusinessDb != "" {
-		return forward_global.MustGetGlobalDBByDBName(BusinessDb).Exec("DROP TABLE " + tableName).Error
+		return f_global.MustGetGlobalDBByDBName(BusinessDb).Exec("DROP TABLE " + tableName).Error
 	} else {
-		return forward_global.GVA_DB.Exec("DROP TABLE " + tableName).Error
+		return f_global.GVA_DB.Exec("DROP TABLE " + tableName).Error
 	}
 }
 
@@ -443,31 +445,31 @@ func (autoCodeService *AutoCodeService) addAutoMoveFile(data *tplData) {
 	}
 	if strings.Contains(fileSlice[1], "server") {
 		if strings.Contains(fileSlice[n-2], "router") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server,
-				fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SRouter, data.autoPackage), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server,
+				fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SRouter, data.autoPackage), base)
 		} else if strings.Contains(fileSlice[n-2], "api") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SApi, data.autoPackage), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SApi, data.autoPackage), base)
 		} else if strings.Contains(fileSlice[n-2], "service") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SService, data.autoPackage), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SService, data.autoPackage), base)
 		} else if strings.Contains(fileSlice[n-2], "model") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SModel, data.autoPackage), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SModel, data.autoPackage), base)
 		} else if strings.Contains(fileSlice[n-2], "request") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SRequest, data.autoPackage), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SRequest, data.autoPackage), base)
 		}
 	} else if strings.Contains(fileSlice[1], "web") {
 		if strings.Contains(fileSlice[n-1], "js") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Web, forward_global.GVA_CONFIG.AutoCode.WApi, base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Web, f_global.GVA_CONFIG.AutoCode.WApi, base)
 		} else if strings.Contains(fileSlice[n-2], "form") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Web, forward_global.GVA_CONFIG.AutoCode.WForm, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), strings.TrimSuffix(base, filepath.Ext(base))+"Form.vue")
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Web, f_global.GVA_CONFIG.AutoCode.WForm, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), strings.TrimSuffix(base, filepath.Ext(base))+"Form.vue")
 		} else if strings.Contains(fileSlice[n-2], "table") {
-			data.autoMoveFilePath = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root,
-				forward_global.GVA_CONFIG.AutoCode.Web, forward_global.GVA_CONFIG.AutoCode.WTable, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), base)
+			data.autoMoveFilePath = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root,
+				f_global.GVA_CONFIG.AutoCode.Web, f_global.GVA_CONFIG.AutoCode.WTable, filepath.Base(filepath.Dir(filepath.Dir(data.autoCodePath))), base)
 		}
 	}
 }
@@ -518,7 +520,7 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 			Method:      "GET",
 		},
 	}
-	err = forward_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+	err = f_global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		for _, v := range apiList {
 			var api system.SysApi
 			if errors.Is(tx.Where("path = ? AND method = ?", v.Path, v.Method).First(&api).Error, gorm.ErrRecordNotFound) {
@@ -536,9 +538,9 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 
 func (autoCodeService *AutoCodeService) getNeedList(autoCode *system.AutoCodeStruct) (dataList []tplData, fileList []string, needMkdir []string, err error) {
 	// 去除所有空格
-	utils.TrimSpace(autoCode)
+	util.TrimSpace(autoCode)
 	for _, field := range autoCode.Fields {
-		utils.TrimSpace(field)
+		util.TrimSpace(field)
 	}
 	// 获取 basePath 文件夹下所有tpl文件
 	tplFileList, err := autoCodeService.GetAllTplFile(autocodePath, nil)
@@ -609,22 +611,22 @@ func (autoCodeService *AutoCodeService) CreateAutoCode(s *system.SysAutoCode) er
 	if s.PackageName == "autocode" || s.PackageName == "system" || s.PackageName == "example" || s.PackageName == "" {
 		return errors.New("不能使用已保留的package name")
 	}
-	if !errors.Is(forward_global.GVA_DB.Where("package_name = ?", s.PackageName).First(&system.SysAutoCode{}).Error, gorm.ErrRecordNotFound) {
+	if !errors.Is(f_global.GVA_DB.Where("package_name = ?", s.PackageName).First(&system.SysAutoCode{}).Error, gorm.ErrRecordNotFound) {
 		return errors.New("存在相同PackageName")
 	}
 	if e := autoCodeService.CreatePackageTemp(s.PackageName); e != nil {
 		return e
 	}
-	return forward_global.GVA_DB.Create(&s).Error
+	return f_global.GVA_DB.Create(&s).Error
 }
 
 func (autoCodeService *AutoCodeService) GetPackage() (pkgList []system.SysAutoCode, err error) {
-	err = forward_global.GVA_DB.Find(&pkgList).Error
+	err = f_global.GVA_DB.Find(&pkgList).Error
 	return pkgList, err
 }
 
 func (autoCodeService *AutoCodeService) DelPackage(a system.SysAutoCode) error {
-	return forward_global.GVA_DB.Delete(&a).Error
+	return f_global.GVA_DB.Delete(&a).Error
 }
 
 func (autoCodeService *AutoCodeService) CreatePackageTemp(packageName string) error {
@@ -643,7 +645,7 @@ func (autoCodeService *AutoCodeService) CreatePackageTemp(packageName string) er
 		temp: string(subcontract.API),
 	}}
 	for i, s := range pendingTemp {
-		pendingTemp[i].path = filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server, filepath.Clean(fmt.Sprintf(s.path, packageName)))
+		pendingTemp[i].path = filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server, filepath.Clean(fmt.Sprintf(s.path, packageName)))
 	}
 	// 选择模板
 	for _, s := range pendingTemp {
@@ -693,10 +695,10 @@ func (autoCodeService *AutoCodeService) CreatePlug(plug system.AutoPlugReq) erro
 		}
 		pathArr := strings.SplitAfter(tpl, "/")
 		if strings.Index(pathArr[2], "tpl") < 0 {
-			dirPath := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SPlug, plug.Snake+"/"+pathArr[2]))
+			dirPath := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SPlug, plug.Snake+"/"+pathArr[2]))
 			os.MkdirAll(dirPath, 0755)
 		}
-		file := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(forward_global.GVA_CONFIG.AutoCode.SPlug, plug.Snake+"/"+tpl[len(plugPath):len(tpl)-4]))
+		file := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server, fmt.Sprintf(f_global.GVA_CONFIG.AutoCode.SPlug, plug.Snake+"/"+tpl[len(plugPath):len(tpl)-4]))
 		f, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			zap.L().Error("open file", zap.String("tpl", tpl), zap.Error(err), zap.Any("plug", plug))
@@ -759,14 +761,14 @@ func (autoCodeService *AutoCodeService) InstallPlugin(file *multipart.FileHeader
 	}
 
 	if webIndex != -1 {
-		err = installation(paths[webIndex], forward_global.GVA_CONFIG.AutoCode.Server, forward_global.GVA_CONFIG.AutoCode.Web)
+		err = installation(paths[webIndex], f_global.GVA_CONFIG.AutoCode.Server, f_global.GVA_CONFIG.AutoCode.Web)
 		if err != nil {
 			return webIndex, serverIndex, err
 		}
 	}
 
 	if serverIndex != -1 {
-		err = installation(paths[serverIndex], forward_global.GVA_CONFIG.AutoCode.Server, forward_global.GVA_CONFIG.AutoCode.Server)
+		err = installation(paths[serverIndex], f_global.GVA_CONFIG.AutoCode.Server, f_global.GVA_CONFIG.AutoCode.Server)
 	}
 	return webIndex, serverIndex, err
 }
@@ -779,8 +781,8 @@ func installation(path string, formPath string, toPath string) error {
 	}
 	name := arr[ln-3]
 
-	var form = filepath.ToSlash(forward_global.GVA_CONFIG.AutoCode.Root + formPath + "/" + path)
-	var to = filepath.ToSlash(forward_global.GVA_CONFIG.AutoCode.Root + toPath + "/plugin/")
+	var form = filepath.ToSlash(f_global.GVA_CONFIG.AutoCode.Root + formPath + "/" + path)
+	var to = filepath.ToSlash(f_global.GVA_CONFIG.AutoCode.Root + toPath + "/plugin/")
 	_, err := os.Stat(to + name)
 	if err == nil {
 		zap.L().Error("autoPath 已存在同名插件，请自行手动安装", zap.String("to", to))
@@ -815,8 +817,8 @@ func (autoCodeService *AutoCodeService) PubPlug(plugName string) (zipPath string
 	// 防止路径穿越
 	plugName = filepath.Clean(plugName)
 
-	webPath := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Web, "plugin", plugName)
-	serverPath := filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server, "plugin", plugName)
+	webPath := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Web, "plugin", plugName)
+	serverPath := filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server, "plugin", plugName)
 	// 创建一个新的zip文件
 
 	// 判断目录是否存在
@@ -954,5 +956,5 @@ func (autoCodeService *AutoCodeService) PubPlug(plugName string) (zipPath string
 	if err != nil {
 		return
 	}
-	return filepath.Join(forward_global.GVA_CONFIG.AutoCode.Root, forward_global.GVA_CONFIG.AutoCode.Server, fileName), nil
+	return filepath.Join(f_global.GVA_CONFIG.AutoCode.Root, f_global.GVA_CONFIG.AutoCode.Server, fileName), nil
 }

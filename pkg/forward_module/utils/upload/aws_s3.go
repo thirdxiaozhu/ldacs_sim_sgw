@@ -3,10 +3,10 @@ package upload
 import (
 	"errors"
 	"fmt"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/forward_module/f_global"
 	"mime/multipart"
 	"time"
-
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -30,25 +30,25 @@ func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 	uploader := s3manager.NewUploader(session)
 
 	fileKey := fmt.Sprintf("%d%s", time.Now().Unix(), file.Filename)
-	filename := forward_global.GVA_CONFIG.AwsS3.PathPrefix + "/" + fileKey
+	filename := f_global.GVA_CONFIG.AwsS3.PathPrefix + "/" + fileKey
 	f, openError := file.Open()
 	if openError != nil {
-		forward_global.GVA_LOG.Error("function file.Open() failed", zap.Any("err", openError.Error()))
+		global.LOGGER.Error("function file.Open() failed", zap.Any("err", openError.Error()))
 		return "", "", errors.New("function file.Open() failed, err:" + openError.Error())
 	}
 	defer f.Close() // 创建文件 defer 关闭
 
 	_, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(forward_global.GVA_CONFIG.AwsS3.Bucket),
+		Bucket: aws.String(f_global.GVA_CONFIG.AwsS3.Bucket),
 		Key:    aws.String(filename),
 		Body:   f,
 	})
 	if err != nil {
-		forward_global.GVA_LOG.Error("function uploader.Upload() failed", zap.Any("err", err.Error()))
+		global.LOGGER.Error("function uploader.Upload() failed", zap.Any("err", err.Error()))
 		return "", "", err
 	}
 
-	return forward_global.GVA_CONFIG.AwsS3.BaseURL + "/" + filename, fileKey, nil
+	return f_global.GVA_CONFIG.AwsS3.BaseURL + "/" + filename, fileKey, nil
 }
 
 //@author: [WqyJh](https://github.com/WqyJh)
@@ -61,15 +61,15 @@ func (*AwsS3) UploadFile(file *multipart.FileHeader) (string, string, error) {
 func (*AwsS3) DeleteFile(key string) error {
 	session := newSession()
 	svc := s3.New(session)
-	filename := forward_global.GVA_CONFIG.AwsS3.PathPrefix + "/" + key
-	bucket := forward_global.GVA_CONFIG.AwsS3.Bucket
+	filename := f_global.GVA_CONFIG.AwsS3.PathPrefix + "/" + key
+	bucket := f_global.GVA_CONFIG.AwsS3.Bucket
 
 	_, err := svc.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(filename),
 	})
 	if err != nil {
-		forward_global.GVA_LOG.Error("function svc.DeleteObject() failed", zap.Any("err", err.Error()))
+		global.LOGGER.Error("function svc.DeleteObject() failed", zap.Any("err", err.Error()))
 		return errors.New("function svc.DeleteObject() failed, err:" + err.Error())
 	}
 
@@ -83,13 +83,13 @@ func (*AwsS3) DeleteFile(key string) error {
 // newSession Create S3 session
 func newSession() *session.Session {
 	sess, _ := session.NewSession(&aws.Config{
-		Region:           aws.String(forward_global.GVA_CONFIG.AwsS3.Region),
-		Endpoint:         aws.String(forward_global.GVA_CONFIG.AwsS3.Endpoint), //minio在这里设置地址,可以兼容
-		S3ForcePathStyle: aws.Bool(forward_global.GVA_CONFIG.AwsS3.S3ForcePathStyle),
-		DisableSSL:       aws.Bool(forward_global.GVA_CONFIG.AwsS3.DisableSSL),
+		Region:           aws.String(f_global.GVA_CONFIG.AwsS3.Region),
+		Endpoint:         aws.String(f_global.GVA_CONFIG.AwsS3.Endpoint), //minio在这里设置地址,可以兼容
+		S3ForcePathStyle: aws.Bool(f_global.GVA_CONFIG.AwsS3.S3ForcePathStyle),
+		DisableSSL:       aws.Bool(f_global.GVA_CONFIG.AwsS3.DisableSSL),
 		Credentials: credentials.NewStaticCredentials(
-			forward_global.GVA_CONFIG.AwsS3.SecretID,
-			forward_global.GVA_CONFIG.AwsS3.SecretKey,
+			f_global.GVA_CONFIG.AwsS3.SecretID,
+			f_global.GVA_CONFIG.AwsS3.SecretKey,
 			"",
 		),
 	})

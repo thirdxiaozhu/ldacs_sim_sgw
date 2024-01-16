@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"ldacs_sim_sgw/internal/global"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"ldacs_sim_sgw/pkg/forward_module/forward_global"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 )
@@ -39,7 +39,7 @@ func OperationRecord() gin.HandlerFunc {
 			var err error
 			body, err = io.ReadAll(c.Request.Body)
 			if err != nil {
-				forward_global.GVA_LOG.Error("read body from request error:", zap.Error(err))
+				global.LOGGER.Error("read body from request error:", zap.Error(err))
 			} else {
 				c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
 			}
@@ -113,7 +113,7 @@ func OperationRecord() gin.HandlerFunc {
 		}
 
 		if err := operationRecordService.CreateSysOperationRecord(record); err != nil {
-			forward_global.GVA_LOG.Error("create operation record error:", zap.Error(err))
+			global.LOGGER.Error("create operation record error:", zap.Error(err))
 		}
 	}
 }
