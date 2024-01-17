@@ -4,7 +4,6 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/example"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"os"
 )
@@ -31,11 +30,6 @@ func RegisterTables() {
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
 		example.ExaFileUploadAndDownload{},
-
-		ldacs_sgw_forward.AccountPlane{},
-		ldacs_sgw_forward.AccountFlight{},
-		ldacs_sgw_forward.AccountAuthz{},
-		ldacs_sgw_forward.AuthzPlane{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

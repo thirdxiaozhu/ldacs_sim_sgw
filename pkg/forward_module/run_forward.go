@@ -3,7 +3,6 @@ package forward_module
 import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/internal/initialize"
 	"ldacs_sim_sgw/pkg/forward_module/f_core"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
 	"ldacs_sim_sgw/pkg/forward_module/f_init"
@@ -26,8 +25,8 @@ func RunForward() {
 	f_init.OtherInit()
 	zap.ReplaceGlobals(global.LOGGER)
 	f_init.Timer()
-	global.DB = initialize.Gorm() // gorm连接数据库
-	initialize.DBList()
+	//global.DB = initialize.Gorm() // gorm连接数据库
+	//initialize.DBList()
 	if global.DB != nil {
 		f_init.RegisterTables() // 初始化表
 		// 程序结束前关闭数据库链接

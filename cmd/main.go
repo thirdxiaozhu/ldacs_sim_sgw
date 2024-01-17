@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"ldacs_sim_sgw/internal/core"
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/initialize"
 	backward "ldacs_sim_sgw/pkg/backward_module"
 	forward "ldacs_sim_sgw/pkg/forward_module"
 	ldacscore "ldacs_sim_sgw/pkg/ldacs_core"
@@ -38,14 +39,14 @@ func main() {
 	global.VP = core.InitViper()   // 初始化Viper
 	global.LOGGER = core.InitZap() // 初始化zap日志库
 
-	//global.DB = initialize.Gorm() // gorm连接数据库
-	//initialize.DBList()
-	//if global.DB != nil {
-	//	initialize.RegisterTables() // 初始化表
-	//	// 程序结束前关闭数据库链接
-	//	db, _ := global.DB.DB()
-	//	defer db.Close()
-	//}
+	global.DB = initialize.Gorm() // gorm连接数据库
+	initialize.DBList()
+	if global.DB != nil {
+		initialize.RegisterTables() // 初始化表
+		// 程序结束前关闭数据库链接
+		db, _ := global.DB.DB()
+		defer db.Close()
+	}
 
 	/* run backward module */
 	go backward.ListenAndServe(":7777", ldacscore.MakeLdacsHandler())

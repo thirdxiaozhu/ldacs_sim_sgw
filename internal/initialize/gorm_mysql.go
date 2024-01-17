@@ -4,16 +4,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	internal "ldacs_sim_sgw/internal/initialize/inside"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 // GormMysql 初始化Mysql数据库
 // Author [piexlmax](https://github.com/piexlmax)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormMysql() *gorm.DB {
-	m := f_global.GVA_CONFIG.Mysql
+	m := global.CONFIG.Mysql
 	if m.Dbname == "" {
 		return nil
 	}
@@ -34,7 +34,7 @@ func GormMysql() *gorm.DB {
 }
 
 // GormMysqlByConfig 初始化Mysql数据库用过传入配置
-func GormMysqlByConfig(m f_config.Mysql) *gorm.DB {
+func GormMysqlByConfig(m config.Mysql) *gorm.DB {
 	if m.Dbname == "" {
 		return nil
 	}

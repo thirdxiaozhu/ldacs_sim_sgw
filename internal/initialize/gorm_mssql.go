@@ -11,15 +11,15 @@ package initialize
 import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	internal "ldacs_sim_sgw/internal/initialize/inside"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 // GormMssql 初始化Mssql数据库
 // Author [LouisZhang](191180776@qq.com)
 func GormMssql() *gorm.DB {
-	m := f_global.GVA_CONFIG.Mssql
+	m := global.CONFIG.Mssql
 	if m.Dbname == "" {
 		return nil
 	}
@@ -39,7 +39,7 @@ func GormMssql() *gorm.DB {
 }
 
 // GormMssqlByConfig 初始化Mysql数据库用过传入配置
-func GormMssqlByConfig(m f_config.Mssql) *gorm.DB {
+func GormMssqlByConfig(m config.Mssql) *gorm.DB {
 	if m.Dbname == "" {
 		return nil
 	}

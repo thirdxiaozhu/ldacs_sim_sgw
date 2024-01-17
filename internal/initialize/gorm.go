@@ -8,9 +8,6 @@ import (
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
-	"ldacs_sim_sgw/pkg/forward_module/model/example"
-	"ldacs_sim_sgw/pkg/forward_module/model/system"
 )
 
 func Gorm() *gorm.DB {
@@ -33,26 +30,6 @@ func Gorm() *gorm.DB {
 func RegisterTables() {
 	db := global.DB
 	err := db.AutoMigrate(
-		system.SysApi{},
-		system.SysUser{},
-		system.SysBaseMenu{},
-		system.JwtBlacklist{},
-		system.SysAuthority{},
-		system.SysDictionary{},
-		system.SysOperationRecord{},
-		system.SysAutoCodeHistory{},
-		system.SysDictionaryDetail{},
-		system.SysBaseMenuParameter{},
-		system.SysBaseMenuBtn{},
-		system.SysAuthorityBtn{},
-		system.SysAutoCode{},
-		system.SysExportTemplate{},
-
-		example.ExaFile{},
-		example.ExaCustomer{},
-		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{},
-
 		ldacs_sgw_forward.AccountPlane{},
 		ldacs_sgw_forward.AccountFlight{},
 		ldacs_sgw_forward.AccountAuthz{},

@@ -3,16 +3,16 @@ package initialize
 import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	internal "ldacs_sim_sgw/internal/initialize/inside"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 // GormPgSql 初始化 Postgresql 数据库
 // Author [piexlmax](https://github.com/piexlmax)
 // Author [SliverHorn](https://github.com/SliverHorn)
 func GormPgSql() *gorm.DB {
-	p := f_global.GVA_CONFIG.Pgsql
+	p := global.CONFIG.Pgsql
 	if p.Dbname == "" {
 		return nil
 	}
@@ -31,7 +31,7 @@ func GormPgSql() *gorm.DB {
 }
 
 // GormPgSqlByConfig 初始化 Postgresql 数据库 通过参数
-func GormPgSqlByConfig(p f_config.Pgsql) *gorm.DB {
+func GormPgSqlByConfig(p config.Pgsql) *gorm.DB {
 	if p.Dbname == "" {
 		return nil
 	}
