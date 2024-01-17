@@ -2,7 +2,7 @@ package request
 
 import (
 	"fmt"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
+	"ldacs_sim_sgw/internal/config"
 	"os"
 )
 
@@ -49,9 +49,9 @@ func (i *InitDB) SqliteEmptyDsn() string {
 
 // ToMysqlConfig 转换 config.Mysql
 // Author [SliverHorn](https://github.com/SliverHorn)
-func (i *InitDB) ToMysqlConfig() f_config.Mysql {
-	return f_config.Mysql{
-		GeneralDB: f_config.GeneralDB{
+func (i *InitDB) ToMysqlConfig() config.Mysql {
+	return config.Mysql{
+		GeneralDB: config.GeneralDB{
 			Path:         i.Host,
 			Port:         i.Port,
 			Dbname:       i.DBName,
@@ -67,9 +67,9 @@ func (i *InitDB) ToMysqlConfig() f_config.Mysql {
 
 // ToPgsqlConfig 转换 config.Pgsql
 // Author [SliverHorn](https://github.com/SliverHorn)
-func (i *InitDB) ToPgsqlConfig() f_config.Pgsql {
-	return f_config.Pgsql{
-		GeneralDB: f_config.GeneralDB{
+func (i *InitDB) ToPgsqlConfig() config.Pgsql {
+	return config.Pgsql{
+		GeneralDB: config.GeneralDB{
 			Path:         i.Host,
 			Port:         i.Port,
 			Dbname:       i.DBName,
@@ -85,9 +85,9 @@ func (i *InitDB) ToPgsqlConfig() f_config.Pgsql {
 
 // ToSqliteConfig 转换 config.Sqlite
 // Author [Kafumio](https://github.com/Kafumio)
-func (i *InitDB) ToSqliteConfig() f_config.Sqlite {
-	return f_config.Sqlite{
-		GeneralDB: f_config.GeneralDB{
+func (i *InitDB) ToSqliteConfig() config.Sqlite {
+	return config.Sqlite{
+		GeneralDB: config.GeneralDB{
 			Path:         i.DBPath,
 			Port:         i.Port,
 			Dbname:       i.DBName,

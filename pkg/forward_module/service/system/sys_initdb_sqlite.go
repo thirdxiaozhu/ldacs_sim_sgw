@@ -7,7 +7,8 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/gookit/color"
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/f_global"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/system/request"
@@ -23,12 +24,12 @@ func NewSqliteInitHandler() *SqliteInitHandler {
 
 // WriteConfig mysql回写配置
 func (h SqliteInitHandler) WriteConfig(ctx context.Context) error {
-	c, ok := ctx.Value("config").(f_config.Sqlite)
+	c, ok := ctx.Value("config").(config.Sqlite)
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	f_global.GVA_CONFIG.System.DbType = "sqlite"
-	f_global.GVA_CONFIG.Sqlite = c
+	global.CONFIG.System.DbType = "sqlite"
+	global.CONFIG.Sqlite = c
 	f_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
 	cs := utils.StructToMap(f_global.GVA_CONFIG)
 	for k, v := range cs {

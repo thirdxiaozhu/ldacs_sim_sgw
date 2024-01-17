@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
-
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
 	"ldacs_sim_sgw/pkg/forward_module/utils"
@@ -107,7 +105,7 @@ func (autoApi *AutoCodeApi) GetDB(c *gin.Context) {
 	businessDB := c.Query("businessDB")
 	dbs, err := autoCodeService.Database(businessDB).GetDB(businessDB)
 	var dbList []map[string]interface{}
-	for _, db := range f_global.GVA_CONFIG.DBList {
+	for _, db := range global.CONFIG.DBList {
 		var item = make(map[string]interface{})
 		item["aliasName"] = db.AliasName
 		item["dbName"] = db.Dbname
@@ -132,7 +130,7 @@ func (autoApi *AutoCodeApi) GetDB(c *gin.Context) {
 // @Success   200  {object}  response.Response{data=map[string]interface{},msg=string}  "获取当前数据库所有表"
 // @Router    /autoCode/getTables [get]
 func (autoApi *AutoCodeApi) GetTables(c *gin.Context) {
-	dbName := c.DefaultQuery("dbName", f_global.GVA_CONFIG.Mysql.Dbname)
+	dbName := c.DefaultQuery("dbName", global.CONFIG.Mysql.Dbname)
 	businessDB := c.Query("businessDB")
 	tables, err := autoCodeService.Database(businessDB).GetTables(businessDB, dbName)
 	if err != nil {
@@ -153,7 +151,7 @@ func (autoApi *AutoCodeApi) GetTables(c *gin.Context) {
 // @Router    /autoCode/getColumn [get]
 func (autoApi *AutoCodeApi) GetColumn(c *gin.Context) {
 	businessDB := c.Query("businessDB")
-	dbName := c.DefaultQuery("dbName", f_global.GVA_CONFIG.Mysql.Dbname)
+	dbName := c.DefaultQuery("dbName", global.CONFIG.Mysql.Dbname)
 	tableName := c.Query("tableName")
 	columns, err := autoCodeService.Database(businessDB).GetColumn(businessDB, tableName, dbName)
 	if err != nil {

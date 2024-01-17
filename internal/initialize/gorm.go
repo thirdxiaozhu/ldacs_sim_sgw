@@ -7,11 +7,10 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 func Gorm() *gorm.DB {
-	switch f_global.GVA_CONFIG.System.DbType {
+	switch global.CONFIG.System.DbType {
 	case "mysql":
 		return GormMysql()
 	case "pgsql":

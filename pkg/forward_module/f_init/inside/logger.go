@@ -5,7 +5,6 @@ import (
 	"ldacs_sim_sgw/internal/global"
 
 	"gorm.io/gorm/logger"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 type writer struct {
@@ -22,11 +21,11 @@ func NewWriter(w logger.Writer) *writer {
 // Author [SliverHorn](https://github.com/SliverHorn)
 func (w *writer) Printf(message string, data ...interface{}) {
 	var logZap bool
-	switch f_global.GVA_CONFIG.System.DbType {
+	switch global.CONFIG.System.DbType {
 	case "mysql":
-		logZap = f_global.GVA_CONFIG.Mysql.LogZap
+		logZap = global.CONFIG.Mysql.LogZap
 	case "pgsql":
-		logZap = f_global.GVA_CONFIG.Pgsql.LogZap
+		logZap = global.CONFIG.Pgsql.LogZap
 	}
 	if logZap {
 		global.LOGGER.Info(fmt.Sprintf(message+"\n", data...))

@@ -1,3 +1,17 @@
+system:
+    db-type: mysql
+    forward-addr: 8888
+    backward-addr: 7777
+zap:
+    level: info
+    prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'
+    format: console
+    director: log
+    encode-level: LowercaseColorLevelEncoder
+    stacktrace-key: stacktrace
+    max-age: 0
+    show-line: true
+    log-in-console: true
 db-list:
     - type: ""
       alias-name: ""
@@ -85,16 +99,3 @@ sqlite:
     max-open-conns: 100
     singular: false
     log-zap: false
-system:
-    db-type: mysql
-    addr: 8888
-zap:
-    level: info
-    prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'
-    format: console
-    director: log
-    encode-level: LowercaseColorLevelEncoder
-    stacktrace-key: stacktrace
-    max-age: 0
-    show-line: true
-    log-in-console: true

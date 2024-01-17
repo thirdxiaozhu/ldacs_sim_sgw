@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	"path/filepath"
 
 	"github.com/gookit/color"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 
 	"github.com/gofrs/uuid/v5"
@@ -27,12 +27,12 @@ func NewMysqlInitHandler() *MysqlInitHandler {
 
 // WriteConfig mysql回写配置
 func (h MysqlInitHandler) WriteConfig(ctx context.Context) error {
-	c, ok := ctx.Value("config").(f_config.Mysql)
+	c, ok := ctx.Value("config").(config.Mysql)
 	if !ok {
 		return errors.New("mysql config invalid")
 	}
-	f_global.GVA_CONFIG.System.DbType = "mysql"
-	f_global.GVA_CONFIG.Mysql = c
+	global.CONFIG.System.DbType = "mysql"
+	global.CONFIG.Mysql = c
 	f_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
 	cs := utils.StructToMap(f_global.GVA_CONFIG)
 	for k, v := range cs {

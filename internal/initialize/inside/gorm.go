@@ -2,13 +2,13 @@ package inside
 
 import (
 	"gorm.io/gorm/schema"
+	"ldacs_sim_sgw/internal/global"
 	"log"
 	"os"
 	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 type DBBASE interface {
@@ -35,15 +35,15 @@ func (g *_gorm) Config(prefix string, singular bool) *gorm.Config {
 		Colorful:      true,
 	})
 	var logMode DBBASE
-	switch f_global.GVA_CONFIG.System.DbType {
+	switch global.CONFIG.System.DbType {
 	case "mysql":
-		logMode = &f_global.GVA_CONFIG.Mysql
+		logMode = &global.CONFIG.Mysql
 	case "pgsql":
-		logMode = &f_global.GVA_CONFIG.Pgsql
+		logMode = &global.CONFIG.Pgsql
 	case "oracle":
-		logMode = &f_global.GVA_CONFIG.Oracle
+		logMode = &global.CONFIG.Oracle
 	default:
-		logMode = &f_global.GVA_CONFIG.Mysql
+		logMode = &global.CONFIG.Mysql
 	}
 
 	switch logMode.GetLogMode() {

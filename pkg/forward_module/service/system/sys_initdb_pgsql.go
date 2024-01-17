@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	"path/filepath"
 
 	"github.com/gookit/color"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-
 	"ldacs_sim_sgw/pkg/forward_module/utils"
 
 	"github.com/gofrs/uuid/v5"
@@ -27,12 +27,12 @@ func NewPgsqlInitHandler() *PgsqlInitHandler {
 
 // WriteConfig pgsql 回写配置
 func (h PgsqlInitHandler) WriteConfig(ctx context.Context) error {
-	c, ok := ctx.Value("config").(f_config.Pgsql)
+	c, ok := ctx.Value("config").(config.Pgsql)
 	if !ok {
 		return errors.New("postgresql config invalid")
 	}
-	f_global.GVA_CONFIG.System.DbType = "pgsql"
-	f_global.GVA_CONFIG.Pgsql = c
+	global.CONFIG.System.DbType = "pgsql"
+	global.CONFIG.Pgsql = c
 	f_global.GVA_CONFIG.JWT.SigningKey = uuid.Must(uuid.NewV4()).String()
 	cs := utils.StructToMap(f_global.GVA_CONFIG)
 	for k, v := range cs {

@@ -49,23 +49,6 @@ cors:
           allow-headers: content-type
           expose-headers: Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type
           allow-credentials: true
-db-list:
-    - type: ""
-      alias-name: ""
-      prefix: ""
-      port: ""
-      config: ""
-      db-name: ""
-      username: ""
-      password: ""
-      path: ""
-      engine: ""
-      log-mode: ""
-      max-idle-conns: 10
-      max-open-conns: 100
-      singular: false
-      log-zap: false
-      disable: true
 email:
     to: xxx@qq.com
     from: xxx@163.com
@@ -103,63 +86,6 @@ mongo:
     is-zap: false
     hosts:
         - host: ""
-          port: ""
-mssql:
-    prefix: ""
-    port: ""
-    config: ""
-    db-name: ""
-    username: ""
-    password: ""
-    path: ""
-    engine: ""
-    log-mode: ""
-    max-idle-conns: 10
-    max-open-conns: 100
-    singular: false
-    log-zap: false
-mysql:
-    prefix: ""
-    port: "3306"
-    config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: ldacs_sgw
-    username: root
-    password: e304e304
-    path: 172.16.208.101
-    engine: ""
-    log-mode: error
-    max-idle-conns: 10
-    max-open-conns: 100
-    singular: false
-    log-zap: false
-oracle:
-    prefix: ""
-    port: ""
-    config: ""
-    db-name: ""
-    username: ""
-    password: ""
-    path: ""
-    engine: ""
-    log-mode: ""
-    max-idle-conns: 10
-    max-open-conns: 100
-    singular: false
-    log-zap: false
-pgsql:
-    prefix: ""
-    port: ""
-    config: ""
-    db-name: ""
-    username: ""
-    password: ""
-    path: ""
-    engine: ""
-    log-mode: ""
-    max-idle-conns: 10
-    max-open-conns: 100
-    singular: false
-    log-zap: false
 qiniu:
     zone: ZoneHuaDong
     bucket: ""
@@ -172,26 +98,10 @@ redis:
     addr: 127.0.0.1:6379
     password: ""
     db: 0
-sqlite:
-    prefix: ""
-    port: ""
-    config: ""
-    db-name: ""
-    username: ""
-    password: ""
-    path: ""
-    engine: ""
-    log-mode: ""
-    max-idle-conns: 10
-    max-open-conns: 100
-    singular: false
-    log-zap: false
 system:
     env: local
-    db-type: mysql
     oss-type: local
     router-prefix: ""
-    addr: 8888
     iplimit-count: 15000
     iplimit-time: 3600
     use-multipoint: false

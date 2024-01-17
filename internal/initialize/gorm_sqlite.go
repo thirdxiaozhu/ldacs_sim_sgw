@@ -3,14 +3,14 @@ package initialize
 import (
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
+	"ldacs_sim_sgw/internal/config"
+	"ldacs_sim_sgw/internal/global"
 	internal "ldacs_sim_sgw/internal/initialize/inside"
-	"ldacs_sim_sgw/pkg/forward_module/f_config"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 )
 
 // GormSqlite 初始化Sqlite数据库
 func GormSqlite() *gorm.DB {
-	s := f_global.GVA_CONFIG.Sqlite
+	s := global.CONFIG.Sqlite
 	if s.Dbname == "" {
 		return nil
 	}
@@ -26,7 +26,7 @@ func GormSqlite() *gorm.DB {
 }
 
 // GormSqliteByConfig 初始化Sqlite数据库用过传入配置
-func GormSqliteByConfig(s f_config.Sqlite) *gorm.DB {
+func GormSqliteByConfig(s config.Sqlite) *gorm.DB {
 	if s.Dbname == "" {
 		return nil
 	}

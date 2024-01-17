@@ -38,8 +38,7 @@ func main() {
 
 	global.VP = core.InitViper()   // 初始化Viper
 	global.LOGGER = core.InitZap() // 初始化zap日志库
-
-	global.DB = initialize.Gorm() // gorm连接数据库
+	global.DB = initialize.Gorm()  // gorm连接数据库
 	initialize.DBList()
 	if global.DB != nil {
 		initialize.RegisterTables() // 初始化表
