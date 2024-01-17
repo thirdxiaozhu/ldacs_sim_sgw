@@ -1,11 +1,11 @@
 package system
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
+	"ldacs_sim_sgw/internal/global"
 )
 
 type SysApi struct {
-	f_global.GVA_MODEL
+	global.GVA_MODEL
 	Path        string `json:"path" gorm:"comment:api路径"`             // api路径
 	Description string `json:"description" gorm:"comment:api中文描述"`    // api中文描述
 	ApiGroup    string `json:"apiGroup" gorm:"comment:api组"`          // api组

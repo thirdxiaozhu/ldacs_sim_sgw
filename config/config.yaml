@@ -49,8 +49,8 @@ mysql:
     config: charset=utf8mb4&parseTime=True&loc=Local
     db-name: ldacs_sgw
     username: root
-    password: e304e304
-    path: 172.16.208.101
+    password: 9456123
+    path: 127.0.0.1
     engine: ""
     log-mode: error
     max-idle-conns: 10

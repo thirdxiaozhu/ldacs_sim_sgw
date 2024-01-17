@@ -31,14 +31,14 @@ import (
 
 const (
 	autoPath           = "autocode_template/"
-	autocodePath       = "resource/autocode_template"
-	plugPath           = "resource/plug_template"
-	packageService     = "service/%s/enter.go"
-	packageServiceName = "service"
-	packageRouter      = "router/%s/enter.go"
-	packageRouterName  = "router"
-	packageAPI         = "api/v1/%s/enter.go"
-	packageAPIName     = "api/v1"
+	autocodePath       = "pkg/forward_module/resource/autocode_template"
+	plugPath           = "pkg/forward_module/resource/plug_template"
+	packageService     = "pkg/forward_module/service/%s/enter.go"
+	packageServiceName = "pkg/forward_module/service"
+	packageRouter      = "pkg/forward_module/router/%s/enter.go"
+	packageRouterName  = "pkg/forward_module/router"
+	packageAPI         = "pkg/forward_module/api/v1/%s/enter.go"
+	packageAPIName     = "pkg/forward_module/api/v1"
 )
 
 type autoPackage struct {
@@ -161,6 +161,8 @@ func (autoCodeService *AutoCodeService) PreviewTemp(autoCode system.AutoCodeStru
 			autoCode.NeedJSON = true
 		}
 	}
+
+	fmt.Println(autoCode)
 	dataList, _, needMkdir, err := autoCodeService.getNeedList(&autoCode)
 	if err != nil {
 		return nil, err
@@ -543,6 +545,7 @@ func (autoCodeService *AutoCodeService) getNeedList(autoCode *system.AutoCodeStr
 	for _, field := range autoCode.Fields {
 		util.TrimSpace(field)
 	}
+
 	// 获取 basePath 文件夹下所有tpl文件
 	tplFileList, err := autoCodeService.GetAllTplFile(autocodePath, nil)
 	if err != nil {

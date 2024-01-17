@@ -8,13 +8,13 @@ aliyun-oss:
 autocode:
     server-model: /model/%s
     server-router: /router/%s
-    server: /server
+    server: /ldacs_sim_sgw/pkg/forward_module
     server-api: /api/v1/%s
     server-plug: /plugin/%s
-    server-initialize: /initialize
-    root: /root/go/src/ldacs_sgw_f
+    server-initialize: /f_init
+    root: /home/jiaxv/go/src
     web-table: /view
-    web: /web/src
+    web: /ldacs_sgw_f/web/src
     server-service: /service/%s
     server-request: /model/%s/request/
     web-api: /api

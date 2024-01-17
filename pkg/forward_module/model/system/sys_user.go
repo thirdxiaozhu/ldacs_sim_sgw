@@ -2,11 +2,11 @@ package system
 
 import (
 	"github.com/gofrs/uuid/v5"
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
+	"ldacs_sim_sgw/internal/global"
 )
 
 type SysUser struct {
-	f_global.GVA_MODEL
+	global.GVA_MODEL
 	UUID        uuid.UUID      `json:"uuid" gorm:"index;comment:用户UUID"`                                                     // 用户UUID
 	Username    string         `json:"userName" gorm:"index;comment:用户登录名"`                                                  // 用户登录名
 	Password    string         `json:"-"  gorm:"comment:用户登录密码"`                                                             // 用户登录密码

@@ -5,4 +5,5 @@ type RouterGroup struct {
 	AccontFlightRouter
 	AccountAuthzRouter
 	AuthzPlaneRouter
+	AirStationRouter
 }
