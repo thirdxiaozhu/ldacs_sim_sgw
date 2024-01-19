@@ -1,7 +1,6 @@
 package {{.Package}}
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/f_global"
 "ldacs_sim_sgw/internal/global"
 
     "ldacs_sim_sgw/pkg/forward_module/model/{{.Package}}"

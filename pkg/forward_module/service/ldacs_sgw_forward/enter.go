@@ -5,5 +5,5 @@ type ServiceGroup struct {
 	AccontFlightService
 	AccountAuthzService
 	AuthzPlaneService
-	AirStationService
+	AccountAsService
 }

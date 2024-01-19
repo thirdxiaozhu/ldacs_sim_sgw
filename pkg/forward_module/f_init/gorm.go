@@ -30,7 +30,7 @@ func RegisterTables() {
 		example.ExaFile{},
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{}, ldacs_sgw_forward.AirStation{},
+		example.ExaFileUploadAndDownload{}, ldacs_sgw_forward.AccountAs{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

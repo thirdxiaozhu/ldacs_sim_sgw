@@ -33,3 +33,28 @@
 [github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:49:02.732	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
 [github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:49:02.732	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:95	router register success
 [github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:49:02.733	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:54:42.766	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:41	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:54:43.082	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/gorm.go:39	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:54:43.084	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:54:43.085	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:95	router register success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:54:43.085	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:58:17.615	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:41	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:58:17.838	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/gorm.go:38	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:58:17.839	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:58:17.840	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:94	router register success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:58:17.840	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:59:49.589	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:41	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:59:49.837	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/gorm.go:38	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:59:49.846	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:59:49.846	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:94	router register success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 12:59:49.846	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:08:34.009	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:41	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:08:34.349	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/gorm.go:39	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:08:34.366	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:08:34.367	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:95	router register success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:08:34.367	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:09:07.922	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:41	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:09:08.251	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/gorm.go:39	register table success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:09:08.253	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:51	register swagger handler
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:09:08.253	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_init/router.go:95	router register success
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 13:09:08.253	[34minfo[0m	/home/jiaxv/go/src/ldacs_sim_sgw/pkg/forward_module/f_core/server.go:43	server run success on 	{"address": ":8888"}

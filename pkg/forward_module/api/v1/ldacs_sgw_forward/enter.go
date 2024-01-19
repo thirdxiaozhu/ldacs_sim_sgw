@@ -5,5 +5,5 @@ type ApiGroup struct {
 	AccontFlightApi
 	AccountAuthzApi
 	AuthzPlaneApi
-	AirStationApi
+	AccountAsApi
 }

@@ -89,7 +89,7 @@ func Routers() *gin.Engine {
 		ldacs_sgw_forwardRouter.InitAccontFlightRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAccountAuthzRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAuthzPlaneRouter(PrivateGroup)
-		ldacs_sgw_forwardRouter.InitAirStationRouter(PrivateGroup)
+		ldacs_sgw_forwardRouter.InitAccountAsRouter(PrivateGroup)
 	}
 
 	global.LOGGER.Info("router register success")
