@@ -5,9 +5,9 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 	"ldacs_sim_sgw/pkg/forward_module/service"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 )
 
 type AccountPlaneApi struct {
@@ -25,7 +25,7 @@ var accountplaneService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup.
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /accountplane/createAccountPlane [post]
 func (accountplaneApi *AccountPlaneApi) CreateAccountPlane(c *gin.Context) {
-	var accountplane ldacs_sgw_forward.AccountPlane
+	var accountplane model.AccountPlane
 	err := c.ShouldBindJSON(&accountplane)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -88,7 +88,7 @@ func (accountplaneApi *AccountPlaneApi) DeleteAccountPlaneByIds(c *gin.Context) 
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /accountplane/updateAccountPlane [put]
 func (accountplaneApi *AccountPlaneApi) UpdateAccountPlane(c *gin.Context) {
-	var accountplane ldacs_sgw_forward.AccountPlane
+	var accountplane model.AccountPlane
 	err := c.ShouldBindJSON(&accountplane)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

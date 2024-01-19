@@ -1,5 +1,5 @@
 // 自动生成模板AccontFlight
-package ldacs_sgw_forward
+package model
 
 import (
 	"ldacs_sim_sgw/internal/global"

@@ -6,8 +6,8 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/backward_module"
-	model "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	service "ldacs_sim_sgw/pkg/forward_module/service/ldacs_sgw_forward"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
 )
 

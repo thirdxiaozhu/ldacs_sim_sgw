@@ -1,4 +1,4 @@
-package ldacs_sgw_forward
+package model
 
 import (
 	"ldacs_sim_sgw/internal/global"

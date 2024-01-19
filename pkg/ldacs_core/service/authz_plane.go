@@ -1,12 +1,12 @@
-package ldacs_sgw_forward
+package service
 
 import (
 	"fmt"
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 )
 
 type AuthzPlaneService struct {
@@ -14,7 +14,7 @@ type AuthzPlaneService struct {
 
 // CreateAuthzPlane 创建飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (authzPlaneService *AuthzPlaneService) CreateAuthzPlane(authzPlane *ldacs_sgw_forward.AuthzPlane) (err error) {
+func (authzPlaneService *AuthzPlaneService) CreateAuthzPlane(authzPlane *model.AuthzPlane) (err error) {
 	authzPlane.AuthzState = 0
 	err = global.DB.Create(authzPlane).Error
 	return err
@@ -23,39 +23,39 @@ func (authzPlaneService *AuthzPlaneService) CreateAuthzPlane(authzPlane *ldacs_s
 // DeleteAuthzPlane 删除飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (authzPlaneService *AuthzPlaneService) DeleteAuthzPlane(id string) (err error) {
-	err = global.DB.Delete(&ldacs_sgw_forward.AuthzPlane{}, "id = ?", id).Error
+	err = global.DB.Delete(&model.AuthzPlane{}, "id = ?", id).Error
 	return err
 }
 
 // DeleteAuthzPlaneByIds 批量删除飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (authzPlaneService *AuthzPlaneService) DeleteAuthzPlaneByIds(ids []string) (err error) {
-	err = global.DB.Delete(&[]ldacs_sgw_forward.AuthzPlane{}, "id in ?", ids).Error
+	err = global.DB.Delete(&[]model.AuthzPlane{}, "id in ?", ids).Error
 	return err
 }
 
 // UpdateAuthzPlane 更新飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (authzPlaneService *AuthzPlaneService) UpdateAuthzPlane(authzPlane ldacs_sgw_forward.AuthzPlane) (err error) {
+func (authzPlaneService *AuthzPlaneService) UpdateAuthzPlane(authzPlane model.AuthzPlane) (err error) {
 	err = global.DB.Save(&authzPlane).Error
 	return err
 }
 
 // GetAuthzPlane 根据id获取飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (authzPlaneService *AuthzPlaneService) GetAuthzPlane(id string) (authzPlane ldacs_sgw_forward.AuthzPlane, err error) {
+func (authzPlaneService *AuthzPlaneService) GetAuthzPlane(id string) (authzPlane model.AuthzPlane, err error) {
 	err = global.DB.Where("id = ?", id).First(&authzPlane).Error
 	return
 }
 
 // GetAuthzPlaneInfoList 分页获取飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw_forwardReq.AuthzPlaneSearch) (list []ldacs_sgw_forward.AuthzPlane, total int64, err error) {
+func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw_forwardReq.AuthzPlaneSearch) (list []model.AuthzPlane, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&ldacs_sgw_forward.AuthzPlane{})
-	var authzPlanes []ldacs_sgw_forward.AuthzPlane
+	db := global.DB.Model(&model.AuthzPlane{})
+	var authzPlanes []model.AuthzPlane
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
@@ -86,9 +86,9 @@ func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw
 	return authzPlanes, total, err
 }
 
-func (authzPlaneService *AuthzPlaneService) GetOptions() (*ldacs_sgw_forward.AuthzOptions, error) {
+func (authzPlaneService *AuthzPlaneService) GetOptions() (*model.AuthzOptions, error) {
 	db := global.DB
-	var authzOpts ldacs_sgw_forward.AuthzOptions
+	var authzOpts model.AuthzOptions
 	var find *gorm.DB
 
 	for {
@@ -112,8 +112,8 @@ func (authzPlaneService *AuthzPlaneService) GetOptions() (*ldacs_sgw_forward.Aut
 	return nil, find.Error
 }
 
-func (authzPlaneService *AuthzPlaneService) StateChange(authzPlane *ldacs_sgw_forward.AuthzPlane) (err error) {
-	db := global.DB.Model(&ldacs_sgw_forward.AuthzPlane{})
+func (authzPlaneService *AuthzPlaneService) StateChange(authzPlane *model.AuthzPlane) (err error) {
+	db := global.DB.Model(&model.AuthzPlane{})
 	err = db.Where("id = ?", authzPlane.ID).Update("authz_state", authzPlane.AuthzState).Error
 
 	fmt.Printf("err: %v\n", err)

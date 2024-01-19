@@ -2,14 +2,14 @@ package ldacs_sgw_forward
 
 import (
 	"fmt"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 )
 
@@ -29,7 +29,7 @@ var authzPlaneService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup.Au
 // @Router /authzPlane/createAuthzPlane [post]
 func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 	//var authzPlane ldacs_sgw_forward.AuthzPlane
-	var authzPlaneMulti ldacs_sgw_forward.AuthzPlaneMulti
+	var authzPlaneMulti model.AuthzPlaneMulti
 	err := c.ShouldBindJSON(&authzPlaneMulti)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -38,7 +38,7 @@ func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 	fmt.Println(authzPlaneMulti)
 
 	for _, authz_n := range authzPlaneMulti.AuthzAuthzs {
-		authzPlaneSingal := ldacs_sgw_forward.AuthzPlane{
+		authzPlaneSingal := model.AuthzPlane{
 			AuthzPlaneId: authzPlaneMulti.AuthzPlaneId,
 			AuthzFlight:  authzPlaneMulti.AuthzFlight,
 			AuthzAuthz:   authz_n,
@@ -101,7 +101,7 @@ func (authzPlaneApi *AuthzPlaneApi) DeleteAuthzPlaneByIds(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /authzPlane/updateAuthzPlane [put]
 func (authzPlaneApi *AuthzPlaneApi) UpdateAuthzPlane(c *gin.Context) {
-	var authzPlane ldacs_sgw_forward.AuthzPlane
+	var authzPlane model.AuthzPlane
 	err := c.ShouldBindJSON(&authzPlane)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -180,7 +180,7 @@ func (authzPlaneApi *AuthzPlaneApi) GetOptions(c *gin.Context) {
 }
 
 func (authzPlaneApi *AuthzPlaneApi) SetStateChange(c *gin.Context) {
-	var authzPlane ldacs_sgw_forward.AuthzPlane
+	var authzPlane model.AuthzPlane
 	err := c.ShouldBindJSON(&authzPlane)
 
 	if err != nil {

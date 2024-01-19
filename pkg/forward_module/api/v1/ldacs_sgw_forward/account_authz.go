@@ -5,9 +5,9 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 	"ldacs_sim_sgw/pkg/forward_module/service"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 )
 
 type AccountAuthzApi struct {
@@ -25,7 +25,7 @@ var accountAuthzService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup.
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /accountAuthz/createAccountAuthz [post]
 func (accountAuthzApi *AccountAuthzApi) CreateAccountAuthz(c *gin.Context) {
-	var accountAuthz ldacs_sgw_forward.AccountAuthz
+	var accountAuthz model.AccountAuthz
 	err := c.ShouldBindJSON(&accountAuthz)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -88,7 +88,7 @@ func (accountAuthzApi *AccountAuthzApi) DeleteAccountAuthzByIds(c *gin.Context) 
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /accountAuthz/updateAccountAuthz [put]
 func (accountAuthzApi *AccountAuthzApi) UpdateAccountAuthz(c *gin.Context) {
-	var accountAuthz ldacs_sgw_forward.AccountAuthz
+	var accountAuthz model.AccountAuthz
 	err := c.ShouldBindJSON(&accountAuthz)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

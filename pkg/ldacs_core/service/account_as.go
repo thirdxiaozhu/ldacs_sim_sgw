@@ -1,13 +1,13 @@
-package ldacs_sgw_forward
+package service
 
 import (
 	"fmt"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"gorm.io/gorm"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 )
 
 type AccountAsService struct {
@@ -15,7 +15,7 @@ type AccountAsService struct {
 
 // CreateAccountAs 创建飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAsService *AccountAsService) CreateAccountAs(accountAs *ldacs_sgw_forward.AccountAs) (err error) {
+func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.AccountAs) (err error) {
 	accountAs.AsState = 0
 	accountAs.AsSac = util.GenerateRandomInt(global.SAC_LEN)
 	err = global.DB.Create(accountAs).Error
@@ -26,10 +26,10 @@ func (accountAsService *AccountAsService) CreateAccountAs(accountAs *ldacs_sgw_f
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) DeleteAccountAs(id string, userID uint) (err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&ldacs_sgw_forward.AccountAs{}).Where("id = ?", id).Update("deleted_by", userID).Error; err != nil {
+		if err := tx.Model(&model.AccountAs{}).Where("id = ?", id).Update("deleted_by", userID).Error; err != nil {
 			return err
 		}
-		if err = tx.Delete(&ldacs_sgw_forward.AccountAs{}, "id = ?", id).Error; err != nil {
+		if err = tx.Delete(&model.AccountAs{}, "id = ?", id).Error; err != nil {
 			return err
 		}
 		return nil
@@ -41,10 +41,10 @@ func (accountAsService *AccountAsService) DeleteAccountAs(id string, userID uint
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) DeleteAccountAsByIds(ids []string, deleted_by uint) (err error) {
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&ldacs_sgw_forward.AccountAs{}).Where("id in ?", ids).Update("deleted_by", deleted_by).Error; err != nil {
+		if err := tx.Model(&model.AccountAs{}).Where("id in ?", ids).Update("deleted_by", deleted_by).Error; err != nil {
 			return err
 		}
-		if err := tx.Where("id in ?", ids).Delete(&ldacs_sgw_forward.AccountAs{}).Error; err != nil {
+		if err := tx.Where("id in ?", ids).Delete(&model.AccountAs{}).Error; err != nil {
 			return err
 		}
 		return nil
@@ -54,31 +54,31 @@ func (accountAsService *AccountAsService) DeleteAccountAsByIds(ids []string, del
 
 // UpdateAccountAs 更新飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAsService *AccountAsService) UpdateAccountAs(accountAs ldacs_sgw_forward.AccountAs) (err error) {
+func (accountAsService *AccountAsService) UpdateAccountAs(accountAs model.AccountAs) (err error) {
 	err = global.DB.Save(&accountAs).Error
 	return err
 }
 
 // GetAccountAs 根据id获取飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs ldacs_sgw_forward.AccountAs, err error) {
+func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs model.AccountAs, err error) {
 	err = global.DB.Where("id = ?", id).First(&accountAs).Error
 	return
 }
 
 func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint8) (count int64, err error) {
-	err = global.DB.Model(&ldacs_sgw_forward.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
+	err = global.DB.Model(&model.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
 	return
 }
 
 // GetAccountAsInfoList 分页获取飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_forwardReq.AccountAsSearch) (list []ldacs_sgw_forward.AccountAs, total int64, err error) {
+func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_forwardReq.AccountAsSearch) (list []model.AccountAs, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&ldacs_sgw_forward.AccountAs{})
-	var accountAss []ldacs_sgw_forward.AccountAs
+	db := global.DB.Model(&model.AccountAs{})
+	var accountAss []model.AccountAs
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
@@ -109,9 +109,9 @@ func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_fo
 	err = db.Joins("Planeid").Joins("Flight").Limit(limit).Offset(offset).Find(&accountAss).Error
 	return accountAss, total, err
 }
-func (accountAsService *AccountAsService) GetOptions() (*ldacs_sgw_forward.AccountAsOptions, error) {
+func (accountAsService *AccountAsService) GetOptions() (*model.AccountAsOptions, error) {
 	db := global.DB
-	var asOpts ldacs_sgw_forward.AccountAsOptions
+	var asOpts model.AccountAsOptions
 	var find *gorm.DB
 
 	for {
@@ -131,8 +131,8 @@ func (accountAsService *AccountAsService) GetOptions() (*ldacs_sgw_forward.Accou
 	return nil, find.Error
 }
 
-func (accountAsService *AccountAsService) StateChange(accountAs *ldacs_sgw_forward.AccountAs) (err error) {
-	db := global.DB.Model(&ldacs_sgw_forward.AccountAs{})
+func (accountAsService *AccountAsService) StateChange(accountAs *model.AccountAs) (err error) {
+	db := global.DB.Model(&model.AccountAs{})
 	err = db.Where("id = ?", accountAs.ID).Update("authz_state", accountAs.AsState).Error
 
 	fmt.Printf("err: %v\n", err)

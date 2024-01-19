@@ -4,10 +4,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 )
 
@@ -26,7 +26,7 @@ var accountFlightService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /accountFlight/createAccontFlight [post]
 func (accountFlightApi *AccontFlightApi) CreateAccontFlight(c *gin.Context) {
-	var accountFlight ldacs_sgw_forward.AccountFlight
+	var accountFlight model.AccountFlight
 	err := c.ShouldBindJSON(&accountFlight)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -89,7 +89,7 @@ func (accountFlightApi *AccontFlightApi) DeleteAccontFlightByIds(c *gin.Context)
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /accountFlight/updateAccontFlight [put]
 func (accountFlightApi *AccontFlightApi) UpdateAccontFlight(c *gin.Context) {
-	var accountFlight ldacs_sgw_forward.AccountFlight
+	var accountFlight model.AccountFlight
 	err := c.ShouldBindJSON(&accountFlight)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

@@ -1,7 +1,7 @@
 package initialize
 
 import (
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"os"
 
 	"go.uber.org/zap"
@@ -29,11 +29,11 @@ func Gorm() *gorm.DB {
 func RegisterTables() {
 	db := global.DB
 	err := db.AutoMigrate(
-		ldacs_sgw_forward.AccountPlane{},
-		ldacs_sgw_forward.AccountFlight{},
-		ldacs_sgw_forward.AccountAuthz{},
-		ldacs_sgw_forward.AuthzPlane{},
-		ldacs_sgw_forward.AuditAsRaw{},
+		model.AccountPlane{},
+		model.AccountFlight{},
+		model.AccountAuthz{},
+		model.AuthzPlane{},
+		model.AuditAsRaw{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

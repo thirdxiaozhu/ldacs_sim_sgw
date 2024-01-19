@@ -2,12 +2,12 @@ package ldacs_sgw_forward
 
 import (
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/pkg/forward_module/model/common/response"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 	"ldacs_sim_sgw/pkg/forward_module/service"
 )
 
@@ -26,7 +26,7 @@ var auditAsRawService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup.Au
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /auditAsRaw/createAuditAsRaw [post]
 func (auditAsRawApi *AuditAsRawApi) CreateAuditAsRaw(c *gin.Context) {
-	var auditAsRaw ldacs_sgw_forward.AuditAsRaw
+	var auditAsRaw model.AuditAsRaw
 	err := c.ShouldBindJSON(&auditAsRaw)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -89,7 +89,7 @@ func (auditAsRawApi *AuditAsRawApi) DeleteAuditAsRawByIds(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
 // @Router /auditAsRaw/updateAuditAsRaw [put]
 func (auditAsRawApi *AuditAsRawApi) UpdateAuditAsRaw(c *gin.Context) {
-	var auditAsRaw ldacs_sgw_forward.AuditAsRaw
+	var auditAsRaw model.AuditAsRaw
 	err := c.ShouldBindJSON(&auditAsRaw)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

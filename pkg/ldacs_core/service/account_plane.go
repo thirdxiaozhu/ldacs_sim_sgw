@@ -1,10 +1,10 @@
-package ldacs_sgw_forward
+package service
 
 import (
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 )
 
 type AccountPlaneService struct {
@@ -12,7 +12,7 @@ type AccountPlaneService struct {
 
 // CreateAccountPlane 创建飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane *ldacs_sgw_forward.AccountPlane) (err error) {
+func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane *model.AccountPlane) (err error) {
 	accountplane.UA = util.GenerateRandomInt(global.UA_LEN)
 	/*TODO: 应有唯一性检查 */
 	err = global.DB.Create(accountplane).Error
@@ -22,39 +22,39 @@ func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane 
 // DeleteAccountPlane 删除飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountplaneService *AccountPlaneService) DeleteAccountPlane(id string) (err error) {
-	err = global.DB.Delete(&ldacs_sgw_forward.AccountPlane{}, "id = ?", id).Error
+	err = global.DB.Delete(&model.AccountPlane{}, "id = ?", id).Error
 	return err
 }
 
 // DeleteAccountPlaneByIds 批量删除飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountplaneService *AccountPlaneService) DeleteAccountPlaneByIds(ids []string) (err error) {
-	err = global.DB.Delete(&[]ldacs_sgw_forward.AccountPlane{}, "id in ?", ids).Error
+	err = global.DB.Delete(&[]model.AccountPlane{}, "id in ?", ids).Error
 	return err
 }
 
 // UpdateAccountPlane 更新飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountplaneService *AccountPlaneService) UpdateAccountPlane(accountplane ldacs_sgw_forward.AccountPlane) (err error) {
+func (accountplaneService *AccountPlaneService) UpdateAccountPlane(accountplane model.AccountPlane) (err error) {
 	err = global.DB.Save(&accountplane).Error
 	return err
 }
 
 // GetAccountPlane 根据id获取飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountplaneService *AccountPlaneService) GetAccountPlane(id string) (accountplane ldacs_sgw_forward.AccountPlane, err error) {
+func (accountplaneService *AccountPlaneService) GetAccountPlane(id string) (accountplane model.AccountPlane, err error) {
 	err = global.DB.Where("id = ?", id).First(&accountplane).Error
 	return
 }
 
 // GetAccountPlaneInfoList 分页获取飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountplaneService *AccountPlaneService) GetAccountPlaneInfoList(info ldacs_sgw_forwardReq.AccountPlaneSearch) (list []ldacs_sgw_forward.AccountPlane, total int64, err error) {
+func (accountplaneService *AccountPlaneService) GetAccountPlaneInfoList(info ldacs_sgw_forwardReq.AccountPlaneSearch) (list []model.AccountPlane, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&ldacs_sgw_forward.AccountPlane{})
-	var accountplanes []ldacs_sgw_forward.AccountPlane
+	db := global.DB.Model(&model.AccountPlane{})
+	var accountplanes []model.AccountPlane
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)

@@ -1,9 +1,9 @@
-package ldacs_sgw_forward
+package service
 
 import (
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
-	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 )
 
 type AccountAuthzService struct {
@@ -11,7 +11,7 @@ type AccountAuthzService struct {
 
 // CreateAccountAuthz 创建业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAuthzService *AccountAuthzService) CreateAccountAuthz(accountAuthz *ldacs_sgw_forward.AccountAuthz) (err error) {
+func (accountAuthzService *AccountAuthzService) CreateAccountAuthz(accountAuthz *model.AccountAuthz) (err error) {
 	err = global.DB.Create(accountAuthz).Error
 	return err
 }
@@ -19,39 +19,39 @@ func (accountAuthzService *AccountAuthzService) CreateAccountAuthz(accountAuthz 
 // DeleteAccountAuthz 删除业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAuthzService *AccountAuthzService) DeleteAccountAuthz(id string) (err error) {
-	err = global.DB.Delete(&ldacs_sgw_forward.AccountAuthz{}, "id = ?", id).Error
+	err = global.DB.Delete(&model.AccountAuthz{}, "id = ?", id).Error
 	return err
 }
 
 // DeleteAccountAuthzByIds 批量删除业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAuthzService *AccountAuthzService) DeleteAccountAuthzByIds(ids []string) (err error) {
-	err = global.DB.Delete(&[]ldacs_sgw_forward.AccountAuthz{}, "id in ?", ids).Error
+	err = global.DB.Delete(&[]model.AccountAuthz{}, "id in ?", ids).Error
 	return err
 }
 
 // UpdateAccountAuthz 更新业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAuthzService *AccountAuthzService) UpdateAccountAuthz(accountAuthz ldacs_sgw_forward.AccountAuthz) (err error) {
+func (accountAuthzService *AccountAuthzService) UpdateAccountAuthz(accountAuthz model.AccountAuthz) (err error) {
 	err = global.DB.Save(&accountAuthz).Error
 	return err
 }
 
 // GetAccountAuthz 根据id获取业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAuthzService *AccountAuthzService) GetAccountAuthz(id string) (accountAuthz ldacs_sgw_forward.AccountAuthz, err error) {
+func (accountAuthzService *AccountAuthzService) GetAccountAuthz(id string) (accountAuthz model.AccountAuthz, err error) {
 	err = global.DB.Where("id = ?", id).First(&accountAuthz).Error
 	return
 }
 
 // GetAccountAuthzInfoList 分页获取业务权限记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (accountAuthzService *AccountAuthzService) GetAccountAuthzInfoList(info ldacs_sgw_forwardReq.AccountAuthzSearch) (list []ldacs_sgw_forward.AccountAuthz, total int64, err error) {
+func (accountAuthzService *AccountAuthzService) GetAccountAuthzInfoList(info ldacs_sgw_forwardReq.AccountAuthzSearch) (list []model.AccountAuthz, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&ldacs_sgw_forward.AccountAuthz{})
-	var accountAuthzs []ldacs_sgw_forward.AccountAuthz
+	db := global.DB.Model(&model.AccountAuthz{})
+	var accountAuthzs []model.AccountAuthz
 	// 如果有条件搜索 下方会自动创建搜索语句
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)

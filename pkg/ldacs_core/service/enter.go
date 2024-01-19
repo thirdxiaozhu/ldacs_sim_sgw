@@ -1,4 +1,4 @@
-package ldacs_sgw_forward
+package service
 
 type ServiceGroup struct {
 	AccountPlaneService
