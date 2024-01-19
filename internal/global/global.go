@@ -18,6 +18,11 @@ var (
 	lock sync.RWMutex
 )
 
+const (
+	UA_LEN  = 28
+	SAC_LEN = 12
+)
+
 // GetGlobalDBByDBName 通过名称获取db list中的db
 func GetGlobalDBByDBName(dbname string) *gorm.DB {
 	lock.RLock()

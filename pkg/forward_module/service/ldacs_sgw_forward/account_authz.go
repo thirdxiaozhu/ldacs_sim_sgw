@@ -69,5 +69,6 @@ func (accountAuthzService *AccountAuthzService) GetAccountAuthzInfoList(info lda
 	}
 
 	err = db.Find(&accountAuthzs).Error
+
 	return accountAuthzs, total, err
 }

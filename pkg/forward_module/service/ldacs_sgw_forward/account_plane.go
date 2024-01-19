@@ -13,7 +13,7 @@ type AccountPlaneService struct {
 // CreateAccountPlane 创建飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane *ldacs_sgw_forward.AccountPlane) (err error) {
-	accountplane.UA = util.GenerateRandomString(28, util.NumCharset)
+	accountplane.UA = util.GenerateRandomInt(global.UA_LEN)
 	/*TODO: 应有唯一性检查 */
 	err = global.DB.Create(accountplane).Error
 	return err

@@ -21,3 +21,7 @@ func GenerateRandomString(length int, charsets ...string) string {
 	}
 	return string(b)
 }
+
+func GenerateRandomInt(bitL int) int {
+	return seededRand.Intn(1 << bitL)
+}

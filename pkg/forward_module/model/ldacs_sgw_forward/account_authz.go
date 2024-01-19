@@ -8,7 +8,7 @@ import (
 // 业务权限 结构体  AccountAuthz
 type AccountAuthz struct {
 	global.PREFIX_MODEL
-	Authz_name string `json:"authz_name" form:"authz_name" gorm:"column:authz_name;comment:;" binding:"required"` //权限名称
+	Authz_name string `json:"authz_name" form:"authz_name" gorm:"column:authz_name;comment:;"` //权限名称
 }
 
 // TableName 业务权限 AccountAuthz自定义表名 account_authz

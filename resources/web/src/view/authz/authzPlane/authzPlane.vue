@@ -1,156 +1,342 @@
 <template>
   <div>
     <div class="gva-search-box">
-      <el-form ref="elSearchFormRef" :inline="true" :model="searchInfo" class="demo-form-inline" :rules="searchRule" @keyup.enter="onSubmit">
-      <el-form-item label="创建日期" prop="createdAt">
-      <template #label>
-        <span>
-          创建日期
-          <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-            <el-icon><QuestionFilled /></el-icon>
-          </el-tooltip>
-        </span>
-      </template>
-      <el-date-picker v-model="searchInfo.startCreatedAt" type="datetime" placeholder="开始日期" :disabled-date="time=> searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"></el-date-picker>
-       —
-      <el-date-picker v-model="searchInfo.endCreatedAt" type="datetime" placeholder="结束日期" :disabled-date="time=> searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"></el-date-picker>
-      </el-form-item>
-        <el-form-item label="被授权飞机" prop="authz_PlaneId">
-            
-             <el-input v-model.number="searchInfo.authz_PlaneId" placeholder="搜索条件" />
+      <el-form
+        ref="elSearchFormRef"
+        :inline="true"
+        :model="searchInfo"
+        class="demo-form-inline"
+        :rules="searchRule"
+        @keyup.enter="onSubmit"
+      >
+        <el-form-item
+          label="创建日期"
+          prop="createdAt"
+        >
+          <template #label>
+            <span>
+              创建日期
+              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
+                <el-icon><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+          </template>
+          <el-date-picker
+            v-model="searchInfo.startCreatedAt"
+            type="datetime"
+            placeholder="开始日期"
+            :disabled-date="time=> searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"
+          />
+          —
+          <el-date-picker
+            v-model="searchInfo.endCreatedAt"
+            type="datetime"
+            placeholder="结束日期"
+            :disabled-date="time=> searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"
+          />
+        </el-form-item>
+        <el-form-item
+          label="被授权飞机"
+          prop="authz_PlaneId"
+        >
+
+          <el-input
+            v-model.number="searchInfo.authz_PlaneId"
+            placeholder="搜索条件"
+          />
 
         </el-form-item>
-        <el-form-item label="被授权航班" prop="authz_flight">
-            
-             <el-input v-model.number="searchInfo.authz_flight" placeholder="搜索条件" />
+        <el-form-item
+          label="被授权航班"
+          prop="authz_flight"
+        >
+
+          <el-input
+            v-model.number="searchInfo.authz_flight"
+            placeholder="搜索条件"
+          />
 
         </el-form-item>
-        <el-form-item label="权限" prop="authz_authz">
-            
-             <el-input v-model.number="searchInfo.authz_authz" placeholder="搜索条件" />
+        <el-form-item
+          label="权限"
+          prop="authz_authz"
+        >
+
+          <el-input
+            v-model.number="searchInfo.authz_authz"
+            placeholder="搜索条件"
+          />
 
         </el-form-item>
-        <el-form-item label="授权状态" prop="authz_state">
-            
-             <el-input v-model.number="searchInfo.authz_state" placeholder="搜索条件" />
+        <el-form-item
+          label="授权状态"
+          prop="authz_state"
+        >
+
+          <el-input
+            v-model.number="searchInfo.authz_state"
+            placeholder="搜索条件"
+          />
 
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" icon="search" @click="onSubmit">查询</el-button>
-          <el-button icon="refresh" @click="onReset">重置</el-button>
+          <el-button
+            type="primary"
+            icon="search"
+            @click="onSubmit"
+          >查询</el-button>
+          <el-button
+            icon="refresh"
+            @click="onReset"
+          >重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="gva-table-box">
-        <div class="gva-btn-list">
-            <el-button type="primary" icon="plus" @click="openDialog">新增</el-button>
-            <el-popover v-model:visible="deleteVisible" :disabled="!multipleSelection.length" placement="top" width="160">
-            <p>确定要删除吗？</p>
-            <div style="text-align: right; margin-top: 8px;">
-                <el-button type="primary" link @click="deleteVisible = false">取消</el-button>
-                <el-button type="primary" @click="onDelete">确定</el-button>
-            </div>
-            <template #reference>
-                <el-button icon="delete" style="margin-left: 10px;" :disabled="!multipleSelection.length" @click="deleteVisible = true">删除</el-button>
-            </template>
-            </el-popover>
-        </div>
-        <el-table
+      <div class="gva-btn-list">
+        <el-button
+          type="primary"
+          icon="plus"
+          @click="openDialog"
+        >新增</el-button>
+        <el-popover
+          v-model:visible="deleteVisible"
+          :disabled="!multipleSelection.length"
+          placement="top"
+          width="160"
+        >
+          <p>确定要删除吗？</p>
+          <div style="text-align: right; margin-top: 8px;">
+            <el-button
+              type="primary"
+              link
+              @click="deleteVisible = false"
+            >取消</el-button>
+            <el-button
+              type="primary"
+              @click="onDelete"
+            >确定</el-button>
+          </div>
+          <template #reference>
+            <el-button
+              icon="delete"
+              style="margin-left: 10px;"
+              :disabled="!multipleSelection.length"
+              @click="deleteVisible = true"
+            >删除</el-button>
+          </template>
+        </el-popover>
+      </div>
+      <el-table
         ref="multipleTable"
         style="width: 100%"
         tooltip-effect="dark"
         :data="tableData"
         row-key="ID"
         @selection-change="handleSelectionChange"
+      >
+        <el-table-column
+          type="selection"
+          width="55"
+        />
+        <el-table-column
+          align="left"
+          label="日期"
+          width="180"
         >
-        <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
-            <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="被授权飞机" prop="plane_id.plane_id" width="120" />
-        <el-table-column align="left" label="被授权航班" prop="flight.flight" width="120" />
-        <el-table-column align="left" label="权限" prop="authz.authz_name" width="120" />
-        <el-table-column align="left" label="授权状态" prop="authz_state" width="120">
+        <el-table-column
+          align="left"
+          label="被授权飞机"
+          prop="plane_id.plane_id"
+          width="120"
+        />
+        <el-table-column
+          align="left"
+          label="被授权航班"
+          prop="flight.flight"
+          width="120"
+        />
+        <el-table-column
+          align="left"
+          label="权限"
+          prop="authz.authz_name"
+          width="120"
+        />
+        <el-table-column
+          align="left"
+          label="授权状态"
+          prop="authz_state"
+          width="120"
+        >
           <template #default="scope">
             <!-- <el-switch @change="stateChange(scope.row)"  model-value="scope.row.state"             :active-value="1"
-            :inactive-value="0" active-color="#13ce66" inactive-color="#ff4949">
-            </el-switch> -->
+						:inactive-value="0" active-color="#13ce66" inactive-color="#ff4949">
+						</el-switch> -->
             <el-switch
-              @change="stateChange(scope.row)"
               v-model="scope.row.authz_state"
               :active-value="1"
               :inactive-value="0"
               active-color="#13ce66"
-              inactive-color="#ff4949">
-            </el-switch>
-          </template>
-          </el-table-column>
-        <el-table-column align="left" label="操作" min-width="120">
-            <template #default="scope">
-            <el-button type="primary" link class="table-button" @click="getDetails(scope.row)">
-                <el-icon style="margin-right: 5px"><InfoFilled /></el-icon>
-                查看详情
-            </el-button>
-            <el-button type="primary" link icon="edit" class="table-button" @click="updateAuthzPlaneFunc(scope.row)">变更</el-button>
-            <el-button type="primary" link icon="delete" @click="deleteRow(scope.row)">删除</el-button>
-            </template>
-        </el-table-column>
-        </el-table>
-        <div class="gva-pagination">
-            <el-pagination
-            layout="total, sizes, prev, pager, next, jumper"
-            :current-page="page"
-            :page-size="pageSize"
-            :page-sizes="[10, 30, 50, 100]"
-            :total="total"
-            @current-change="handleCurrentChange"
-            @size-change="handleSizeChange"
+              inactive-color="#ff4949"
+              @change="stateChange(scope.row)"
             />
-        </div>
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="left"
+          label="操作"
+          min-width="120"
+        >
+          <template #default="scope">
+            <el-button
+              type="primary"
+              link
+              class="table-button"
+              @click="getDetails(scope.row)"
+            >
+              <el-icon style="margin-right: 5px"><InfoFilled /></el-icon>
+              查看详情
+            </el-button>
+            <el-button
+              type="primary"
+              link
+              icon="edit"
+              class="table-button"
+              @click="updateAuthzPlaneFunc(scope.row)"
+            >变更</el-button>
+            <el-button
+              type="primary"
+              link
+              icon="delete"
+              @click="deleteRow(scope.row)"
+            >删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div class="gva-pagination">
+        <el-pagination
+          layout="total, sizes, prev, pager, next, jumper"
+          :current-page="page"
+          :page-size="pageSize"
+          :page-sizes="[10, 30, 50, 100]"
+          :total="total"
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </div>
-      <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" :title="type === 'create' ? '添加' : '修改'" destroy-on-close>
-        <el-scrollbar height="500px">
-            <el-form :model="formData" label-position="right" ref="elFormRef" :rules="rule" label-width="80px">
-              <el-form-item label="被授权飞机:"  prop="authz_PlaneId" >
-                <el-select v-model="formData.authz_PlaneId" filterable  placeholder="请选择" style="width:100%" :clearable="true" >
-                  <el-option v-for="(item, key) in plane_opts" :key="key" :label="item.plane_id" :value="item.ID" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="被授权航班:"  prop="authz_flight" >
-                <el-select v-model="formData.authz_flight" filterable  placeholder="请选择" style="width:100%" :clearable="true" >
-                  <el-option v-for="(item,key) in flight_opts" :key="key" :label="item.flight" :value="item.ID" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="权限:"  prop="authz_authz" >
-                  <el-select v-model="formData.authz_authz" filterable multiple placeholder="请选择" style="width:100%" :clearable="true" >
-                    <el-option v-for="(item,key) in auth_opts" :key="key" :label="item.authz_name" :value="item.ID" />
-                  </el-select>
-              </el-form-item>
-            </el-form>
-        </el-scrollbar>
-        <template #footer>
-          <div class="dialog-footer">
-            <el-button @click="closeDialog">取 消</el-button>
-            <el-button type="primary" @click="enterDialog">确 定</el-button>
-          </div>
-        </template>
-      </el-dialog>
+    <el-dialog
+      v-model="dialogFormVisible"
+      :before-close="closeDialog"
+      :title="type === 'create' ? '添加' : '修改'"
+      destroy-on-close
+    >
+      <el-scrollbar height="500px">
+        <el-form
+          ref="elFormRef"
+          :model="formData"
+          label-position="right"
+          :rules="rule"
+          label-width="80px"
+        >
+          <el-form-item
+            label="被授权飞机:"
+            prop="authz_PlaneId"
+          >
+            <el-select
+              v-model="formData.authz_PlaneId"
+              filterable
+              placeholder="请选择"
+              style="width:100%"
+              :clearable="true"
+            >
+              <el-option
+                v-for="(item, key) in plane_opts"
+                :key="key"
+                :label="item.plane_id"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            label="被授权航班:"
+            prop="authz_flight"
+          >
+            <el-select
+              v-model="formData.authz_flight"
+              filterable
+              placeholder="请选择"
+              style="width:100%"
+              :clearable="true"
+            >
+              <el-option
+                v-for="(item,key) in flight_opts"
+                :key="key"
+                :label="item.flight"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            label="权限:"
+            prop="authz_authz"
+          >
+            <el-select
+              v-model="formData.authz_authz"
+              filterable
+              multiple
+              placeholder="请选择"
+              style="width:100%"
+              :clearable="true"
+            >
+              <el-option
+                v-for="(item,key) in auth_opts"
+                :key="key"
+                :label="item.authz_name"
+                :value="item.ID"
+              />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </el-scrollbar>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeDialog">取 消</el-button>
+          <el-button
+            type="primary"
+            @click="enterDialog"
+          >确 定</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
-    <el-dialog v-model="detailShow" style="width: 800px" lock-scroll :before-close="closeDetailShow" title="查看详情" destroy-on-close>
+    <el-dialog
+      v-model="detailShow"
+      style="width: 800px"
+      lock-scroll
+      :before-close="closeDetailShow"
+      title="查看详情"
+      destroy-on-close
+    >
       <el-scrollbar height="550px">
-        <el-descriptions column="1" border>
-                <el-descriptions-item label="被授权飞机">
-                        {{ formData.authz_PlaneId }}
-                </el-descriptions-item>
-                <el-descriptions-item label="被授权航班">
-                        {{ formData.authz_flight }}
-                </el-descriptions-item>
-                <el-descriptions-item label="权限">
-                        {{ formData.authz_authz }}
-                </el-descriptions-item>
-                <el-descriptions-item label="授权状态">
-                        {{ formData.authz_state }}
-                </el-descriptions-item>
+        <el-descriptions
+          column="1"
+          border
+        >
+          <el-descriptions-item label="被授权飞机">
+            {{ formData.authz_PlaneId }}
+          </el-descriptions-item>
+          <el-descriptions-item label="被授权航班">
+            {{ formData.authz_flight }}
+          </el-descriptions-item>
+          <el-descriptions-item label="权限">
+            {{ formData.authz_authz }}
+          </el-descriptions-item>
+          <el-descriptions-item label="授权状态">
+            {{ formData.authz_state }}
+          </el-descriptions-item>
         </el-descriptions>
       </el-scrollbar>
     </el-dialog>
@@ -175,43 +361,42 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
 defineOptions({
-    name: 'AuthzPlane'
+  name: 'AuthzPlane'
 })
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-        authz_PlaneId: 0,
-        authz_flight: 0,
-        authz_authz: 0,
-        })
-
+  authz_PlaneId: 0,
+  authz_flight: 0,
+  authz_authz: 0,
+})
 
 // 验证规则
 const rule = reactive({
-              // authz_PlaneId : [{
-              //     required: true,
-              //     message: '',
-              //     trigger: ['input','blur'],
-              // },
-              //],
-              // authz_flight : [{
-              //     required: true,
-              //     message: '',
-              //     trigger: ['input','blur'],
-              // },
-              //],
-              // authz_authz : [{
-              //     required: true,
-              //     message: '',
-              //     trigger: ['input','blur'],
-              // },
-              //],
-              // authz_state : [{
-              //     required: true,
-              //     message: '',
-              //     trigger: ['input','blur'],
-              // },
-              //],
+  // authz_PlaneId : [{
+  //     required: true,
+  //     message: '',
+  //     trigger: ['input','blur'],
+  // },
+  // ],
+  // authz_flight : [{
+  //     required: true,
+  //     message: '',
+  //     trigger: ['input','blur'],
+  // },
+  // ],
+  // authz_authz : [{
+  //     required: true,
+  //     message: '',
+  //     trigger: ['input','blur'],
+  // },
+  // ],
+  // authz_state : [{
+  //     required: true,
+  //     message: '',
+  //     trigger: ['input','blur'],
+  // },
+  // ],
 })
 
 const searchRule = reactive({
@@ -287,10 +472,10 @@ const plane_opts = ref([])
 const flight_opts = ref([])
 const auth_opts = ref([])
 // 获取需要的字典 可能为空 按需保留
-const setOptions = async () =>{
+const setOptions = async() => {
   const res = await getOptions()
-  if (res.code === 0){
-    //options.value = res.data.options
+  if (res.code === 0) {
+    // options.value = res.data.options
     plane_opts.value = res.data.options.plane_ids
     flight_opts.value = res.data.options.flights
     auth_opts.value = res.data.options.authzs
@@ -300,124 +485,116 @@ const setOptions = async () =>{
 // 获取需要的字典 可能为空 按需保留
 setOptions()
 
-
 // 多选数据
 const multipleSelection = ref([])
 // 多选
 const handleSelectionChange = (val) => {
-    multipleSelection.value = val
+  multipleSelection.value = val
 }
 
 // 删除行
 const deleteRow = (row) => {
-    ElMessageBox.confirm('确定要删除吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-    }).then(() => {
-            deleteAuthzPlaneFunc(row)
-        })
-    }
-
+  ElMessageBox.confirm('确定要删除吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deleteAuthzPlaneFunc(row)
+  })
+}
 
 // 批量删除控制标记
 const deleteVisible = ref(false)
 
 // 多选删除
 const onDelete = async() => {
-      const ids = []
-      if (multipleSelection.value.length === 0) {
-        ElMessage({
-          type: 'warning',
-          message: '请选择要删除的数据'
-        })
-        return
-      }
-      multipleSelection.value &&
-        multipleSelection.value.map(item => {
-          ids.push(item.ID)
-        })
-      const res = await deleteAuthzPlaneByIds({ ids })
-      if (res.code === 0) {
-        ElMessage({
-          type: 'success',
-          message: '删除成功'
-        })
-        if (tableData.value.length === ids.length && page.value > 1) {
-          page.value--
-        }
-        deleteVisible.value = false
-        getTableData()
-      }
+  const ids = []
+  if (multipleSelection.value.length === 0) {
+    ElMessage({
+      type: 'warning',
+      message: '请选择要删除的数据'
+    })
+    return
+  }
+  multipleSelection.value &&
+  multipleSelection.value.map(item => {
+    ids.push(item.ID)
+  })
+  const res = await deleteAuthzPlaneByIds({ ids })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功'
+    })
+    if (tableData.value.length === ids.length && page.value > 1) {
+      page.value--
     }
+    deleteVisible.value = false
+    getTableData()
+  }
+}
 
 // 行为控制标记（弹窗内部需要增还是改）
 const type = ref('')
 
 // 更新行
 const updateAuthzPlaneFunc = async(row) => {
-    const res = await findAuthzPlane({ ID: row.ID })
-    type.value = 'update'
-    if (res.code === 0) {
-        formData.value = res.data.reauthzPlane
-        dialogFormVisible.value = true
-    }
+  const res = await findAuthzPlane({ ID: row.ID })
+  type.value = 'update'
+  if (res.code === 0) {
+    formData.value = res.data.reauthzPlane
+    dialogFormVisible.value = true
+  }
 }
 
-
-const stateChange = async(row) =>{
+const stateChange = async(row) => {
   console.log(row)
   const res = await setStateChange(row)
   console.log(res)
   if (res.code === 0) {
-       if(res.data.state == 0){
-        ElMessage({
-                type: 'error',
-                message: '授权取消'
-            })
-       }else{
-        ElMessage({
-                type: 'success',
-                message: '授权启动'
-            })
-       }
-        getTableData()
-    } 
+    if (res.data.state === 0) {
+      ElMessage({
+        type: 'error',
+        message: '授权取消'
+      })
+    } else {
+      ElMessage({
+        type: 'success',
+        message: '授权启动'
+      })
+    }
+    getTableData()
+  }
 }
 
-
-
 // 删除行
-const deleteAuthzPlaneFunc = async (row) => {
-    const res = await deleteAuthzPlane({ ID: row.ID })
-    if (res.code === 0) {
-        ElMessage({
-                type: 'success',
-                message: '删除成功'
-            })
-            if (tableData.value.length === 1 && page.value > 1) {
-            page.value--
-        }
-        getTableData()
+const deleteAuthzPlaneFunc = async(row) => {
+  const res = await deleteAuthzPlane({ ID: row.ID })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '删除成功'
+    })
+    if (tableData.value.length === 1 && page.value > 1) {
+      page.value--
     }
+    getTableData()
+  }
 }
 
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
 
-
 // 查看详情控制标记
 const detailShow = ref(false)
-
 
 // 打开详情弹窗
 const openDetailShow = () => {
   detailShow.value = true
 }
 
-
 // 打开详情
-const getDetails = async (row) => {
+const getDetails = async(row) => {
   // 打开弹窗
   const res = await findAuthzPlane({ ID: row.ID })
   if (res.code === 0) {
@@ -426,60 +603,58 @@ const getDetails = async (row) => {
   }
 }
 
-
 // 关闭详情弹窗
 const closeDetailShow = () => {
   detailShow.value = false
   formData.value = {
-          authz_PlaneId: 0,
-          authz_flight: 0,
-          authz_authz: 0,
-          authz_state: 0,
-          }
+    authz_PlaneId: 0,
+    authz_flight: 0,
+    authz_authz: 0,
+    authz_state: 0,
+  }
 }
-
 
 // 打开弹窗
 const openDialog = () => {
-    type.value = 'create'
-    dialogFormVisible.value = true
+  type.value = 'create'
+  dialogFormVisible.value = true
 }
 
 // 关闭弹窗
 const closeDialog = () => {
-    dialogFormVisible.value = false
-    formData.value = {
-        authz_PlaneId: 0,
-        authz_flight: 0,
-        authz_authz: 0,
-        authz_state: 0,
-        }
+  dialogFormVisible.value = false
+  formData.value = {
+    authz_PlaneId: 0,
+    authz_flight: 0,
+    authz_authz: 0,
+    authz_state: 0,
+  }
 }
 // 弹窗确定
-const enterDialog = async () => {
-     elFormRef.value?.validate( async (valid) => {
-             if (!valid) return
-              let res
-              switch (type.value) {
-                case 'create':
-                  res = await createAuthzPlane(formData.value)
-                  break
-                case 'update':
-                  res = await updateAuthzPlane(formData.value)
-                  break
-                default:
-                  res = await createAuthzPlane(formData.value)
-                  break
-              }
-              if (res.code === 0) {
-                ElMessage({
-                  type: 'success',
-                  message: '创建/更改成功'
-                })
-                closeDialog()
-                getTableData()
-              }
+const enterDialog = async() => {
+  elFormRef.value?.validate(async(valid) => {
+    if (!valid) return
+    let res
+    switch (type.value) {
+      case 'create':
+        res = await createAuthzPlane(formData.value)
+        break
+      case 'update':
+        res = await updateAuthzPlane(formData.value)
+        break
+      default:
+        res = await createAuthzPlane(formData.value)
+        break
+    }
+    if (res.code === 0) {
+      ElMessage({
+        type: 'success',
+        message: '创建/更改成功'
       })
+      closeDialog()
+      getTableData()
+    }
+  })
 }
 
 </script>

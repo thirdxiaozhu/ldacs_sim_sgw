@@ -96,7 +96,6 @@ export const getAuthzPlaneList = (params) => {
   })
 }
 
-
 export const getOptions = (params) => {
   return service({
     url: '/authzPlane/getOptions',
