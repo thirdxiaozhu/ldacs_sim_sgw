@@ -14,7 +14,7 @@ autocode:
     server-initialize: /f_init
     root: /home/jiaxv/go/src
     web-table: /view
-    web: /ldacs_sgw_f/web/src
+    web: /ldacs_sim_sgw/resources/web/src
     server-service: /service/%s
     server-request: /model/%s/request/
     web-api: /api

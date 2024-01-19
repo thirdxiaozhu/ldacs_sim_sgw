@@ -24,7 +24,7 @@ func (p *{{ .PlugName}}Api) ApiName(c *gin.Context) {
         _ = c.ShouldBindJSON(&plug)
     {{ end }}
         if {{ if .HasResponse }} res, {{ end }} err:= service.ServiceGroupApp.PlugService({{ if .HasRequest }}plug{{ end -}}); err != nil {
-		global.GVA_LOG.Error("失败!", zap.Error(err))
+		global.LOGGER.Error("失败!", zap.Error(err))
 		response.FailWithMessage("失败", c)
 	} else {
 	{{if .HasResponse }}

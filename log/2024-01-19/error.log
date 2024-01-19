@@ -1,0 +1,2 @@
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 11:41:38.946	[31merror[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:38	register table failed	{"error": "Error 1062 (23000): Duplicate entry '0' for key 'account_plane.test_ua'"}
+[github.com/flipped-aurora/gin-vue-admin/server]2024/01/19 - 11:42:04.617	[31merror[0m	/home/jiaxv/go/src/ldacs_sim_sgw/internal/initialize/gorm.go:38	register table failed	{"error": "Error 1062 (23000): Duplicate entry '0' for key 'account_plane.test_ua'"}

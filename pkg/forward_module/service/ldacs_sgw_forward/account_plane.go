@@ -2,6 +2,7 @@ package ldacs_sgw_forward
 
 import (
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward/request"
 )
@@ -12,6 +13,8 @@ type AccountPlaneService struct {
 // CreateAccountPlane 创建飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane *ldacs_sgw_forward.AccountPlane) (err error) {
+	accountplane.UA = util.GenerateRandomString(28, util.NumCharset)
+	/*TODO: 应有唯一性检查 */
 	err = global.DB.Create(accountplane).Error
 	return err
 }

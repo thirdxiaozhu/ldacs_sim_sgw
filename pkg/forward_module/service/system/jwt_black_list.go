@@ -37,7 +37,7 @@ func (jwtService *JwtService) JsonInBlacklist(jwtList system.JwtBlacklist) (err 
 func (jwtService *JwtService) IsBlacklist(jwt string) bool {
 	_, ok := f_global.BlackCache.Get(jwt)
 	return ok
-	// err := global.GVA_DB.Where("jwt = ?", jwt).First(&system.JwtBlacklist{}).Error
+	// err := global.DB.Where("jwt = ?", jwt).First(&system.JwtBlacklist{}).Error
 	// isNotFound := errors.Is(err, gorm.ErrRecordNotFound)
 	// return !isNotFound
 }

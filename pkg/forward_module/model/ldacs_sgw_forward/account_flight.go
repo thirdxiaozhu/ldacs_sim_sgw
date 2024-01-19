@@ -7,7 +7,7 @@ import (
 
 // 航班 结构体  AccountFlight
 type AccountFlight struct {
-	global.GVA_MODEL
+	global.PREFIX_MODEL
 	Flight string `json:"flight" form:"flight" gorm:"column:flight;comment:;"binding:"required"` //航班号
 }
 

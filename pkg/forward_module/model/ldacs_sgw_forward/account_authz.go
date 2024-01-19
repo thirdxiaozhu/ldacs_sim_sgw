@@ -7,7 +7,7 @@ import (
 
 // 业务权限 结构体  AccountAuthz
 type AccountAuthz struct {
-	global.GVA_MODEL
+	global.PREFIX_MODEL
 	Authz_name string `json:"authz_name" form:"authz_name" gorm:"column:authz_name;comment:;" binding:"required"` //权限名称
 }
 
