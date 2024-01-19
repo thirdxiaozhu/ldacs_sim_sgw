@@ -3,12 +3,16 @@ package ldacscore
 import (
 	"context"
 	"encoding/json"
+	"go.uber.org/zap"
+	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/backward_module"
+	model "ldacs_sim_sgw/pkg/forward_module/model/ldacs_sgw_forward"
+	service "ldacs_sim_sgw/pkg/forward_module/service/ldacs_sgw_forward"
 	"sync"
 )
 
 type LdacsUnit struct {
-	UaAs  uint8           `json:"ua_as"`
+	AsSac uint8           `json:"as_sac"`
 	UaGs  uint8           `json:"ua_gs"`
 	UaGsc uint8           `json:"ua_gsc"`
 	Head  SecHead         `json:"head"`
@@ -55,11 +59,23 @@ func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
 		return
 	}
 
-	v, _ := l.ldacsConn.Load(unit.UaAs)
+	accountAsService := service.AccountAsService{}
+	if count, err := accountAsService.GetAccountAsBySac(unit.AsSac); count != 0 && err == nil {
+		auditService := service.AuditAsRawService{}
+		if err := auditService.CreateAuditAsRaw(&model.AuditAsRaw{
+			AuditAsSac: int(unit.AsSac),
+			AuditAsMsg: string(msg),
+		}); err != nil {
+			global.LOGGER.Error("失败", zap.Error(err))
+		}
+	}
+	global.LOGGER.Info("成功")
+
+	v, _ := l.ldacsConn.Load(unit.AsSac)
 	if v == nil {
-		uas := genUAs(unit.UaAs, unit.UaGs, unit.UaGsc)
+		uas := genUAs(unit.AsSac, unit.UaGs, unit.UaGsc)
 		v = newUnitNode(uas, conn)
-		l.ldacsConn.Store(unit.UaAs, v)
+		l.ldacsConn.Store(unit.AsSac, v)
 	}
 
 	ProcessMsg(&unit, v.(*LdacsStateConnNode))

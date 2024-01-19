@@ -6,4 +6,5 @@ type RouterGroup struct {
 	AccountAuthzRouter
 	AuthzPlaneRouter
 	AccountAsRouter
+	AuditAsRawRouter
 }

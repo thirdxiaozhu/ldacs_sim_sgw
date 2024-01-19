@@ -1,0 +1,5 @@
+package ldacscore
+
+func InitCoreModule() {
+
+}

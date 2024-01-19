@@ -159,7 +159,7 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	fmt.Println(unitData)
 
 	pkt := LdacsUnit{
-		UaAs:  st.UaAs,
+		AsSac: st.UaAs,
 		UaGs:  st.UaGs,
 		UaGsc: st.UaGsc,
 		Head:  st.SecHead,

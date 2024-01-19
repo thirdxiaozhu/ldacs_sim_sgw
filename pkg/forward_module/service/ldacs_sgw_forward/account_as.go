@@ -66,6 +66,11 @@ func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs lda
 	return
 }
 
+func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint8) (count int64, err error) {
+	err = global.DB.Model(&ldacs_sgw_forward.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
+	return
+}
+
 // GetAccountAsInfoList 分页获取飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_forwardReq.AccountAsSearch) (list []ldacs_sgw_forward.AccountAs, total int64, err error) {

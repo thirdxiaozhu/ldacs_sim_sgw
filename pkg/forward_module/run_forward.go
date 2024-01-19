@@ -28,7 +28,7 @@ func RunForward() {
 	//global.DB = initialize.Gorm() // gorm连接数据库
 	//initialize.DBList()
 	if global.DB != nil {
-		f_init.RegisterTables() // 初始化表
+		f_init.RegisterForwardTables() // 初始化表
 		// 程序结束前关闭数据库链接
 		//db, _ := global.DB.DB()
 		//defer db.Close()

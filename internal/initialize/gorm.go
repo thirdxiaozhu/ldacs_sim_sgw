@@ -33,6 +33,7 @@ func RegisterTables() {
 		ldacs_sgw_forward.AccountFlight{},
 		ldacs_sgw_forward.AccountAuthz{},
 		ldacs_sgw_forward.AuthzPlane{},
+		ldacs_sgw_forward.AuditAsRaw{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

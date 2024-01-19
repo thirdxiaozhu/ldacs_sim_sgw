@@ -9,7 +9,7 @@ import (
 	"os"
 )
 
-func RegisterTables() {
+func RegisterForwardTables() {
 	db := global.DB
 	err := db.AutoMigrate(
 		system.SysApi{},
