@@ -6,5 +6,6 @@ type ApiGroup struct {
 	AccountAuthzApi
 	AuthzPlaneApi
 	AccountAsApi
+	AccountGsApi
 	AuditAsRawApi
 }

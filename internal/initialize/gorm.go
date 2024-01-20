@@ -32,8 +32,10 @@ func RegisterTables() {
 		model.AccountPlane{},
 		model.AccountFlight{},
 		model.AccountAuthz{},
-		model.AuthzPlane{},
+		model.AccountAs{},
+		model.AccountGs{},
 		model.AuditAsRaw{},
+		model.AuthzPlane{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

@@ -5,7 +5,6 @@ import (
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/forward_module/model/example"
 	"ldacs_sim_sgw/pkg/forward_module/model/system"
-	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"os"
 )
 
@@ -30,7 +29,7 @@ func RegisterForwardTables() {
 		example.ExaFile{},
 		example.ExaCustomer{},
 		example.ExaFileChunk{},
-		example.ExaFileUploadAndDownload{}, model.AccountAs{},
+		example.ExaFileUploadAndDownload{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

@@ -6,17 +6,17 @@ aliyun-oss:
     bucket-url: yourBucketUrl
     base-path: yourBasePath
 autocode:
-    server-model: /ldacs_core/model
-    server-router: /forward_module/router/%s
-    server: /ldacs_sim_sgw/pkg
-    server-api: /forward_module/api/v1/%s
-    server-plug: /forward_module/plugin/%s
-    server-initialize: /forward_module/f_init
+    server-model: /model/%s
+    server-router: /router/%s
+    server: /ldacs_sim_sgw/pkg/forward_module
+    server-api: /api/v1/%s
+    server-plug: /plugin/%s
+    server-initialize: /f_init
     root: /home/jiaxv/go/src
     web-table: /view
     web: /ldacs_sim_sgw/resources/web/src
-    server-service: /ldacs_core/service
-    server-request: /ldacs_core/model/request/
+    server-service: /service/%s
+    server-request: /model/%s/request
     web-api: /api
     web-form: /view
     transfer-restart: true
