@@ -4,8 +4,9 @@ type RouterGroup struct {
 	AccountPlaneRouter
 	AccontFlightRouter
 	AccountAuthzRouter
-	AuthzPlaneRouter
 	AccountAsRouter
 	AccountGsRouter
+	AccountGscRouter
+	AuthzPlaneRouter
 	AuditAsRawRouter
 }

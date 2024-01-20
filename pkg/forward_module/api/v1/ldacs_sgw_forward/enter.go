@@ -4,8 +4,9 @@ type ApiGroup struct {
 	AccountPlaneApi
 	AccontFlightApi
 	AccountAuthzApi
-	AuthzPlaneApi
 	AccountAsApi
 	AccountGsApi
+	AccountGscApi
+	AuthzPlaneApi
 	AuditAsRawApi
 }

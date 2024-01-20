@@ -60,10 +60,12 @@ func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
 	}
 
 	accountAsService := service.AccountAsService{}
-	if count, err := accountAsService.GetAccountAsBySac(unit.AsSac); count != 0 && err == nil {
+	accountAs, err := accountAsService.GetAccountAsBySac(unit.AsSac)
+
+	if err == nil {
 		auditService := service.AuditAsRawService{}
 		if err := auditService.CreateAuditAsRaw(&model.AuditAsRaw{
-			AuditAsSac: int(unit.AsSac),
+			AsSac:      accountAs,
 			AuditAsMsg: string(msg),
 		}); err != nil {
 			global.LOGGER.Error("失败", zap.Error(err))

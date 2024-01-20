@@ -4,8 +4,9 @@ type ServiceGroup struct {
 	AccountPlaneService
 	AccontFlightService
 	AccountAuthzService
-	AuthzPlaneService
 	AccountAsService
 	AccountGsService
+	AccountGscService
+	AuthzPlaneService
 	AuditAsRawService
 }

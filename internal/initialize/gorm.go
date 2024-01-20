@@ -34,6 +34,7 @@ func RegisterTables() {
 		model.AccountAuthz{},
 		model.AccountAs{},
 		model.AccountGs{},
+		model.AccountGsc{},
 		model.AuditAsRaw{},
 		model.AuthzPlane{},
 	)
