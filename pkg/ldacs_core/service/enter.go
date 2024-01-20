@@ -8,5 +8,6 @@ type ServiceGroup struct {
 	AccountGsService
 	AccountGscService
 	AuthzPlaneService
+	AuthcStateService
 	AuditAsRawService
 }

@@ -92,6 +92,7 @@ func Routers() *gin.Engine {
 		ldacs_sgw_forwardRouter.InitAccountGsRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAccountGscRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAuthzPlaneRouter(PrivateGroup)
+		ldacs_sgw_forwardRouter.InitAuthcStateRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAuditAsRawRouter(PrivateGroup)
 	}
 
