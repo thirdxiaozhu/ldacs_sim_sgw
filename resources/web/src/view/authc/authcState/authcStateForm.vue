@@ -11,8 +11,8 @@
         <el-form-item label="当前地面控制站:" prop="authc_gsc_sac">
           <el-input v-model.number="formData.authc_gsc_sac" :clearable="false" placeholder="请输入" />
        </el-form-item>
-        <el-form-item label="认证状态:" prop="authz_state">
-          <el-select v-model="formData.authz_state" placeholder="请选择" :clearable="false">
+        <el-form-item label="认证状态:" prop="authc_state">
+          <el-select v-model="formData.authc_state" placeholder="请选择" :clearable="false">
             <el-option v-for="(item,key) in AuthenticationOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
        </el-form-item>
@@ -54,7 +54,7 @@ const formData = ref({
             authc_as_sac: 0,
             authc_gs_sac: 0,
             authc_gsc_sac: 0,
-            authz_state: undefined,
+            authc_state: undefined,
             authc_trans_time: new Date(),
         })
 // 验证规则
@@ -74,7 +74,7 @@ const rule = reactive({
                    message: '',
                    trigger: ['input','blur'],
                }],
-               authz_state : [{
+               authc_state : [{
                    required: true,
                    message: '',
                    trigger: ['input','blur'],

@@ -14,6 +14,13 @@ const (
 	PROC_NOT_FOUND
 )
 
+type linkOrientation Constant
+
+const (
+	OriFl linkOrientation = iota
+	OriRl
+)
+
 type authStateKind Constant
 
 const (

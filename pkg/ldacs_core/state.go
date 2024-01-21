@@ -20,6 +20,7 @@ type state struct {
 	KdfLen    uint32
 	SharedKey []uint8
 	KdfK      []uint8
+	IsOK      uint8
 	SecHead   SecHead
 	AuthFsm   fsm.FSM
 }

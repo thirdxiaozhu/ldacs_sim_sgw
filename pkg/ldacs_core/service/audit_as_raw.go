@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
@@ -73,4 +74,22 @@ func (auditAsRawService *AuditAsRawService) GetAuditAsRawInfoList(info ldacs_sgw
 
 	err = db.Find(&auditAsRaws).Error
 	return auditAsRaws, total, err
+}
+
+func (auditAsRawService *AuditAsRawService) NewAuditRaw(as uint8, ori int, msg string) error {
+	accountAs, err := AccountAsSer.GetAccountAsBySac(as)
+	if err != nil {
+		global.LOGGER.Error("Failure", zap.Error(err))
+		return err
+	}
+	if err := auditAsRawService.CreateAuditAsRaw(&model.AuditAsRaw{
+		AsSac:        accountAs,
+		AuditLinkOri: ori,
+		AuditAsMsg:   msg,
+	}); err != nil {
+		global.LOGGER.Error("Failure", zap.Error(err))
+		return err
+	}
+	global.LOGGER.Info("成功")
+	return nil
 }

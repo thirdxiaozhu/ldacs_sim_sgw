@@ -11,7 +11,7 @@ type AuthcStateSearch struct {
 	AuthcAsSac          *int       `json:"authc_as_sac" form:"authc_as_sac" `
 	AuthcGsSac          *int       `json:"authc_gs_sac" form:"authc_gs_sac" `
 	AuthcGscSac         *int       `json:"authc_gsc_sac" form:"authc_gsc_sac" `
-	AuthzState          *int       `json:"authz_state" form:"authz_state" `
+	AuthcState          *int       `json:"authc_state" form:"authc_state" `
 	StartAuthcTransTime *time.Time `json:"startAuthcTransTime" form:"startAuthcTransTime"`
 	EndAuthcTransTime   *time.Time `json:"endAuthcTransTime" form:"endAuthcTransTime"`
 	request.PageInfo

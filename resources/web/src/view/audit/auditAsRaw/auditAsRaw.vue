@@ -133,9 +133,19 @@
         />
         <el-table-column
           align="left"
+          label="链路方向"
+          prop="audit_link_ori"
+          width="120"
+        >
+          <template #default="scope">
+            {{ filterDict(scope.row.audit_link_ori,LinkOrientationOptions) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          align="left"
           label="飞机站报文"
           prop="audit_as_msg"
-          width="120"
+          width="480"
         />
         <el-table-column
           align="left"
@@ -272,6 +282,7 @@ defineOptions({
 })
 
 // 自动化生成的字典（可能为空）以及字段
+const LinkOrientationOptions = ref([])
 const formData = ref({
   audit_as_sac: 0,
   audit_as_msg: '',
@@ -344,6 +355,7 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   const table = await getAuditAsRawList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  console.log(table.data)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -358,6 +370,8 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
+  LinkOrientationOptions.value = await getDictFunc('LinkOrientation')
+  console.log(LinkOrientationOptions.value)
 }
 
 // 获取需要的字典 可能为空 按需保留

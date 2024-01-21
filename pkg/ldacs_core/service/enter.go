@@ -11,3 +11,15 @@ type ServiceGroup struct {
 	AuthcStateService
 	AuditAsRawService
 }
+
+var (
+	AccountPlaneSer  AccountPlaneService
+	AccountFlightSer AccontFlightService
+	AccountAuthzSer  AccountAuthzService
+	AccountAsSer     AccountAsService
+	AccountGsSer     AccountGsService
+	AccountGscSer    AccountGscService
+	AuthzPlaneSer    AuthzPlaneService
+	AuthcStateSer    AuthcStateService
+	AuditAsRawSer    AuditAsRawService
+)

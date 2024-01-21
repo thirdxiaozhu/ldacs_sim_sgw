@@ -65,8 +65,8 @@ func (authcStateService *AuthcStateService) GetAuthcStateInfoList(info ldacs_sgw
 	if info.AuthcGscSac != nil {
 		db = db.Where("authc_gsc_sac = ?", info.AuthcGscSac)
 	}
-	if info.AuthzState != nil {
-		db = db.Where("authz_state = ?", info.AuthzState)
+	if info.AuthcState != nil {
+		db = db.Where("authc_state = ?", info.AuthcState)
 	}
 	if info.StartAuthcTransTime != nil && info.EndAuthcTransTime != nil {
 		db = db.Where("authc_trans_time BETWEEN ? AND ? ", info.StartAuthcTransTime, info.EndAuthcTransTime)

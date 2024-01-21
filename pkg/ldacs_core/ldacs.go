@@ -3,10 +3,8 @@ package ldacscore
 import (
 	"context"
 	"encoding/json"
-	"go.uber.org/zap"
-	"ldacs_sim_sgw/internal/global"
+	"fmt"
 	"ldacs_sim_sgw/pkg/backward_module"
-	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
 )
@@ -43,6 +41,12 @@ func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode 
 	return unitnodeP
 }
 
+func (node *LdacsStateConnNode) ToSendPkt(pktUnit *LdacsUnit) {
+	fmt.Println(pktUnit)
+	pktJ, _ := json.Marshal(pktUnit)
+	node.Conn.SendPkt(pktJ)
+}
+
 type LdacsHandler struct {
 	ldacsConn sync.Map //uas <-> ld_u_c_node  map
 }
@@ -59,19 +63,10 @@ func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
 		return
 	}
 
-	accountAsService := service.AccountAsService{}
-	accountAs, err := accountAsService.GetAccountAsBySac(unit.AsSac)
-
-	if err == nil {
-		auditService := service.AuditAsRawService{}
-		if err := auditService.CreateAuditAsRaw(&model.AuditAsRaw{
-			AsSac:      accountAs,
-			AuditAsMsg: string(msg),
-		}); err != nil {
-			global.LOGGER.Error("失败", zap.Error(err))
-		}
+	/* add a new audit raw msg */
+	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(OriRl), string(msg)); err != nil {
+		return
 	}
-	global.LOGGER.Info("成功")
 
 	v, _ := l.ldacsConn.Load(unit.AsSac)
 	if v == nil {
@@ -100,11 +95,9 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 	st.SecHead = unit.Head
 
 	ctx = context.WithValue(ctx, "node", node)
-	ctx = context.WithValue(ctx, "unit", unit)
 	switch st.SecHead.Cmd {
 	case uint8(REGIONAL_ACCESS_REQ):
-		err := json.Unmarshal(unit.Data, &unit.pldA1)
-		if err != nil {
+		if err := json.Unmarshal(unit.Data, &unit.pldA1); err != nil {
 			return
 		}
 
@@ -112,17 +105,18 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		st.AuthId = unit.pldA1.AuthID
 		st.EncId = unit.pldA1.EncID
 
-		err = st.AuthFsm.Event(ctx, AUTH_STATE_G1.String())
-		if err != nil {
+		if err := st.AuthFsm.Event(ctx, AUTH_STATE_G1.String()); err != nil {
 			return
 		}
+
 	case uint8(REGIONAL_ACCESS_CONFIRM):
-		err := json.Unmarshal(unit.Data, &unit.pldKdfCon)
-		if err != nil {
+		if err := json.Unmarshal(unit.Data, &unit.pldKdfCon); err != nil {
 			return
 		}
-		err = st.AuthFsm.Event(ctx, AUTH_STATE_G2.String())
-		if err != nil {
+
+		st.IsOK = unit.pldKdfCon.IsOK
+
+		if err := st.AuthFsm.Event(ctx, AUTH_STATE_G2.String()); err != nil {
 			return
 		}
 	}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"ldacs_sim_sgw/internal/core"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/initialize"
@@ -19,7 +18,6 @@ import (
 import "C"
 
 func systemTeardown() {
-	fmt.Println("!!!!!!!!!!!!!!!")
 }
 
 func mainloop() {

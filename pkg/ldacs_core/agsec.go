@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"time"
 	"unsafe"
 
@@ -154,11 +153,9 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 		TimeV:  uint64(time.Now().Unix()),
 		KdfK:   st.KdfK,
 	}
-	fmt.Println(kdfMsg.KdfK, st.KdfK)
 	unitData, _ := json.Marshal(kdfMsg)
-	fmt.Println(unitData)
 
-	pkt := LdacsUnit{
+	pktUnit := LdacsUnit{
 		AsSac: st.UaAs,
 		UaGs:  st.UaGs,
 		UaGsc: st.UaGsc,
@@ -166,20 +163,12 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 		Data:  unitData,
 	}
 
-	pktJ, _ := json.Marshal(pkt)
-	node.Conn.SendPkt(pktJ)
+	node.ToSendPkt(&pktUnit)
 
-	fmt.Println(pkt)
 	return nil
 }
 func (s *SecState) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
-	unit := ctx.Value("unit").(*LdacsUnit)
-
-	if unit.pldKdfCon.IsOK == True {
-		return nil
-	} else {
-		return errors.New("Fail KDF")
-	}
+	return nil
 }
 
 func (s *SecState) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) error {
