@@ -27,7 +27,6 @@ type LdacsStateConnNode struct {
 }
 
 func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode {
-
 	unitnodeP := &LdacsStateConnNode{
 		State: initState(uas),
 		Conn:  conn,
@@ -114,7 +113,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 			return
 		}
 
-		st.IsOK = unit.pldKdfCon.IsOK
+		st.IsSuccess = unit.pldKdfCon.IsOK
 
 		if err := st.AuthFsm.Event(ctx, AUTH_STATE_G2.String()); err != nil {
 			return

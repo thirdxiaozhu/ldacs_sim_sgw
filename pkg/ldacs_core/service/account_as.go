@@ -18,6 +18,10 @@ type AccountAsService struct {
 func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.AccountAs) (err error) {
 	accountAs.AsState = 0
 	accountAs.AsSac = util.GenerateRandomInt(global.SAC_LEN)
+
+	//err = AuthcStateSer.CreateAuthcState(&model.AuthcState{
+	//
+	//})
 	err = global.DB.Create(accountAs).Error
 	return err
 }

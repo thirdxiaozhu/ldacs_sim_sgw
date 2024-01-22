@@ -140,30 +140,26 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 
 	st.SecHead.Cmd = uint8(REGIONAL_ACCESS_RES)
 
-	err := genSharedInfo(st)
-	if err != nil {
+	if err := genSharedInfo(st); err != nil {
 		return err
 	}
 
-	kdfMsg := SecPldKdf{
+	unitData, _ := json.Marshal(SecPldKdf{
 		MacLen: st.MacLen,
 		AuthID: st.AuthId,
 		EncID:  st.EncId,
 		RandV:  st.RandV,
 		TimeV:  uint64(time.Now().Unix()),
 		KdfK:   st.KdfK,
-	}
-	unitData, _ := json.Marshal(kdfMsg)
+	})
 
-	pktUnit := LdacsUnit{
+	node.ToSendPkt(&LdacsUnit{
 		AsSac: st.UaAs,
 		UaGs:  st.UaGs,
 		UaGsc: st.UaGsc,
 		Head:  st.SecHead,
 		Data:  unitData,
-	}
-
-	node.ToSendPkt(&pktUnit)
+	})
 
 	return nil
 }
