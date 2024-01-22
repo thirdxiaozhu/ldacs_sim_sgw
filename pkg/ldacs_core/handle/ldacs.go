@@ -1,4 +1,4 @@
-package ldacscore
+package handle
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
 )
@@ -24,13 +25,30 @@ type LdacsUnit struct {
 }
 
 type LdacsStateConnNode struct {
-	State *State
-	Conn  *backward_module.GscConn
+	State   *model.State
+	SecHead *SecHead
+	Conn    *backward_module.GscConn
+}
+
+func InitState(uas uint32) *model.State {
+	st := model.State{
+		SnpState:  global.SNP_STATE_CONNECTING,
+		AuthState: global.AUTH_STATE_G0,
+		IsTerm:    false,
+		AsSac:     util.ParseUAs(uas, "AS"),
+		GsSac:     util.ParseUAs(uas, "GS"),
+		GscSac:    util.ParseUAs(uas, "GSC"),
+		KdfLen:    19,
+		SharedKey: util.GetShardKey(uas),
+		AuthFsm:   *InitNewAuthFsm(),
+	}
+
+	return &st
 }
 
 func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode {
 	unitnodeP := &LdacsStateConnNode{
-		State: initState(uas),
+		State: InitState(uas),
 		Conn:  conn,
 	}
 
@@ -50,10 +68,6 @@ func (node *LdacsStateConnNode) ToSendPkt(pktUnit *LdacsUnit) {
 
 type LdacsHandler struct {
 	ldacsConn sync.Map //uas <-> ld_u_c_node  map
-}
-
-func MakeLdacsHandler() *LdacsHandler {
-	return &LdacsHandler{}
 }
 
 func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
@@ -93,10 +107,11 @@ func (l *LdacsHandler) Close(conn *backward_module.GscConn) {
 func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 	ctx := context.Background()
 	st := node.State
-	st.SecHead = unit.Head
+	//st.SecHead = unit.Head
+	node.SecHead = &unit.Head
 
 	ctx = context.WithValue(ctx, "node", node)
-	switch st.SecHead.Cmd {
+	switch node.SecHead.Cmd {
 	case uint8(REGIONAL_ACCESS_REQ):
 		if err := json.Unmarshal(unit.Data, &unit.pldA1); err != nil {
 			return

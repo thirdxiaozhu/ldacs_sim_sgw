@@ -1,10 +1,9 @@
-package ldacscore
+package model
 
 import "C"
 import (
 	"github.com/looplab/fsm"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/internal/util"
 )
 
 /* belong to AS_SAC */
@@ -26,22 +25,6 @@ type State struct {
 	SharedKey []uint8              `json:"shared_key" gorm:"column:shared_key;"`
 	KdfK      []uint8              `json:"kdf_k" gorm:"column:kdf_k;"`
 	IsSuccess uint8                `json:"is_success" gorm:"column:is_success;type:int;default:0;"`
-	SecHead   SecHead              `json:"sec_head"`
-	AuthFsm   fsm.FSM              `json:"auth_fsm"`
-}
-
-func initState(uas uint32) *State {
-	st := State{
-		SnpState:  global.SNP_STATE_CONNECTING,
-		AuthState: global.AUTH_STATE_G0,
-		IsTerm:    false,
-		AsSac:     util.ParseUAs(uas, "AS"),
-		GsSac:     util.ParseUAs(uas, "GS"),
-		GscSac:    util.ParseUAs(uas, "GSC"),
-		KdfLen:    19,
-		SharedKey: util.GetShardKey(uas),
-		AuthFsm:   *InitNewAuthFsm(),
-	}
-
-	return &st
+	//SecHead   handle.SecHead       `json:"sec_head"`
+	AuthFsm fsm.FSM `json:"auth_fsm"`
 }
