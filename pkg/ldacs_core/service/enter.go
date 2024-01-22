@@ -10,6 +10,7 @@ type ServiceGroup struct {
 	AuthzPlaneService
 	AuthcStateService
 	AuditAsRawService
+	StateService
 }
 
 var (
@@ -22,4 +23,5 @@ var (
 	AuthzPlaneSer    AuthzPlaneService
 	AuthcStateSer    AuthcStateService
 	AuditAsRawSer    AuditAsRawService
+	StateSer         StateService
 )

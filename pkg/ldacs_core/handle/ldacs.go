@@ -3,7 +3,7 @@ package handle
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/looplab/fsm"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
@@ -13,9 +13,9 @@ import (
 )
 
 type LdacsUnit struct {
-	AsSac uint8           `json:"as_sac"`
-	UaGs  uint8           `json:"ua_gs"`
-	UaGsc uint8           `json:"ua_gsc"`
+	AsSac uint64          `json:"as_sac"`
+	UaGs  uint64          `json:"ua_gs"`
+	UaGsc uint64          `json:"ua_gsc"`
 	Head  SecHead         `json:"head"`
 	Data  json.RawMessage `json:"data"`
 
@@ -27,10 +27,11 @@ type LdacsUnit struct {
 type LdacsStateConnNode struct {
 	State   *model.State
 	SecHead *SecHead
+	AuthFsm fsm.FSM
 	Conn    *backward_module.GscConn
 }
 
-func InitState(uas uint32) *model.State {
+func InitState(uas uint64) *model.State {
 	st := model.State{
 		SnpState:  global.SNP_STATE_CONNECTING,
 		AuthState: global.AUTH_STATE_G0,
@@ -40,19 +41,20 @@ func InitState(uas uint32) *model.State {
 		GscSac:    util.ParseUAs(uas, "GSC"),
 		KdfLen:    19,
 		SharedKey: util.GetShardKey(uas),
-		AuthFsm:   *InitNewAuthFsm(),
+		//AuthFsm:   *InitNewAuthFsm(),
 	}
 
 	return &st
 }
 
-func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode {
+func newUnitNode(uas uint64, conn *backward_module.GscConn) *LdacsStateConnNode {
 	unitnodeP := &LdacsStateConnNode{
-		State: InitState(uas),
-		Conn:  conn,
+		State:   InitState(uas),
+		AuthFsm: *InitNewAuthFsm(),
+		Conn:    conn,
 	}
 
-	err := unitnodeP.State.AuthFsm.Event(context.Background(), global.AUTH_STATE_G0.String())
+	err := unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STATE_G0.String())
 	if err != nil {
 		return nil
 	}
@@ -61,7 +63,6 @@ func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode 
 }
 
 func (node *LdacsStateConnNode) ToSendPkt(pktUnit *LdacsUnit) {
-	fmt.Println(pktUnit)
 	pktJ, _ := json.Marshal(pktUnit)
 	node.Conn.SendPkt(pktJ)
 }
@@ -121,7 +122,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		st.AuthId = unit.pldA1.AuthID
 		st.EncId = unit.pldA1.EncID
 
-		if err := st.AuthFsm.Event(ctx, global.AUTH_STATE_G1.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STATE_G1.String()); err != nil {
 			return
 		}
 
@@ -132,7 +133,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 
 		st.IsSuccess = unit.pldKdfCon.IsOK
 
-		if err := st.AuthFsm.Event(ctx, global.AUTH_STATE_G2.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STATE_G2.String()); err != nil {
 			return
 		}
 	}

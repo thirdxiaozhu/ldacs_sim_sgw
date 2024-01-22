@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"unsafe"
 
@@ -75,20 +76,23 @@ func genSharedInfo(st *model.State) error {
 	C.generate_rand((*C.uchar)(unsafe.Pointer(&keyOcts[0])))
 	st.RandV = binary.BigEndian.Uint32(keyOcts)
 
+	st.SharedKeyB = util.Base64Decode(st.SharedKey)
+	st.KdfKB = make([]uint8, st.KdfLen)
+
 	info := sharedInfo{
 		Constant:     0x01,
 		MacLen:       st.MacLen,
 		AuthId:       st.AuthId,
 		EncId:        st.EncId,
 		RandV:        st.RandV,
-		UaAs:         st.AsSac,
-		UaGsc:        st.GscSac,
+		UaAs:         uint8(st.AsSac),
+		UaGsc:        uint8(st.GscSac),
 		KdfLen:       uint(st.KdfLen),
-		SharedKeyLen: uint(len(st.SharedKey)),
+		SharedKeyLen: uint(len(st.SharedKeyB)),
 	}
 
-	st.KdfK = make([]uint8, st.KdfLen)
-	e := C.generate_kdf_by_info((*C.struct_shared_info_s)(unsafe.Pointer(&info)), (*C.uchar)(unsafe.Pointer(&st.SharedKey[0])), (*C.uchar)(unsafe.Pointer(&st.KdfK[0])))
+	e := C.generate_kdf_by_info((*C.struct_shared_info_s)(unsafe.Pointer(&info)), (*C.uchar)(unsafe.Pointer(&st.SharedKeyB[0])), (*C.uchar)(unsafe.Pointer(&st.KdfKB[0])))
+	st.KdfK = util.Base64Encode(st.KdfKB)
 
 	if e == 0 {
 		return errors.New("fail")
@@ -115,7 +119,7 @@ type SecPldKdf struct {
 	EncID  uint8   `json:"encid"`
 	RandV  uint32  `json:"randv"`
 	TimeV  uint64  `json:"time"`
-	KdfK   []uint8 `json:"kdfk"`
+	KdfKB  []uint8 `json:"kdfk"`
 }
 type SecPldKdfCon struct {
 	IsOK uint8 `json:"is_ok"`

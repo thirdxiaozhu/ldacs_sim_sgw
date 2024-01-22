@@ -16,12 +16,18 @@ type AccountAsService struct {
 // CreateAccountAs 创建飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.AccountAs) (err error) {
-	accountAs.AsState = 0
-	accountAs.AsSac = util.GenerateRandomInt(global.SAC_LEN)
+	accountAs.AsCurrState = 0
+	accountAs.AsSac = uint64(util.GenerateRandomInt(global.SAC_LEN))
+	//accountAs.State = model.State{
+	//	SnpState: global.SNP_STATE_CONNECTING,
+	//}
+	accountAs.State = model.InitState()
 
-	//err = AuthcStateSer.CreateAuthcState(&model.AuthcState{
-	//
-	//})
+	/* 创建空状态 */
+	//if err = StateSer.CreateState(&accountAs.State); err != nil {
+	//	return err
+	//}
+
 	err = global.DB.Create(accountAs).Error
 	return err
 }
@@ -70,7 +76,7 @@ func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs mod
 	return
 }
 
-func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint8) (accountAs model.AccountAs, err error) {
+func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint64) (accountAs model.AccountAs, err error) {
 	//err = global.DB.Model(&model.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
 	err = global.DB.Where("as_sac = ?", sac).First(&accountAs).Error
 	return
@@ -138,7 +144,7 @@ func (accountAsService *AccountAsService) GetOptions() (*model.AccountAsOptions,
 
 func (accountAsService *AccountAsService) StateChange(accountAs *model.AccountAs) (err error) {
 	db := global.DB.Model(&model.AccountAs{})
-	err = db.Where("id = ?", accountAs.ID).Update("authz_state", accountAs.AsState).Error
+	err = db.Where("id = ?", accountAs.ID).Update("authz_state", accountAs.AsCurrState).Error
 
 	fmt.Printf("err: %v\n", err)
 	return err

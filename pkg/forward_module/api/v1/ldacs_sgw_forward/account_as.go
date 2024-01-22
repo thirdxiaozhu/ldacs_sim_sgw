@@ -180,14 +180,14 @@ func (accountAsApi *AccountAsApi) SetStateChange(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Printf("STATE %d\n", accountAs.AsState)
+	fmt.Printf("STATE %d\n", accountAs.AsCurrState)
 
 	if err := accountAsService.StateChange(&accountAs); err != nil {
 		global.LOGGER.Error("授权启动失败!", zap.Error(err))
 		response.FailWithMessage("授权启动失败", c)
 	} else {
 		retMap := gin.H{}
-		retMap["state"] = accountAs.AsState
+		retMap["state"] = accountAs.AsCurrState
 		//if accountAs.AsState == 1 {
 		//} else {
 		//	retMap["state"] = 0

@@ -76,7 +76,7 @@ func (auditAsRawService *AuditAsRawService) GetAuditAsRawInfoList(info ldacs_sgw
 	return auditAsRaws, total, err
 }
 
-func (auditAsRawService *AuditAsRawService) NewAuditRaw(as uint8, ori int, msg string) error {
+func (auditAsRawService *AuditAsRawService) NewAuditRaw(as uint64, ori int, msg string) error {
 	accountAs, err := AccountAsSer.GetAccountAsBySac(as)
 	if err != nil {
 		global.LOGGER.Error("Failure", zap.Error(err))
@@ -90,6 +90,7 @@ func (auditAsRawService *AuditAsRawService) NewAuditRaw(as uint8, ori int, msg s
 		global.LOGGER.Error("Failure", zap.Error(err))
 		return err
 	}
+
 	global.LOGGER.Info("成功")
 	return nil
 }

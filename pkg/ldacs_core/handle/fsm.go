@@ -27,7 +27,7 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 		EncID:  st.EncId,
 		RandV:  st.RandV,
 		TimeV:  uint64(time.Now().Unix()),
-		KdfK:   st.KdfK,
+		KdfKB:  st.KdfKB,
 	})
 
 	node.ToSendPkt(&LdacsUnit{
