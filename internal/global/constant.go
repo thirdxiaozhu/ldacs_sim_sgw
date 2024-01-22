@@ -1,4 +1,4 @@
-package ldacscore
+package global
 
 type Constant uint32
 
@@ -21,10 +21,10 @@ const (
 	OriRl
 )
 
-type authStateKind Constant
+type AuthStateKind Constant
 
 const (
-	AUTH_STATE_UNDEFINED authStateKind = iota /* 0 -- most likely accident */
+	AUTH_STATE_UNDEFINED AuthStateKind = iota /* 0 -- most likely accident */
 	AUTH_STATE_DELETING                       /* indicates state is dead but not yet freed */
 
 	/* IKE states */
@@ -38,7 +38,7 @@ const (
 	AUTH_STATE_OFF
 )
 
-func (a authStateKind) String() string {
+func (a AuthStateKind) String() string {
 	return [...]string{
 		"AUTH_STATE_UNDEFINED",
 		"AUTH_STATE_DELETING",
@@ -52,10 +52,10 @@ func (a authStateKind) String() string {
 	}[a]
 }
 
-type snpStateKind Constant
+type SnpStateKind Constant
 
 const (
-	SNP_STATE_WAIT snpStateKind = iota
+	SNP_STATE_WAIT SnpStateKind = iota
 	SNP_STATE_CONNECTING
 	SNP_STATE_CONNECTED
 )

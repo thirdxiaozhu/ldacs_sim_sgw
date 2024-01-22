@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
@@ -22,7 +24,7 @@ type LdacsUnit struct {
 }
 
 type LdacsStateConnNode struct {
-	State *state
+	State *State
 	Conn  *backward_module.GscConn
 }
 
@@ -32,7 +34,7 @@ func newUnitNode(uas uint32, conn *backward_module.GscConn) *LdacsStateConnNode 
 		Conn:  conn,
 	}
 
-	err := unitnodeP.State.AuthFsm.Event(context.Background(), AUTH_STATE_G0.String())
+	err := unitnodeP.State.AuthFsm.Event(context.Background(), global.AUTH_STATE_G0.String())
 	if err != nil {
 		return nil
 	}
@@ -63,13 +65,13 @@ func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
 	}
 
 	/* add a new audit raw msg */
-	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(OriRl), string(msg)); err != nil {
+	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriRl), string(msg)); err != nil {
 		return
 	}
 
 	v, _ := l.ldacsConn.Load(unit.AsSac)
 	if v == nil {
-		uas := genUAs(unit.AsSac, unit.UaGs, unit.UaGsc)
+		uas := util.GenUAs(unit.AsSac, unit.UaGs, unit.UaGsc)
 		v = newUnitNode(uas, conn)
 		l.ldacsConn.Store(unit.AsSac, v)
 	}
@@ -104,7 +106,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		st.AuthId = unit.pldA1.AuthID
 		st.EncId = unit.pldA1.EncID
 
-		if err := st.AuthFsm.Event(ctx, AUTH_STATE_G1.String()); err != nil {
+		if err := st.AuthFsm.Event(ctx, global.AUTH_STATE_G1.String()); err != nil {
 			return
 		}
 
@@ -115,7 +117,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 
 		st.IsSuccess = unit.pldKdfCon.IsOK
 
-		if err := st.AuthFsm.Event(ctx, AUTH_STATE_G2.String()); err != nil {
+		if err := st.AuthFsm.Event(ctx, global.AUTH_STATE_G2.String()); err != nil {
 			return
 		}
 	}

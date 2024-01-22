@@ -3,86 +3,43 @@ package ldacscore
 import "C"
 import (
 	"github.com/looplab/fsm"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 )
 
-type state struct {
-	SnpState  snpStateKind
-	AuthState authStateKind
-	IsTerm    bool
-	UaAs      uint8
-	UaGs      uint8
-	UaGsc     uint8
-	MacLen    uint8
-	AuthId    uint8
-	EncId     uint8
-	RandV     uint32
-	Sqn       uint32
-	KdfLen    uint32
-	SharedKey []uint8
-	KdfK      []uint8
-	IsSuccess uint8
-	SecHead   SecHead
-	AuthFsm   fsm.FSM
+/* belong to AS_SAC */
+type State struct {
+	global.PREFIX_MODEL
+	//AsSac     model.AccountAs `json:"as_sac"`
+	SnpState  global.SnpStateKind  `json:"snp_state" gorm:"column:snp_state;type:int;default:0;"`
+	AuthState global.AuthStateKind `json:"auth_state" gorm:"column:auth_state;type:int;default:0;"`
+	IsTerm    bool                 `json:"is_term" gorm:"column:is_term;type:int;default:0;"`
+	AsSac     uint8                `json:"as_sac" gorm:"column:as_sac;type:int;default:0;"`
+	GsSac     uint8                `json:"gs_sac" gorm:"column:gs_sac;type:int;default:0;"`
+	GscSac    uint8                `json:"gsc_sac" gorm:"column:gsc_sac;type:int;default:0;"`
+	MacLen    uint8                `json:"mac_len" gorm:"column:mac_len;type:int;default:0;"`
+	AuthId    uint8                `json:"auth_id" gorm:"column:auth_id;type:int;default:0;"`
+	EncId     uint8                `json:"enc_id" gorm:"column:enc_id;type:int;default:0;"`
+	RandV     uint32               `json:"rand_v" gorm:"column:rand_v;type:int;default:0;"`
+	Sqn       uint32               `json:"sqn" gorm:"column:sqn;type:int;default:0;"`
+	KdfLen    uint32               `json:"kdf_len" gorm:"column:kdf_len;type:int;default:0;"`
+	SharedKey []uint8              `json:"shared_key" gorm:"column:shared_key;"`
+	KdfK      []uint8              `json:"kdf_k" gorm:"column:kdf_k;"`
+	IsSuccess uint8                `json:"is_success" gorm:"column:is_success;type:int;default:0;"`
+	SecHead   SecHead              `json:"sec_head"`
+	AuthFsm   fsm.FSM              `json:"auth_fsm"`
 }
 
-//func (s *sharedInfo) Pack(out unsafe.Pointer) {
-//	buf := &bytes.Buffer{}
-//	binary.Write(buf, binary.LittleEndian, s.Constant)
-//	binary.Write(buf, binary.LittleEndian, s.MacLen)
-//	binary.Write(buf, binary.LittleEndian, s.AuthId)
-//	binary.Write(buf, binary.LittleEndian, s.EncId)
-//	binary.Write(buf, binary.LittleEndian, s.RandV)
-//	binary.Write(buf, binary.LittleEndian, s.UaAs)
-//	binary.Write(buf, binary.LittleEndian, s.UaGsc)
-//	binary.Write(buf, binary.LittleEndian, s.KdfLen)
-//	binary.Write(buf, binary.LittleEndian, s.SharedKeyLen)
-//	//Getting the lenfth of memory
-//	l := buf.Len()
-//	//Cast the point to byte slie to allow for direct memory manipulatios
-//	o := (*[1 << 20]C.uchar)(out)
-//	//Write to memory
-//	for i := 0; i < l; i++ {
-//		b, _ := buf.ReadByte()
-//		o[i] = C.uchar(b)
-//	}
-//}
-
-func parseUAs(uas uint32, tag string) uint8 {
-	if tag == "AS" {
-		return uint8(uas>>(UA_GS_LEN+UA_GSC_LEN)) & 0xFF
-	} else if tag == "GS" {
-		return uint8(uas>>UA_GSC_LEN) & 0x0F
-	} else if tag == "GSC" {
-		return uint8(uas) & 0x0F
-	}
-	return 0
-}
-
-func genUAs(uaAs, uaGs, uaGsc uint8) uint32 {
-	uaAs32 := uint32(uaAs)
-	uaGs32 := uint32(uaGs)
-	uaGsc32 := uint32(uaGsc)
-	return uaAs32<<(UA_GS_LEN+UA_GSC_LEN) + uaGs32<<UA_GSC_LEN + uaGsc32
-}
-
-/*
-未来应从数据库中读取
-*/
-func GetShardKey(uas uint32) []uint8 {
-	keys := []uint8{0x12, 0x34, 0x56, 0x78}
-	return keys[:]
-}
-
-func initState(uas uint32) *state {
-	st := state{
-		SnpState:  SNP_STATE_CONNECTING,
-		AuthState: AUTH_STATE_G0,
+func initState(uas uint32) *State {
+	st := State{
+		SnpState:  global.SNP_STATE_CONNECTING,
+		AuthState: global.AUTH_STATE_G0,
 		IsTerm:    false,
-		UaAs:      parseUAs(uas, "AS"),
-		UaGs:      parseUAs(uas, "GS"),
-		UaGsc:     parseUAs(uas, "GSC"),
+		AsSac:     util.ParseUAs(uas, "AS"),
+		GsSac:     util.ParseUAs(uas, "GS"),
+		GscSac:    util.ParseUAs(uas, "GSC"),
 		KdfLen:    19,
-		SharedKey: GetShardKey(uas),
+		SharedKey: util.GetShardKey(uas),
 		AuthFsm:   *InitNewAuthFsm(),
 	}
 

@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"ldacs_sim_sgw/internal/global"
 	"time"
 	"unsafe"
 
@@ -16,7 +17,7 @@ import (
 // #include <ldacs_core/ldacs_core.h>
 import "C"
 
-type SEC_CMDS Constant
+type SEC_CMDS global.Constant
 
 const (
 	CMD_RESERVED SEC_CMDS = iota
@@ -70,7 +71,7 @@ type sharedInfo struct {
 	SharedKeyLen uint
 }
 
-func genSharedInfo(st *state) error {
+func genSharedInfo(st *State) error {
 
 	keyOcts := make([]uint8, 4)
 	C.generate_rand((*C.uchar)(unsafe.Pointer(&keyOcts[0])))
@@ -82,8 +83,8 @@ func genSharedInfo(st *state) error {
 		AuthId:       st.AuthId,
 		EncId:        st.EncId,
 		RandV:        st.RandV,
-		UaAs:         st.UaAs,
-		UaGsc:        st.UaGsc,
+		UaAs:         st.AsSac,
+		UaGsc:        st.GscSac,
 		KdfLen:       uint(st.KdfLen),
 		SharedKeyLen: uint(len(st.SharedKey)),
 	}
@@ -154,9 +155,9 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	})
 
 	node.ToSendPkt(&LdacsUnit{
-		AsSac: st.UaAs,
-		UaGs:  st.UaGs,
-		UaGsc: st.UaGsc,
+		AsSac: st.AsSac,
+		UaGs:  st.GsSac,
+		UaGsc: st.GscSac,
 		Head:  st.SecHead,
 		Data:  unitData,
 	})
@@ -182,7 +183,7 @@ func getFSMEvents(dst string, src ...string) *fsm.EventDesc {
 
 func (s *SecState) handleErrEvent(ctx context.Context, err error) {
 	if err != nil {
-		err := s.FSM.Event(ctx, AUTH_STATE_UNDEFINED.String())
+		err := s.FSM.Event(ctx, global.AUTH_STATE_UNDEFINED.String())
 		if err != nil {
 			return
 		}
@@ -190,26 +191,26 @@ func (s *SecState) handleErrEvent(ctx context.Context, err error) {
 }
 
 func InitNewAuthFsm() *fsm.FSM {
-	return fsm.NewFSM(AUTH_STATE_UNDEFINED.String(),
+	return fsm.NewFSM(global.AUTH_STATE_UNDEFINED.String(),
 		fsm.Events{
-			*getFSMEvents(AUTH_STATE_G0.String(), AUTH_STATE_UNDEFINED.String()),
-			*getFSMEvents(AUTH_STATE_G1.String(), AUTH_STATE_G0.String()),
-			*getFSMEvents(AUTH_STATE_G2.String(), AUTH_STATE_G1.String()),
+			*getFSMEvents(global.AUTH_STATE_G0.String(), global.AUTH_STATE_UNDEFINED.String()),
+			*getFSMEvents(global.AUTH_STATE_G1.String(), global.AUTH_STATE_G0.String()),
+			*getFSMEvents(global.AUTH_STATE_G2.String(), global.AUTH_STATE_G1.String()),
 
 			//处理错误
-			*getFSMEvents(AUTH_STATE_UNDEFINED.String(), AUTH_STATE_G0.String(), AUTH_STATE_G1.String(), AUTH_STATE_G2.String(), AUTH_STATE_UNDEFINED.String()),
+			*getFSMEvents(global.AUTH_STATE_UNDEFINED.String(), global.AUTH_STATE_G0.String(), global.AUTH_STATE_G1.String(), global.AUTH_STATE_G2.String(), global.AUTH_STATE_UNDEFINED.String()),
 		},
 		fsm.Callbacks{
-			"before_" + AUTH_STATE_G0.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STATE_G0.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG0(ctx, e))
 			},
-			"before_" + AUTH_STATE_G1.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STATE_G1.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG1(ctx, e))
 			},
-			"before_" + AUTH_STATE_G2.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STATE_G2.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG2(ctx, e))
 			},
-			"before_" + AUTH_STATE_UNDEFINED.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STATE_UNDEFINED.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateUndef(ctx, e))
 			},
 		},
