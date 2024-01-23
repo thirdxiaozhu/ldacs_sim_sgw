@@ -45,7 +45,7 @@ func GenUAs(uaAs, uaGs, uaGsc uint64) uint64 {
 /*
 未来应从数据库中读取
 */
-func GetShardKey(uas uint64) string {
+func GetShardKey(as_sac uint64) string {
 	keys := []uint8{0x12, 0x34, 0x56, 0x78}
 	return Base64Encode(keys[:])
 }

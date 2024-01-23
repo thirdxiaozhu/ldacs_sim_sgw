@@ -122,7 +122,7 @@ type SecPldKdf struct {
 	KdfKB  []uint8 `json:"kdfk"`
 }
 type SecPldKdfCon struct {
-	IsOK uint8 `json:"is_ok"`
+	IsOK int `json:"is_ok"`
 }
 
 type SecState struct {

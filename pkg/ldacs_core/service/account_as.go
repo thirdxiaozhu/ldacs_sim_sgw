@@ -18,15 +18,8 @@ type AccountAsService struct {
 func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.AccountAs) (err error) {
 	accountAs.AsCurrState = 0
 	accountAs.AsSac = uint64(util.GenerateRandomInt(global.SAC_LEN))
-	//accountAs.State = model.State{
-	//	SnpState: global.SNP_STATE_CONNECTING,
-	//}
-	accountAs.State = model.InitState()
-
 	/* 创建空状态 */
-	//if err = StateSer.CreateState(&accountAs.State); err != nil {
-	//	return err
-	//}
+	accountAs.State = model.InitState()
 
 	err = global.DB.Create(accountAs).Error
 	return err
@@ -72,7 +65,8 @@ func (accountAsService *AccountAsService) UpdateAccountAs(accountAs model.Accoun
 // GetAccountAs 根据id获取飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs model.AccountAs, err error) {
-	err = global.DB.Where("id = ?", id).First(&accountAs).Error
+	//err = global.DB.Model(&model.AccountAs{}).Preload("State.AccountGs").Preload("State.AccountGsc").Where(fmt.Sprintf("`%v`.`id` = ?", model.AccountAs{}.TableName()), id).Joins("Planeid").Joins("Flight").First(&accountAs).Error
+	err = global.DB.Model(&model.AccountAs{}).Where(fmt.Sprintf("`%v`.`id` = ?", model.AccountAs{}.TableName()), id).Joins("Planeid").Joins("Flight").Joins("State").First(&accountAs).Error
 	return
 }
 
@@ -117,7 +111,7 @@ func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_fo
 
 	//err = db.Find(&accountAss).Error
 
-	err = db.Joins("Planeid").Joins("Flight").Limit(limit).Offset(offset).Find(&accountAss).Error
+	err = db.Joins("Planeid").Joins("Flight").Joins("State").Limit(limit).Offset(offset).Find(&accountAss).Error
 	return accountAss, total, err
 }
 func (accountAsService *AccountAsService) GetOptions() (*model.AccountAsOptions, error) {

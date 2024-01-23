@@ -18,7 +18,7 @@ type AccountAs struct {
 	StateID     uint          `json:"state_id" form:"state_id" gorm:"column:state_id;comment:;"`
 	Planeid     AccountPlane  `json:"plane_id" form:"plane_id" gorm:"foreignKey:AsPlaneId;references:ID"`
 	Flight      AccountFlight `json:"flight" form:"flight" gorm:"foreignKey:AsFlight;references:ID"`
-	State       *State        `json:"state" gorm:"foreignKey:ID;references:StateID"`
+	State       State         `json:"state" form:"state" gorm:"foreignKey:StateID;references:ID"`
 	CreatedBy   uint          `gorm:"column:created_by;comment:创建者"`
 	UpdatedBy   uint          `gorm:"column:updated_by;comment:更新者"`
 	DeletedBy   uint          `gorm:"column:deleted_by;comment:删除者"`

@@ -35,7 +35,7 @@ func InitState(uas uint64) *model.State {
 	st := model.State{
 		SnpState:  global.SNP_STATE_CONNECTING,
 		AuthState: global.AUTH_STATE_G0,
-		IsTerm:    false,
+		IsTerm:    0,
 		AsSac:     util.ParseUAs(uas, "AS"),
 		GsSac:     util.ParseUAs(uas, "GS"),
 		GscSac:    util.ParseUAs(uas, "GSC"),

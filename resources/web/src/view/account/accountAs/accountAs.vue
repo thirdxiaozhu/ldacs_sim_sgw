@@ -165,13 +165,13 @@
         <el-table-column
           align="left"
           label="飞机注册号"
-          prop="as_plane_id"
+          prop="plane_id.plane_id"
           width="120"
         />
         <el-table-column
           align="left"
           label="执飞航班号"
-          prop="as_flight"
+          prop="flight.flight"
           width="120"
         />
         <el-table-column
@@ -332,6 +332,42 @@
           <el-descriptions-item label="飞机站SAC">
             {{ formData.as_sac }}
           </el-descriptions-item>
+          <el-descriptions-item label="当前GS">
+            {{ formData.state.gs_sac }}
+          </el-descriptions-item>
+          <el-descriptions-item label="当前GSC">
+            {{ formData.state.gsc_sac }}
+          </el-descriptions-item>
+          <el-descriptions-item label="认证套件">
+            {{ formData.state.auth_id }}
+          </el-descriptions-item>
+          <el-descriptions-item label="认证状态">
+            {{ formData.state.auth_state }}
+          </el-descriptions-item>
+          <el-descriptions-item label="加密套件">
+            {{ formData.state.enc_id }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否认证成功">
+            {{ formData.state.is_success }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否结束">
+            {{ formData.state.is_term }}
+          </el-descriptions-item>
+          <el-descriptions-item label="KDF">
+            {{ formData.state.kdf_k }}
+          </el-descriptions-item>
+          <el-descriptions-item label="随机数">
+            {{ formData.state.rand_v }}
+          </el-descriptions-item>
+          <el-descriptions-item label="共享密钥">
+            {{ formData.state.shared_key }}
+          </el-descriptions-item>
+          <el-descriptions-item label="SNP状态">
+            {{ formData.state.snp_state }}
+          </el-descriptions-item>
+          <el-descriptions-item label="序列号">
+            {{ formData.state.sqn }}
+          </el-descriptions-item>
         </el-descriptions>
       </el-scrollbar>
     </el-dialog>
@@ -365,6 +401,7 @@ const formData = ref({
   as_flight: 0,
   as_date: new Date(),
   as_sac: 0,
+  state: '',
 })
 
 // 验证规则
@@ -468,6 +505,7 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   const table = await getAccountAsList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
+  console.log(table.data)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -592,6 +630,7 @@ const getDetails = async(row) => {
   // 打开弹窗
   const res = await findAccountAs({ ID: row.ID })
   if (res.code === 0) {
+    console.log(res.data)
     formData.value = res.data.reaccountAs
     openDetailShow()
   }
@@ -604,6 +643,7 @@ const closeDetailShow = () => {
     as_plane_id: 0,
     as_flight: 0,
     as_date: new Date(),
+    state: '',
   }
 }
 
