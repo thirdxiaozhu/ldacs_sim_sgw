@@ -29,9 +29,9 @@ type State struct {
 	IsSuccess  int                  `json:"is_success" form:"is_success" gorm:"column:is_success;type:int;default:0;"`
 }
 
-func InitState() State {
+func NewState() State {
 	return State{
-		//SnpState: global.SNP_STATE_CONNECTED,
+		SnpState: global.SNP_STATE_WAIT,
 	}
 }
 

@@ -24,31 +24,31 @@ const (
 type AuthStateKind Constant
 
 const (
-	AUTH_STATE_UNDEFINED AuthStateKind = iota /* 0 -- most likely accident */
-	AUTH_STATE_DELETING                       /* indicates state is dead but not yet freed */
+	AUTH_STAGE_UNDEFINED AuthStateKind = iota /* 0 -- most likely accident */
+	AUTH_STAGE_DELETING                       /* indicates state is dead but not yet freed */
 
 	/* IKE states */
-	AUTH_STATE_A0
-	AUTH_STATE_G0
-	AUTH_STATE_A1
-	AUTH_STATE_G1
-	AUTH_STATE_A2
-	AUTH_STATE_G2
+	AUTH_STAGE_A0
+	AUTH_STAGE_G0
+	AUTH_STAGE_A1
+	AUTH_STAGE_G1
+	AUTH_STAGE_A2
+	AUTH_STAGE_G2
 
-	AUTH_STATE_OFF
+	AUTH_STAGE_OFF
 )
 
 func (a AuthStateKind) String() string {
 	return [...]string{
-		"AUTH_STATE_UNDEFINED",
-		"AUTH_STATE_DELETING",
-		"AUTH_STATE_A0",
-		"AUTH_STATE_G0",
-		"AUTH_STATE_A1",
-		"AUTH_STATE_G1",
-		"AUTH_STATE_A2",
-		"AUTH_STATE_G2",
-		"AUTH_STATE_OFF",
+		"AUTH_STAGE_UNDEFINED",
+		"AUTH_STAGE_DELETING",
+		"AUTH_STAGE_A0",
+		"AUTH_STAGE_G0",
+		"AUTH_STAGE_A1",
+		"AUTH_STAGE_G1",
+		"AUTH_STAGE_A2",
+		"AUTH_STAGE_G2",
+		"AUTH_STAGE_OFF",
 	}[a]
 }
 

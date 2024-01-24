@@ -34,7 +34,7 @@ type LdacsStateConnNode struct {
 func InitState(uas uint64) *model.State {
 	st := model.State{
 		SnpState:  global.SNP_STATE_CONNECTING,
-		AuthState: global.AUTH_STATE_G0,
+		AuthState: global.AUTH_STAGE_G0,
 		IsTerm:    0,
 		AsSac:     util.ParseUAs(uas, "AS"),
 		GsSac:     util.ParseUAs(uas, "GS"),
@@ -54,7 +54,7 @@ func newUnitNode(uas uint64, conn *backward_module.GscConn) *LdacsStateConnNode 
 		Conn:    conn,
 	}
 
-	err := unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STATE_G0.String())
+	err := unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STAGE_G0.String())
 	if err != nil {
 		return nil
 	}
@@ -122,7 +122,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		st.AuthId = unit.pldA1.AuthID
 		st.EncId = unit.pldA1.EncID
 
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STATE_G1.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.String()); err != nil {
 			return
 		}
 
@@ -133,7 +133,7 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 
 		st.IsSuccess = unit.pldKdfCon.IsOK
 
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STATE_G2.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.String()); err != nil {
 			return
 		}
 	}

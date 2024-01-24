@@ -59,7 +59,7 @@ func getFSMEvents(dst string, src ...string) *fsm.EventDesc {
 
 func (s *SecState) handleErrEvent(ctx context.Context, err error) {
 	if err != nil {
-		err := s.FSM.Event(ctx, global.AUTH_STATE_UNDEFINED.String())
+		err := s.FSM.Event(ctx, global.AUTH_STAGE_UNDEFINED.String())
 		if err != nil {
 			return
 		}
@@ -67,26 +67,26 @@ func (s *SecState) handleErrEvent(ctx context.Context, err error) {
 }
 
 func InitNewAuthFsm() *fsm.FSM {
-	return fsm.NewFSM(global.AUTH_STATE_UNDEFINED.String(),
+	return fsm.NewFSM(global.AUTH_STAGE_UNDEFINED.String(),
 		fsm.Events{
-			*getFSMEvents(global.AUTH_STATE_G0.String(), global.AUTH_STATE_UNDEFINED.String()),
-			*getFSMEvents(global.AUTH_STATE_G1.String(), global.AUTH_STATE_G0.String()),
-			*getFSMEvents(global.AUTH_STATE_G2.String(), global.AUTH_STATE_G1.String()),
+			*getFSMEvents(global.AUTH_STAGE_G0.String(), global.AUTH_STAGE_UNDEFINED.String()),
+			*getFSMEvents(global.AUTH_STAGE_G1.String(), global.AUTH_STAGE_G0.String()),
+			*getFSMEvents(global.AUTH_STAGE_G2.String(), global.AUTH_STAGE_G1.String()),
 
 			//处理错误
-			*getFSMEvents(global.AUTH_STATE_UNDEFINED.String(), global.AUTH_STATE_G0.String(), global.AUTH_STATE_G1.String(), global.AUTH_STATE_G2.String(), global.AUTH_STATE_UNDEFINED.String()),
+			*getFSMEvents(global.AUTH_STAGE_UNDEFINED.String(), global.AUTH_STAGE_G0.String(), global.AUTH_STAGE_G1.String(), global.AUTH_STAGE_G2.String(), global.AUTH_STAGE_UNDEFINED.String()),
 		},
 		fsm.Callbacks{
-			"before_" + global.AUTH_STATE_G0.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STAGE_G0.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG0(ctx, e))
 			},
-			"before_" + global.AUTH_STATE_G1.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STAGE_G1.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG1(ctx, e))
 			},
-			"before_" + global.AUTH_STATE_G2.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STAGE_G2.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG2(ctx, e))
 			},
-			"before_" + global.AUTH_STATE_UNDEFINED.String(): func(ctx context.Context, e *fsm.Event) {
+			"before_" + global.AUTH_STAGE_UNDEFINED.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateUndef(ctx, e))
 			},
 		},

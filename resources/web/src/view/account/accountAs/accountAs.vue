@@ -342,7 +342,8 @@
             {{ formData.state.auth_id }}
           </el-descriptions-item>
           <el-descriptions-item label="认证状态">
-            {{ formData.state.auth_state }}
+              {{ filterDict(formData.state.auth_state, AuthstageOptions) }}
+            <!-- {{ formData.state.auth_state }} -->
           </el-descriptions-item>
           <el-descriptions-item label="加密套件">
             {{ formData.state.enc_id }}
@@ -396,6 +397,7 @@ defineOptions({
 })
 
 // 自动化生成的字典（可能为空）以及字段
+const AuthstageOptions = ref({})
 const formData = ref({
   as_plane_id: 0,
   as_flight: 0,
@@ -525,13 +527,15 @@ const auth_opts = ref([])
 const setOptions = async() => {
   const res = await getOptions()
 
-  console.log(res)
   if (res.code === 0) {
     // options.value = res.data.options
     plane_opts.value = res.data.options.plane_ids
     flight_opts.value = res.data.options.flights
     auth_opts.value = res.data.options.authzs
   }
+
+  AuthstageOptions.value = await getDictFunc('Authstage')
+  console.log(AuthstageOptions.value)
 }
 
 // 获取需要的字典 可能为空 按需保留

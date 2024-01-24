@@ -19,7 +19,7 @@ func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.Accou
 	accountAs.AsCurrState = 0
 	accountAs.AsSac = uint64(util.GenerateRandomInt(global.SAC_LEN))
 	/* 创建空状态 */
-	accountAs.State = model.InitState()
+	accountAs.State = model.NewState()
 
 	err = global.DB.Create(accountAs).Error
 	return err
