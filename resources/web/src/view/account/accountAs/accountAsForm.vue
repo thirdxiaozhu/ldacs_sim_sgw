@@ -89,7 +89,6 @@ const formData = ref({
   as_plane_id: 0,
   as_flight: 0,
   as_date: new Date(),
-  as_sac: '',
 })
 // 验证规则
 const rule = reactive({
@@ -104,11 +103,6 @@ const rule = reactive({
     trigger: ['input', 'blur'],
   }],
   as_date: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  }],
-  as_sac: [{
     required: true,
     message: '',
     trigger: ['input', 'blur'],

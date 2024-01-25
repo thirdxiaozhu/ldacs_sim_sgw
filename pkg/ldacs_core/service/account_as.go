@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
@@ -17,7 +16,7 @@ type AccountAsService struct {
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) CreateAccountAs(accountAs *model.AccountAs) (err error) {
 	accountAs.AsCurrState = 0
-	accountAs.AsSac = uint64(util.GenerateRandomInt(global.SAC_LEN))
+	//accountAs.AsSac = uint64(util.GenerateRandomInt(global.SAC_LEN))
 	/* 创建空状态 */
 	accountAs.State = model.NewState()
 
@@ -72,7 +71,7 @@ func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs mod
 
 func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint64) (accountAs model.AccountAs, err error) {
 	//err = global.DB.Model(&model.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
-	err = global.DB.Where("as_sac = ?", sac).First(&accountAs).Error
+	err = global.DB.Preload("State").Where(fmt.Sprintf("`%v`.`as_sac` = ?", model.State{}.TableNameU()), sac).Joins("State").First(&accountAs).Error
 	return
 }
 
@@ -97,9 +96,9 @@ func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_fo
 	if info.StartAsDate != nil && info.EndAsDate != nil {
 		db = db.Where("as_date BETWEEN ? AND ? ", info.StartAsDate, info.EndAsDate)
 	}
-	if info.AsSac != "" {
-		db = db.Where("as_sac = ?", info.AsSac)
-	}
+	//if info.AsSac != "" {
+	//	db = db.Where("as_sac = ?", info.AsSac)
+	//}
 	err = db.Count(&total).Error
 	if err != nil {
 		return

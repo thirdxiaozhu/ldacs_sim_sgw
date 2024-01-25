@@ -38,6 +38,13 @@ const (
 	AUTH_STAGE_OFF
 )
 
+type Bool Constant
+
+const (
+	FALSE Bool = iota
+	TRUE
+)
+
 func (a AuthStateKind) String() string {
 	return [...]string{
 		"AUTH_STAGE_UNDEFINED",
@@ -52,21 +59,8 @@ func (a AuthStateKind) String() string {
 	}[a]
 }
 
-type SnpStateKind Constant
-
-const (
-	SNP_STATE_WAIT SnpStateKind = iota
-	SNP_STATE_CONNECTING
-	SNP_STATE_CONNECTED
-)
-
 const (
 	UA_AS_LEN  = 8
 	UA_GS_LEN  = 4
 	UA_GSC_LEN = 4
-)
-
-const (
-	False = 0
-	True  = 1
 )
