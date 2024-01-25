@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/looplab/fsm"
+	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
@@ -31,31 +32,26 @@ type LdacsStateConnNode struct {
 	Conn    *backward_module.GscConn
 }
 
-func InitState(uas uint64) *model.State {
-	st := model.State{
-		SnpState:  global.SNP_STATE_CONNECTING,
-		AuthState: global.AUTH_STAGE_G0,
-		IsTerm:    0,
-		AsSac:     util.ParseUAs(uas, "AS"),
-		GsSac:     util.ParseUAs(uas, "GS"),
-		GscSac:    util.ParseUAs(uas, "GSC"),
-		KdfLen:    19,
-		SharedKey: util.GetShardKey(uas),
-		//AuthFsm:   *InitNewAuthFsm(),
+func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConnNode {
+	st, err := service.StateSer.FindStateByAsSac(unit.AsSac)
+	if err != nil {
+		global.LOGGER.Error("错误！", zap.Error(err))
+		return nil
 	}
 
-	return &st
-}
+	st.AuthState = global.AUTH_STAGE_G0
+	st.GsSac = unit.UaGs
+	st.GscSac = unit.UaGsc
+	st.SharedKey = util.GetShardKey(unit.AsSac)
 
-func newUnitNode(uas uint64, conn *backward_module.GscConn) *LdacsStateConnNode {
 	unitnodeP := &LdacsStateConnNode{
-		State:   InitState(uas),
+		State:   &st,
 		AuthFsm: *InitNewAuthFsm(),
 		Conn:    conn,
 	}
 
-	err := unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STAGE_G0.String())
-	if err != nil {
+	if err = unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STAGE_G0.String()); err != nil {
+		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
 
@@ -68,11 +64,10 @@ func (node *LdacsStateConnNode) ToSendPkt(pktUnit *LdacsUnit) {
 }
 
 type LdacsHandler struct {
-	ldacsConn sync.Map //uas <-> ld_u_c_node  map
+	ldacsConn sync.Map //as_sac <-> ld_u_c_node  map
 }
 
 func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
-
 	var unit LdacsUnit
 	err := json.Unmarshal(msg, &unit)
 	if err != nil {
@@ -86,26 +81,35 @@ func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
 
 	v, _ := l.ldacsConn.Load(unit.AsSac)
 	if v == nil {
-		uas := util.GenUAs(unit.AsSac, unit.UaGs, unit.UaGsc)
-		v = newUnitNode(uas, conn)
+		v = newUnitNode(&unit, conn)
 		l.ldacsConn.Store(unit.AsSac, v)
 	}
 
-	ProcessMsg(&unit, v.(*LdacsStateConnNode))
+	/* Process new msg */
+	ProcessInputMsg(&unit, v.(*LdacsStateConnNode))
+
+	/* Update new service into database */
+	if err = service.StateSer.UpdateState(v.(*LdacsStateConnNode).State); err != nil {
+		global.LOGGER.Error("错误！", zap.Error(err))
+	}
 }
 
 func (l *LdacsHandler) Close(conn *backward_module.GscConn) {
 	l.ldacsConn.Range(func(key, value interface{}) bool {
-		uas := key
+		asSac := key
 		node := value.(*LdacsStateConnNode)
 		if node.Conn == conn {
-			l.ldacsConn.Delete(uas)
+			l.ldacsConn.Delete(asSac)
 		}
 		return true
 	})
 }
 
-func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
+func UpdateState() {
+
+}
+
+func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 	ctx := context.Background()
 	st := node.State
 	//st.SecHead = unit.Head
@@ -137,5 +141,4 @@ func ProcessMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 			return
 		}
 	}
-
 }

@@ -3,6 +3,7 @@ package model
 import "C"
 import (
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 )
 
 /* belong to AS_SAC */
@@ -13,7 +14,6 @@ type State struct {
 	GscSac     uint64               `json:"gsc_sac" form:"gsc_sac" gorm:"column:gsc_sac;comment:;"`
 	AccountGs  AccountGs            `json:"account_gs" form:"account_gs" gorm:"foreignKey:GsSac;references:GsSac"`
 	AccountGsc AccountGsc           `json:"account_gsc" form:"account_gsc" gorm:"foreignKey:GscSac;references:GscSac"`
-	SnpState   global.SnpStateKind  `json:"snp_state" form:"snp_state" gorm:"column:snp_state;type:int;default:0;"`
 	AuthState  global.AuthStateKind `json:"auth_state" form:"auth_state" gorm:"column:auth_state;type:int;default:0;"`
 	IsTerm     int                  `json:"is_term" form:"is_term" gorm:"column:is_term;type:int;default:0;"`
 	MacLen     uint8                `json:"mac_len" form:"mac_len" gorm:"column:mac_len;type:int;default:0;"`
@@ -29,12 +29,19 @@ type State struct {
 	IsSuccess  int                  `json:"is_success" form:"is_success" gorm:"column:is_success;type:int;default:0;"`
 }
 
-func NewState() State {
-	return State{
-		SnpState: global.SNP_STATE_WAIT,
+func NewState() *State {
+	return &State{
+		AsSac:     uint64(util.GenerateRandomInt(global.SAC_LEN)),
+		AuthState: global.AUTH_STAGE_UNDEFINED,
+		KdfLen:    19,
+		IsTerm:    0,
 	}
 }
 
-func (*State) TableName() string {
+func (State) TableName() string {
 	return "state"
+}
+
+func (State) TableNameU() string {
+	return "State"
 }

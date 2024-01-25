@@ -184,7 +184,7 @@
         <el-table-column
           align="left"
           label="飞机站SAC"
-          prop="as_sac"
+          prop="state.as_sac"
           width="120"
         />
         <el-table-column
@@ -330,7 +330,7 @@
             {{ formatDate(formData.as_date) }}
           </el-descriptions-item>
           <el-descriptions-item label="飞机站SAC">
-            {{ formData.as_sac }}
+            {{ formData.state.as_sac }}
           </el-descriptions-item>
           <el-descriptions-item label="当前GS">
             {{ formData.state.gs_sac }}
@@ -342,7 +342,7 @@
             {{ formData.state.auth_id }}
           </el-descriptions-item>
           <el-descriptions-item label="认证状态">
-              {{ filterDict(formData.state.auth_state, AuthstageOptions) }}
+            {{ filterDict(formData.state.auth_state, AuthstageOptions) }}
             <!-- {{ formData.state.auth_state }} -->
           </el-descriptions-item>
           <el-descriptions-item label="加密套件">
@@ -352,7 +352,10 @@
             {{ formData.state.is_success }}
           </el-descriptions-item>
           <el-descriptions-item label="是否结束">
+            <!--
             {{ formData.state.is_term }}
+-->
+            {{ filterDict(formData.state.is_term, BiJudgeOptions) }}
           </el-descriptions-item>
           <el-descriptions-item label="KDF">
             {{ formData.state.kdf_k }}
@@ -362,9 +365,6 @@
           </el-descriptions-item>
           <el-descriptions-item label="共享密钥">
             {{ formData.state.shared_key }}
-          </el-descriptions-item>
-          <el-descriptions-item label="SNP状态">
-            {{ formData.state.snp_state }}
           </el-descriptions-item>
           <el-descriptions-item label="序列号">
             {{ formData.state.sqn }}
@@ -398,12 +398,13 @@ defineOptions({
 
 // 自动化生成的字典（可能为空）以及字段
 const AuthstageOptions = ref({})
+const BiJudgeOptions = ref({})
 const formData = ref({
   as_plane_id: 0,
   as_flight: 0,
   as_date: new Date(),
   as_sac: 0,
-  state: '',
+  state: {},
 })
 
 // 验证规则
@@ -425,17 +426,6 @@ const rule = reactive({
     message: '',
     trigger: ['input', 'blur'],
   },
-  ],
-  as_sac: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  {
-    whitespace: true,
-    message: '不能只输入空格',
-    trigger: ['input', 'blur'],
-  }
   ],
 })
 
@@ -507,7 +497,6 @@ const handleCurrentChange = (val) => {
 // 查询
 const getTableData = async() => {
   const table = await getAccountAsList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
-  console.log(table.data)
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
@@ -535,7 +524,7 @@ const setOptions = async() => {
   }
 
   AuthstageOptions.value = await getDictFunc('Authstage')
-  console.log(AuthstageOptions.value)
+  BiJudgeOptions.value = await getDictFunc('BiJudge')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -647,7 +636,7 @@ const closeDetailShow = () => {
     as_plane_id: 0,
     as_flight: 0,
     as_date: new Date(),
-    state: '',
+    state: {},
   }
 }
 
