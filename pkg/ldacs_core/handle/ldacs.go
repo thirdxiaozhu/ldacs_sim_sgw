@@ -33,6 +33,8 @@ type LdacsStateConnNode struct {
 }
 
 func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConnNode {
+	ctx := context.Background()
+
 	st, err := service.StateSer.FindStateByAsSac(unit.AsSac)
 	if err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
@@ -50,7 +52,8 @@ func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConn
 		Conn:    conn,
 	}
 
-	if err = unitnodeP.AuthFsm.Event(context.Background(), global.AUTH_STAGE_G0.String()); err != nil {
+	ctx = context.WithValue(ctx, "node", unitnodeP)
+	if err = unitnodeP.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.String()); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
@@ -58,8 +61,16 @@ func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConn
 	return unitnodeP
 }
 
-func (node *LdacsStateConnNode) ToSendPkt(pktUnit *LdacsUnit) {
-	pktJ, _ := json.Marshal(pktUnit)
+func (node *LdacsStateConnNode) ToSendPkt(unit *LdacsUnit) {
+	pktJ, err := json.Marshal(unit)
+	if err != nil {
+		return
+	}
+
+	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriFl), string(pktJ)); err != nil {
+		return
+	}
+
 	node.Conn.SendPkt(pktJ)
 }
 

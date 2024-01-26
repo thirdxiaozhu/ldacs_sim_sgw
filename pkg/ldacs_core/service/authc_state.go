@@ -1,6 +1,7 @@
 package service
 
 import (
+	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
@@ -82,4 +83,23 @@ func (authcStateService *AuthcStateService) GetAuthcStateInfoList(info ldacs_sgw
 
 	err = db.Find(&authcStates).Error
 	return authcStates, total, err
+}
+func (authcStateService *AuthcStateService) NewAuthcStateTrans(asSac, gsSac, gscSac uint64, newState global.AuthStateKind) error {
+	accountAs, err := AccountAsSer.GetAccountAsBySac(asSac)
+	if err != nil {
+		global.LOGGER.Error("Failure", zap.Error(err))
+		return err
+	}
+	if err := authcStateService.CreateAuthcState(&model.AuthcState{
+		AsSac:       accountAs,
+		AuthcGsSac:  gsSac,
+		AuthcGscSac: gscSac,
+		AuthcState:  newState,
+	}); err != nil {
+		global.LOGGER.Error("Failure", zap.Error(err))
+		return err
+	}
+
+	global.LOGGER.Info("成功")
+	return nil
 }
