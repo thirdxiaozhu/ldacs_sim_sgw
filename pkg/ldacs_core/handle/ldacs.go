@@ -153,3 +153,16 @@ func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		}
 	}
 }
+
+func TransState(node *LdacsStateConnNode, newState global.AuthStateKind) error {
+	node.State.AuthState = newState
+	err := service.AuthcStateSer.NewAuthcStateTrans(
+		node.State.AsSac,
+		node.State.GsSac,
+		node.State.GscSac,
+		newState)
+	if err != nil {
+		return err
+	}
+	return nil
+}

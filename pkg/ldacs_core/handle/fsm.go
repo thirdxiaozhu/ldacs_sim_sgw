@@ -3,22 +3,26 @@ package handle
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/looplab/fsm"
 	"ldacs_sim_sgw/internal/global"
 	"time"
 )
 
-func (s *SecState) beforeAuthStateG0(ctx context.Context, e *fsm.Event) error {
+type SecStateFsm struct {
+	Name string
+	FSM  *fsm.FSM
+}
+
+var (
+	SecStates SecStateFsm
+)
+
+func (s *SecStateFsm) beforeAuthStateG0(ctx context.Context, e *fsm.Event) error {
 	return nil
 }
 
-func (s *SecState) afterAuthStateG0(ctx context.Context, e *fsm.Event) error {
-	node := ctx.Value("node").(*LdacsStateConnNode)
-	node.State.AuthState = global.AUTH_STAGE_G0
-	global.LOGGER.Warn("AFFFTER G0!!!")
-	return nil
-}
-func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
+func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	node := ctx.Value("node").(*LdacsStateConnNode)
 	st := node.State
 
@@ -47,23 +51,34 @@ func (s *SecState) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 
 	return nil
 }
-func (s *SecState) afterAuthStateG1(ctx context.Context, e *fsm.Event) error {
-	node := ctx.Value("node").(*LdacsStateConnNode)
-	node.State.AuthState = global.AUTH_STAGE_G1
-	global.LOGGER.Warn("AFFFTER G1!!!")
+func (s *SecStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
 	return nil
 }
-func (s *SecState) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
-	return nil
-}
-func (s *SecState) afterAuthStateG2(ctx context.Context, e *fsm.Event) error {
+func (s *SecStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
 	node := ctx.Value("node").(*LdacsStateConnNode)
-	node.State.AuthState = global.AUTH_STAGE_G2
-	global.LOGGER.Warn("AFFFTER G2!!!")
+
+	var authSt global.AuthStateKind
+
+	switch e.Dst {
+	case global.AUTH_STAGE_G0.String():
+		authSt = global.AUTH_STAGE_G0
+	case global.AUTH_STAGE_G1.String():
+		authSt = global.AUTH_STAGE_G1
+	case global.AUTH_STAGE_G2.String():
+		authSt = global.AUTH_STAGE_G2
+	case global.AUTH_STAGE_UNDEFINED.String():
+		authSt = global.AUTH_STAGE_UNDEFINED
+	default:
+		return errors.New("wrong Para")
+	}
+
+	if err := TransState(node, authSt); err != nil {
+		return err
+	}
 	return nil
 }
 
-func (s *SecState) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) error {
+func (s *SecStateFsm) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) error {
 
 	return nil
 }
@@ -76,7 +91,7 @@ func getFSMEvents(dst string, src ...string) *fsm.EventDesc {
 	}
 }
 
-func (s *SecState) handleErrEvent(ctx context.Context, err error) {
+func (s *SecStateFsm) handleErrEvent(ctx context.Context, err error) {
 	if err != nil {
 		err := s.FSM.Event(ctx, global.AUTH_STAGE_UNDEFINED.String())
 		if err != nil {
@@ -99,23 +114,17 @@ func InitNewAuthFsm() *fsm.FSM {
 			"before_" + global.AUTH_STAGE_G0.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG0(ctx, e))
 			},
-			"after_" + global.AUTH_STAGE_G0.String(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.afterAuthStateG0(ctx, e))
-			},
 			"before_" + global.AUTH_STAGE_G1.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG1(ctx, e))
-			},
-			"after_" + global.AUTH_STAGE_G1.String(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.afterAuthStateG1(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_G2.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG2(ctx, e))
 			},
-			"after_" + global.AUTH_STAGE_G2.String(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.afterAuthStateG2(ctx, e))
-			},
 			"before_" + global.AUTH_STAGE_UNDEFINED.String(): func(ctx context.Context, e *fsm.Event) {
 				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateUndef(ctx, e))
+			},
+			"after_event": func(ctx context.Context, e *fsm.Event) {
+				SecStates.handleErrEvent(ctx, SecStates.afterEvent(ctx, e))
 			},
 		},
 	)

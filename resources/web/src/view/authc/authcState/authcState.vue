@@ -47,7 +47,7 @@
 
         </el-form-item>
         <el-form-item
-          label="当前地面站"
+          label="地面站"
           prop="authc_gs_sac"
         >
 
@@ -58,7 +58,7 @@
 
         </el-form-item>
         <el-form-item
-          label="当前地面控制站"
+          label="地面控制站"
           prop="authc_gsc_sac"
         >
 
@@ -145,34 +145,34 @@
           label="日期"
           width="180"
         >
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
-          label="认证飞机站"
+          label="AS SAC"
           prop="authc_as_sac"
           width="120"
         />
         <el-table-column
           align="left"
-          label="当前地面站"
+          label="当前GS"
           prop="authc_gs_sac"
           width="120"
         />
         <el-table-column
           align="left"
-          label="当前地面控制站"
+          label="当前GSC"
           prop="authc_gsc_sac"
           width="120"
         />
         <el-table-column
           align="left"
-          label="认证状态"
+          label="当前认证状态"
           prop="authc_state"
           width="120"
         >
           <template #default="scope">
-            {{ filterDict(scope.row.authc_state,AuthenticationOptions) }}
+            {{ filterDict(scope.row.authc_state,AuthstageOptions) }}
           </template>
         </el-table-column>
         <el-table-column
@@ -180,7 +180,7 @@
           label="状态转换时间"
           width="180"
         >
-          <template #default="scope">{{ formatDate(scope.row.authc_trans_time) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.authc_trans_time, Spattern) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
@@ -197,19 +197,6 @@
               <el-icon style="margin-right: 5px"><InfoFilled /></el-icon>
               查看详情
             </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="edit"
-              class="table-button"
-              @click="updateAuthcStateFunc(scope.row)"
-            >变更</el-button>
-            <el-button
-              type="primary"
-              link
-              icon="delete"
-              @click="deleteRow(scope.row)"
-            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -357,7 +344,15 @@ import {
 } from '@/api/authcState'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
+import {
+  getDictFunc,
+  formatDate,
+  formatBoolean,
+  filterDict,
+  ReturnArrImg,
+  onDownloadFile,
+  Spattern
+} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
@@ -366,7 +361,8 @@ defineOptions({
 })
 
 // 自动化生成的字典（可能为空）以及字段
-const AuthenticationOptions = ref([])
+//const AuthenticationOptions = ref([])
+const AuthstageOptions = ref([])
 const formData = ref({
   authc_as_sac: 0,
   authc_gs_sac: 0,
@@ -492,7 +488,8 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
-  AuthenticationOptions.value = await getDictFunc('Authentication')
+  //AuthenticationOptions.value = await getDictFunc('Authentication')
+  AuthstageOptions.value = await getDictFunc('Authstage')
 }
 
 // 获取需要的字典 可能为空 按需保留

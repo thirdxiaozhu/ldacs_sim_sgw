@@ -179,7 +179,7 @@
           label="执飞日期"
           width="180"
         >
-          <template #default="scope">{{ formatDate(scope.row.as_date) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.as_date, dpattern) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
@@ -210,11 +210,11 @@
               @click="updateAccountAsFunc(scope.row)"
             >变更</el-button>
             <el-button
-              type="primary"
+              type="danger"
               link
               icon="delete"
-              @click="deleteRow(scope.row)"
-            >删除</el-button>
+              @click="deprecateRow(scope.row)"
+            >弃用</el-button>
             <el-button
               type="primary"
               link
@@ -343,7 +343,7 @@
             label="日期"
             min-width="20%"
           >
-            <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+            <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
           </el-table-column>
           <el-table-column
             align="left"
@@ -367,12 +367,58 @@
 
     <el-dialog
       v-model="transTrackShow"
-      style="width: 800px"
+      style="width: 1000px"
       :before-close="closeTransTrack"
       title="状态追踪"
       destroy-on-close
     >
-      <el-scrollbar height="550px" />
+      <el-scrollbar height="550px">
+        <el-table
+          ref="multipleTable"
+          style="width: 100%"
+          tooltip-effect="dark"
+          :data="transTrackTableData"
+          row-key="ID"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column
+            align="left"
+            label="日期"
+            min_width="30%"
+          >
+            <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="当前GS"
+            prop="authc_gs_sac"
+            min_width="10%"
+          />
+          <el-table-column
+            align="left"
+            label="当前GSC"
+            prop="authc_gsc_sac"
+            min_width="10%"
+          />
+          <el-table-column
+            align="left"
+            label="当前认证状态"
+            prop="authc_state"
+            min_width="20%"
+          >
+            <template #default="scope">
+              {{ filterDict(scope.row.authc_state,AuthstageOptions) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="状态转换时间"
+            min_width="30%"
+          >
+            <template #default="scope">{{ formatDate(scope.row.authc_trans_time, Spattern) }}</template>
+          </el-table-column>
+        </el-table>
+      </el-scrollbar>
     </el-dialog>
 
     <el-dialog
@@ -395,7 +441,7 @@
             {{ formData.flight.flight }}
           </el-descriptions-item>
           <el-descriptions-item label="执飞日期">
-            {{ formatDate(formData.as_date) }}
+            {{ formatDate(formData.as_date, dpattern) }}
           </el-descriptions-item>
           <el-descriptions-item label="飞机站SAC">
             {{ formData.state.as_sac }}
@@ -449,15 +495,24 @@ import {
   findAccountAs,
   getAccountAsList,
   getOptions,
-  setStateChange,
+  setStateChange, deprecateAccountAs,
 } from '@/api/accountAs'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
+import {
+  getDictFunc,
+  formatDate,
+  formatBoolean,
+  filterDict,
+  ReturnArrImg,
+  onDownloadFile,
+  dpattern, Spattern
+} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 import { Grid, InfoFilled } from '@element-plus/icons-vue'
 import { getAuditAsRawList } from '@/api/auditAsRaw'
+import {getAuthcStateList} from "@/api/authcState";
 
 defineOptions({
   name: 'AccountAs'
@@ -540,6 +595,7 @@ const searchInfo = ref({})
 // 报文追踪数据
 // const audit_as_sac = ref(0)
 const msgTrackTableData = ref([])
+const transTrackTableData = ref([])
 
 // 重置
 const onReset = () => {
@@ -626,6 +682,18 @@ const deleteRow = (row) => {
   })
 }
 
+//弃用AS
+
+const deprecateRow = (row) => {
+  ElMessageBox.confirm('确定要弃用该AS吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deprecateAccountAsFunc(row)
+  })
+}
+
 // 批量删除控制标记
 const deleteVisible = ref(false)
 
@@ -685,6 +753,21 @@ const deleteAccountAsFunc = async(row) => {
   }
 }
 
+// 删除行
+const deprecateAccountAsFunc = async(row) => {
+  const res = await deprecateAccountAs({ ID: row.ID })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '已弃用'
+    })
+    //if (tableData.value.length === 1 && page.value > 1) {
+    //  page.value--
+    //}
+    //etTableData()
+  }
+}
+
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
 
@@ -727,9 +810,13 @@ const closeDetailShow = () => {
 const openMsgTrackShow = () => {
   msgTrackShow.value = true
 }
+
+const openTransTrackShow = () => {
+  transTrackShow.value = true
+}
+
 const getMsgTrack = async(row) => {
   const res = await getAuditAsRawList({ page: 0, pageSize: 0, audit_as_sac: row.ID })
-  console.log(res.data)
   if (res.code === 0) {
     msgTrackTableData.value = res.data.list
     openMsgTrackShow()
@@ -741,11 +828,16 @@ const closeMsgTrack = () => {
 }
 
 const getTransTrack = async(row) => {
+  const res = await getAuthcStateList({ page: 0, pageSize: 0, authc_as_sac: row.ID })
 
+  if (res.code === 0) {
+    transTrackTableData.value = res.data.list
+    openTransTrackShow()
+  }
 }
 
 const closeTransTrack = () => {
-
+  transTrackShow.value = false
 }
 
 // 打开弹窗

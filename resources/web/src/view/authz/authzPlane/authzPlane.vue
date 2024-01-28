@@ -46,17 +46,7 @@
           />
 
         </el-form-item>
-        <el-form-item
-          label="被授权航班"
-          prop="authz_flight"
-        >
 
-          <el-input
-            v-model.number="searchInfo.authz_flight"
-            placeholder="搜索条件"
-          />
-
-        </el-form-item>
         <el-form-item
           label="权限"
           prop="authz_authz"
@@ -148,14 +138,8 @@
         </el-table-column>
         <el-table-column
           align="left"
-          label="被授权飞机"
+          label="被授权AS"
           prop="plane_id.plane_id"
-          width="120"
-        />
-        <el-table-column
-          align="left"
-          label="被授权航班"
-          prop="flight.flight"
           width="120"
         />
         <el-table-column
@@ -242,7 +226,7 @@
           label-width="80px"
         >
           <el-form-item
-            label="被授权飞机:"
+            label="被授权AS:"
             prop="authz_PlaneId"
           >
             <el-select

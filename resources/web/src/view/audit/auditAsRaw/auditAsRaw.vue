@@ -114,7 +114,7 @@
           label="日期"
           width="180"
         >
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
@@ -153,19 +153,6 @@
               <el-icon style="margin-right: 5px"><InfoFilled /></el-icon>
               查看详情
             </el-button>
-            <el-button
-              type="primary"
-              link
-              icon="edit"
-              class="table-button"
-              @click="updateAuditAsRawFunc(scope.row)"
-            >变更</el-button>
-            <el-button
-              type="primary"
-              link
-              icon="delete"
-              @click="deleteRow(scope.row)"
-            >删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -264,7 +251,15 @@ import {
 } from '@/api/auditAsRaw'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
+import {
+  getDictFunc,
+  formatDate,
+  formatBoolean,
+  filterDict,
+  ReturnArrImg,
+  onDownloadFile,
+  Spattern
+} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
