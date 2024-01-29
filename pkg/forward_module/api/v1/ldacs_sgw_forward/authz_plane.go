@@ -40,7 +40,6 @@ func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 	for _, authz_n := range authzPlaneMulti.AuthzAuthzs {
 		authzPlaneSingal := model.AuthzPlane{
 			AuthzPlaneId: authzPlaneMulti.AuthzPlaneId,
-			AuthzFlight:  authzPlaneMulti.AuthzFlight,
 			AuthzAuthz:   authz_n,
 		}
 

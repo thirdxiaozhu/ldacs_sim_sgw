@@ -17,6 +17,7 @@ func (s *AccountAsRouter) InitAccountAsRouter(Router *gin.RouterGroup) {
 	{
 		accountAsRouter.POST("createAccountAs", accountAsApi.CreateAccountAs)             // 新建飞机站账户
 		accountAsRouter.DELETE("deleteAccountAs", accountAsApi.DeleteAccountAs)           // 删除飞机站账户
+		accountAsRouter.DELETE("deprecateAccountAs", accountAsApi.DeprecateAccountAs)     // 删除飞机站账户
 		accountAsRouter.DELETE("deleteAccountAsByIds", accountAsApi.DeleteAccountAsByIds) // 批量删除飞机站账户
 		accountAsRouter.PUT("updateAccountAs", accountAsApi.UpdateAccountAs)              // 更新飞机站账户
 		accountAsRouter.PUT("setStateChange", accountAsApi.SetStateChange)                //启用状态更新

@@ -63,9 +63,6 @@ func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw
 	if info.Authz_planeId != nil {
 		db = db.Where("authz_plane_id = ?", info.Authz_planeId)
 	}
-	if info.Authz_flight != nil {
-		db = db.Where("authz_flight = ?", info.Authz_flight)
-	}
 	if info.Authz_autz != nil {
 		db = db.Where("authz_autz = ?", info.Authz_autz)
 	}
@@ -82,7 +79,7 @@ func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw
 	//}
 
 	//err = db.Find(&authzPlanes).Error
-	err = db.Joins("Planeid").Joins("Flight").Joins("Authz").Limit(limit).Offset(offset).Find(&authzPlanes).Error
+	err = db.Joins("Planeid").Joins("Authz").Limit(limit).Offset(offset).Find(&authzPlanes).Error
 	return authzPlanes, total, err
 }
 

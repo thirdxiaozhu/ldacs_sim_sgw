@@ -179,7 +179,7 @@
           label="执飞日期"
           width="180"
         >
-          <template #default="scope">{{ formatDate(scope.row.as_date) }}</template>
+          <template #default="scope">{{ formatDate(scope.row.as_date, dpattern) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
@@ -210,11 +210,27 @@
               @click="updateAccountAsFunc(scope.row)"
             >变更</el-button>
             <el-button
-              type="primary"
+              type="danger"
               link
               icon="delete"
-              @click="deleteRow(scope.row)"
-            >删除</el-button>
+              @click="deprecateRow(scope.row)"
+            >弃用</el-button>
+            <el-button
+              type="primary"
+              link
+              @click="getMsgTrack(scope.row)"
+            >
+              <el-icon style="margin-right: 5px"><Grid /></el-icon>
+              报文追踪
+            </el-button>
+            <el-button
+              type="primary"
+              link
+              @click="getTransTrack(scope.row)"
+            >
+              <el-icon style="margin-right: 5px"><Guide /></el-icon>
+              状态追踪
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -308,6 +324,104 @@
     </el-dialog>
 
     <el-dialog
+      v-model="msgTrackShow"
+      style="width: 1000px"
+      :before-close="closeMsgTrack"
+      title="报文追踪"
+      destroy-on-close
+    >
+      <el-scrollbar height="550px">
+        <el-table
+          ref="multipleTable"
+          style="width: 100%"
+          tooltip-effect="dark"
+          :data="msgTrackTableData"
+          row-key="ID"
+        >
+          <el-table-column
+            align="left"
+            label="日期"
+            min-width="20%"
+          >
+            <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="链路方向"
+            prop="audit_link_ori"
+            min-width="10%"
+          >
+            <template #default="scope">
+              {{ filterDict(scope.row.audit_link_ori,LinkOrientationOptions) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="飞机站报文"
+            prop="audit_as_msg"
+            min-width="70%"
+          />
+        </el-table>
+      </el-scrollbar>
+    </el-dialog>
+
+    <el-dialog
+      v-model="transTrackShow"
+      style="width: 1000px"
+      :before-close="closeTransTrack"
+      title="状态追踪"
+      destroy-on-close
+    >
+      <el-scrollbar height="550px">
+        <el-table
+          ref="multipleTable"
+          style="width: 100%"
+          tooltip-effect="dark"
+          :data="transTrackTableData"
+          row-key="ID"
+          @selection-change="handleSelectionChange"
+        >
+          <el-table-column
+            align="left"
+            label="日期"
+            min_width="30%"
+          >
+            <template #default="scope">{{ formatDate(scope.row.CreatedAt, Spattern) }}</template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="当前GS"
+            prop="authc_gs_sac"
+            min_width="10%"
+          />
+          <el-table-column
+            align="left"
+            label="当前GSC"
+            prop="authc_gsc_sac"
+            min_width="10%"
+          />
+          <el-table-column
+            align="left"
+            label="当前认证状态"
+            prop="authc_state"
+            min_width="20%"
+          >
+            <template #default="scope">
+              {{ filterDict(scope.row.authc_state,AuthstageOptions) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            align="left"
+            label="状态转换时间"
+            min_width="30%"
+          >
+            <template #default="scope">{{ formatDate(scope.row.authc_trans_time, Spattern) }}</template>
+          </el-table-column>
+        </el-table>
+      </el-scrollbar>
+    </el-dialog>
+
+    <el-dialog
       v-model="detailShow"
       style="width: 800px"
       lock-scroll
@@ -321,13 +435,13 @@
           border
         >
           <el-descriptions-item label="飞机注册号">
-            {{ formData.as_plane_id }}
+            {{ formData.plane_id.plane_id }}
           </el-descriptions-item>
           <el-descriptions-item label="执飞航班号">
-            {{ formData.as_flight }}
+            {{ formData.flight.flight }}
           </el-descriptions-item>
           <el-descriptions-item label="执飞日期">
-            {{ formatDate(formData.as_date) }}
+            {{ formatDate(formData.as_date, dpattern) }}
           </el-descriptions-item>
           <el-descriptions-item label="飞机站SAC">
             {{ formData.state.as_sac }}
@@ -338,23 +452,20 @@
           <el-descriptions-item label="当前GSC">
             {{ formData.state.gsc_sac }}
           </el-descriptions-item>
-          <el-descriptions-item label="认证套件">
-            {{ formData.state.auth_id }}
+          <el-descriptions-item label="认证算法">
+            {{ filterDict(formData.state.auth_id, SecAlgAuthOptions) }}
           </el-descriptions-item>
           <el-descriptions-item label="认证状态">
             {{ filterDict(formData.state.auth_state, AuthstageOptions) }}
             <!-- {{ formData.state.auth_state }} -->
           </el-descriptions-item>
-          <el-descriptions-item label="加密套件">
-            {{ formData.state.enc_id }}
+          <el-descriptions-item label="加密算法">
+            {{ filterDict(formData.state.enc_id, SecAlgEncOptions) }}
           </el-descriptions-item>
           <el-descriptions-item label="是否认证成功">
-            {{ formData.state.is_success }}
+            {{ filterDict(formData.state.is_success, BiJudgeOptions) }}
           </el-descriptions-item>
           <el-descriptions-item label="是否结束">
-            <!--
-            {{ formData.state.is_term }}
--->
             {{ filterDict(formData.state.is_term, BiJudgeOptions) }}
           </el-descriptions-item>
           <el-descriptions-item label="KDF">
@@ -384,13 +495,24 @@ import {
   findAccountAs,
   getAccountAsList,
   getOptions,
-  setStateChange,
+  setStateChange, deprecateAccountAs,
 } from '@/api/accountAs'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
+import {
+  getDictFunc,
+  formatDate,
+  formatBoolean,
+  filterDict,
+  ReturnArrImg,
+  onDownloadFile,
+  dpattern, Spattern
+} from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import { Grid, InfoFilled } from '@element-plus/icons-vue'
+import { getAuditAsRawList } from '@/api/auditAsRaw'
+import {getAuthcStateList} from "@/api/authcState";
 
 defineOptions({
   name: 'AccountAs'
@@ -399,6 +521,10 @@ defineOptions({
 // 自动化生成的字典（可能为空）以及字段
 const AuthstageOptions = ref({})
 const BiJudgeOptions = ref({})
+const SecAlgEncOptions = ref({})
+const SecAlgAuthOptions = ref({})
+// 链路方向
+const LinkOrientationOptions = ref([])
 const formData = ref({
   as_plane_id: 0,
   as_flight: 0,
@@ -466,6 +592,11 @@ const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
 
+// 报文追踪数据
+// const audit_as_sac = ref(0)
+const msgTrackTableData = ref([])
+const transTrackTableData = ref([])
+
 // 重置
 const onReset = () => {
   searchInfo.value = {}
@@ -525,6 +656,9 @@ const setOptions = async() => {
 
   AuthstageOptions.value = await getDictFunc('Authstage')
   BiJudgeOptions.value = await getDictFunc('BiJudge')
+  SecAlgEncOptions.value = await getDictFunc('SecAlgEnc')
+  SecAlgAuthOptions.value = await getDictFunc('SecAlgAuth')
+  LinkOrientationOptions.value = await getDictFunc('LinkOrientation')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -545,6 +679,18 @@ const deleteRow = (row) => {
     type: 'warning'
   }).then(() => {
     deleteAccountAsFunc(row)
+  })
+}
+
+//弃用AS
+
+const deprecateRow = (row) => {
+  ElMessageBox.confirm('确定要弃用该AS吗?', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(() => {
+    deprecateAccountAsFunc(row)
   })
 }
 
@@ -607,11 +753,32 @@ const deleteAccountAsFunc = async(row) => {
   }
 }
 
+// 删除行
+const deprecateAccountAsFunc = async(row) => {
+  const res = await deprecateAccountAs({ ID: row.ID })
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: '已弃用'
+    })
+    //if (tableData.value.length === 1 && page.value > 1) {
+    //  page.value--
+    //}
+    //etTableData()
+  }
+}
+
 // 弹窗控制标记
 const dialogFormVisible = ref(false)
 
 // 查看详情控制标记
 const detailShow = ref(false)
+
+// 报文追踪开启标记
+const msgTrackShow = ref(false)
+
+// 状态追踪开启标记
+const transTrackShow = ref(false)
 
 // 打开详情弹窗
 const openDetailShow = () => {
@@ -638,6 +805,39 @@ const closeDetailShow = () => {
     as_date: new Date(),
     state: {},
   }
+}
+
+const openMsgTrackShow = () => {
+  msgTrackShow.value = true
+}
+
+const openTransTrackShow = () => {
+  transTrackShow.value = true
+}
+
+const getMsgTrack = async(row) => {
+  const res = await getAuditAsRawList({ page: 0, pageSize: 0, audit_as_sac: row.ID })
+  if (res.code === 0) {
+    msgTrackTableData.value = res.data.list
+    openMsgTrackShow()
+  }
+}
+
+const closeMsgTrack = () => {
+  msgTrackShow.value = false
+}
+
+const getTransTrack = async(row) => {
+  const res = await getAuthcStateList({ page: 0, pageSize: 0, authc_as_sac: row.ID })
+
+  if (res.code === 0) {
+    transTrackTableData.value = res.data.list
+    openTransTrackShow()
+  }
+}
+
+const closeTransTrack = () => {
+  transTrackShow.value = false
 }
 
 // 打开弹窗

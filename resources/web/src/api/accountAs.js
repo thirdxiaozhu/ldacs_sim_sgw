@@ -33,6 +33,14 @@ export const deleteAccountAs = (params) => {
   })
 }
 
+export const deprecateAccountAs = (params) => {
+  return service({
+    url: '/accountAs/deprecateAccountAs',
+    method: 'delete',
+    params
+  })
+}
+
 // @Tags AccountAs
 // @Summary 批量删除飞机站账户
 // @Security ApiKeyAuth

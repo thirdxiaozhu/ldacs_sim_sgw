@@ -72,12 +72,12 @@ func (auditAsRawService *AuditAsRawService) GetAuditAsRawInfoList(info ldacs_sgw
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Find(&auditAsRaws).Error
+	err = db.Preload("AsSac.State").Find(&auditAsRaws).Error
 	return auditAsRaws, total, err
 }
 
-func (auditAsRawService *AuditAsRawService) NewAuditRaw(as uint64, ori int, msg string) error {
-	accountAs, err := AccountAsSer.GetAccountAsBySac(as)
+func (auditAsRawService *AuditAsRawService) NewAuditRaw(asSac uint64, ori int, msg string) error {
+	accountAs, err := AccountAsSer.GetAccountAsBySac(asSac)
 	if err != nil {
 		global.LOGGER.Error("Failure", zap.Error(err))
 		return err

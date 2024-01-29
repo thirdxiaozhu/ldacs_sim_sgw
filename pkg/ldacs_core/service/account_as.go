@@ -5,6 +5,7 @@ import (
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -32,6 +33,22 @@ func (accountAsService *AccountAsService) DeleteAccountAs(id string, userID uint
 			return err
 		}
 		if err = tx.Delete(&model.AccountAs{}, "id = ?", id).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	return err
+}
+
+// DeleteAccountAs 弃用飞机站账户记录
+// Author [piexlmax](https://github.com/piexlmax)
+func (accountAsService *AccountAsService) DeprecateAccountAs(id string, userID uint) (err error) {
+	fmt.Println()
+	err = global.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.AccountAs{}).Where("id = ?", id).Update("deprecated_by", userID).Error; err != nil {
+			return err
+		}
+		if err = tx.Model(&model.AccountAs{}).Where("id = ?", id).Update("deprecated_time", time.Now()).Error; err != nil {
 			return err
 		}
 		return nil

@@ -8,10 +8,20 @@ export const formatBoolean = (bool) => {
     return ''
   }
 }
-export const formatDate = (time) => {
+
+export const Spattern = 'yyyy-MM-dd hh:mm:ss.S'
+export const spattern = 'yyyy-MM-dd hh:mm:ss'
+export const dpattern = 'yyyy-MM-dd'
+export const formatDate = (time, ...pattern) => {
+  let pat = spattern
+  // eslint-disable-next-line keyword-spacing
+  if(pattern.length === 1) {
+    pat = pattern[0]
+  }
+
   if (time !== null && time !== '') {
     var date = new Date(time)
-    return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+    return formatTimeToStr(date, pat)
   } else {
     return ''
   }

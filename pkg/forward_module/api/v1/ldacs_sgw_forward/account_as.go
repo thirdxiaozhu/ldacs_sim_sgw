@@ -64,6 +64,17 @@ func (accountAsApi *AccountAsApi) DeleteAccountAs(c *gin.Context) {
 	}
 }
 
+func (accountAsApi *AccountAsApi) DeprecateAccountAs(c *gin.Context) {
+	id := c.Query("ID")
+	userID := utils.GetUserID(c)
+	if err := accountAsService.DeprecateAccountAs(id, userID); err != nil {
+		global.LOGGER.Error("弃用失败!", zap.Error(err))
+		response.FailWithMessage("弃用失败", c)
+	} else {
+		response.OkWithMessage("弃用成功", c)
+	}
+}
+
 // DeleteAccountAsByIds 批量删除飞机站账户
 // @Tags AccountAs
 // @Summary 批量删除飞机站账户

@@ -7,8 +7,6 @@ import (
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"unsafe"
-
-	"github.com/looplab/fsm"
 )
 
 // #cgo CFLAGS: -I /usr/local/include/ldacs
@@ -124,12 +122,3 @@ type SecPldKdf struct {
 type SecPldKdfCon struct {
 	IsOK int `json:"is_ok"`
 }
-
-type SecState struct {
-	Name string
-	FSM  *fsm.FSM
-}
-
-var (
-	SecStates SecState
-)

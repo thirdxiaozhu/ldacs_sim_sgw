@@ -151,10 +151,10 @@
           width="120"
         />
         <el-table-column
-            align="left"
-            label="UA"
-            prop="ua"
-            width="120"
+          align="left"
+          label="UA"
+          prop="ua"
+          width="120"
         />
         <el-table-column
           align="left"

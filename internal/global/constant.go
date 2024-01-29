@@ -39,7 +39,6 @@ const (
 )
 
 type Bool Constant
-
 const (
 	FALSE Bool = iota
 	TRUE
