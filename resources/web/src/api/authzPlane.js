@@ -16,6 +16,7 @@ export const createAuthzPlane = (data) => {
   })
 }
 
+
 // @Tags AuthzPlane
 // @Summary 删除飞机业务授权
 // @Security ApiKeyAuth
@@ -111,3 +112,4 @@ export const setStateChange = (data) => {
     data
   })
 }
+

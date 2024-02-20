@@ -119,3 +119,11 @@ export const setStateChange = (data) => {
     data
   })
 }
+
+export const getAsByIdFlightApi = (params) => {
+  return service({
+    url: '/accountAs/getAsByIdFlight',
+    method: 'get',
+    params
+  })
+}

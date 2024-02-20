@@ -156,6 +156,22 @@ func (accountAsService *AccountAsService) StateChange(accountAs *model.AccountAs
 	db := global.DB.Model(&model.AccountAs{})
 	err = db.Where("id = ?", accountAs.ID).Update("authz_state", accountAs.AsCurrState).Error
 
-	fmt.Printf("err: %v\n", err)
 	return err
+}
+
+func (accountAsService *AccountAsService) GetAsByIdFlight(plane_id, flight string) (list []model.AccountAs, err error) {
+	db := global.DB.Model(&model.AccountAs{})
+	var accountAss []model.AccountAs
+
+	fmt.Println(plane_id, flight)
+	// 如果有条件搜索 下方会自动创建搜索语句
+	if plane_id != "0" {
+		db = db.Where("as_plane_id = ?", plane_id)
+	}
+	if flight != "0" {
+		db = db.Where("as_flight = ?", flight)
+	}
+
+	err = db.Joins("Planeid").Joins("Flight").Joins("State").Find(&accountAss).Error
+	return accountAss, err
 }

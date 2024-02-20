@@ -139,7 +139,7 @@
         <el-table-column
           align="left"
           label="被授权AS"
-          prop="plane_id.plane_id"
+          prop="as.state.as_sac"
           width="120"
         />
         <el-table-column
@@ -186,13 +186,6 @@
             <el-button
               type="primary"
               link
-              icon="edit"
-              class="table-button"
-              @click="updateAuthzPlaneFunc(scope.row)"
-            >变更</el-button>
-            <el-button
-              type="primary"
-              link
               icon="delete"
               @click="deleteRow(scope.row)"
             >删除</el-button>
@@ -223,7 +216,7 @@
           :model="formData"
           label-position="right"
           :rules="rule"
-          label-width="80px"
+          label-width="100px"
         >
           <el-form-item
             label="被授权AS:"
@@ -263,12 +256,40 @@
               />
             </el-select>
           </el-form-item>
+
+          <el-form-item>
+            <el-button
+              type="primary"
+              style="width: 100%"
+              @click="getAsByIdFlight"
+            >筛选AS SAC</el-button>
+          </el-form-item>
+          <el-form-item
+            label="AS SAC:"
+            prop="authz_as"
+          >
+            <el-select
+              v-model="asStateFormData.authz_as"
+              filterable
+              placeholder="请选择"
+              style="width:100%"
+              :clearable="true"
+            >
+              <el-option
+                v-for="(item,key) in as_s"
+                :key="key"
+                :label="item.state.as_sac"
+                :value="item.ID"
+              />
+            </el-select>
+
+          </el-form-item>
           <el-form-item
             label="权限:"
             prop="authz_authz"
           >
             <el-select
-              v-model="formData.authz_authz"
+              v-model="asStateFormData.authz_authz"
               filterable
               multiple
               placeholder="请选择"
@@ -310,16 +331,19 @@
           border
         >
           <el-descriptions-item label="被授权飞机">
-            {{ formData.authz_PlaneId }}
+            {{ asStateFormData.as.as_plane_id }}
           </el-descriptions-item>
           <el-descriptions-item label="被授权航班">
-            {{ formData.authz_flight }}
+            {{ asStateFormData.as.as_flight }}
+          </el-descriptions-item>
+          <el-descriptions-item label="被授权AS">
+            {{ asStateFormData.as.state.as_sac }}
           </el-descriptions-item>
           <el-descriptions-item label="权限">
-            {{ formData.authz_authz }}
+            {{ asStateFormData.authz.authz_name }}
           </el-descriptions-item>
           <el-descriptions-item label="授权状态">
-            {{ formData.authz_state }}
+            {{ asStateFormData.authz_state }}
           </el-descriptions-item>
         </el-descriptions>
       </el-scrollbar>
@@ -343,6 +367,7 @@ import {
 import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import { getAsByIdFlightApi } from '@/api/accountAs'
 
 defineOptions({
   name: 'AuthzPlane'
@@ -352,7 +377,12 @@ defineOptions({
 const formData = ref({
   authz_PlaneId: 0,
   authz_flight: 0,
+})
+
+const asStateFormData = ref({
+  authz_as: 0,
   authz_authz: 0,
+  authz_state: 0,
 })
 
 // 验证规则
@@ -455,6 +485,7 @@ getTableData()
 const plane_opts = ref([])
 const flight_opts = ref([])
 const auth_opts = ref([])
+const as_s = ref([])
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
   const res = await getOptions()
@@ -582,11 +613,10 @@ const getDetails = async(row) => {
   // 打开弹窗
   const res = await findAuthzPlane({ ID: row.ID })
   if (res.code === 0) {
-    formData.value = res.data.reauthzPlane
+    asStateFormData.value = res.data.reauthzPlane
     openDetailShow()
   }
 }
-
 // 关闭详情弹窗
 const closeDetailShow = () => {
   detailShow.value = false
@@ -614,6 +644,14 @@ const closeDialog = () => {
     authz_state: 0,
   }
 }
+
+const getAsByIdFlight = async() => {
+  const res = await getAsByIdFlightApi(formData.value)
+  if (res.code === 0) {
+    as_s.value = res.data.Ass
+  }
+}
+
 // 弹窗确定
 const enterDialog = async() => {
   elFormRef.value?.validate(async(valid) => {
@@ -621,13 +659,13 @@ const enterDialog = async() => {
     let res
     switch (type.value) {
       case 'create':
-        res = await createAuthzPlane(formData.value)
+        res = await createAuthzPlane(asStateFormData.value)
         break
       case 'update':
         res = await updateAuthzPlane(formData.value)
         break
       default:
-        res = await createAuthzPlane(formData.value)
+        res = await createAuthzPlane(asStateFormData.value)
         break
     }
     if (res.code === 0) {

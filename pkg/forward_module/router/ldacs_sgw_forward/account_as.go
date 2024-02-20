@@ -26,5 +26,6 @@ func (s *AccountAsRouter) InitAccountAsRouter(Router *gin.RouterGroup) {
 		accountAsRouterWithoutRecord.GET("findAccountAs", accountAsApi.FindAccountAs)       // 根据ID获取飞机站账户
 		accountAsRouterWithoutRecord.GET("getAccountAsList", accountAsApi.GetAccountAsList) // 获取飞机站账户列表
 		accountAsRouterWithoutRecord.GET("getOptions", accountAsApi.GetOptions)             //获取选项
+		accountAsRouterWithoutRecord.GET("getAsByIdFlight", accountAsApi.GetAsByIdFlight)   // 获取飞机业务授权列表
 	}
 }
