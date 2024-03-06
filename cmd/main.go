@@ -13,7 +13,7 @@ import (
 )
 
 // #cgo CFLAGS: -I /usr/local/include/ldacs
-// #cgo LDFLAGS:  -lldacscore -lldacsmsgcore  -lldacsnetcore -lldacsutilcore -lldacsrolecore -lgmssl -lm -lyaml -lcjson
+// #cgo LDFLAGS:  -lldacscore -lldacsmsgcore  -lldacsnetcore -lldacsutilcore -lldacsrolecore -lgmssl -lm -lyaml -lcjson -lbase64
 // #include <ldacs_core/ldacs_core.h>
 import "C"
 

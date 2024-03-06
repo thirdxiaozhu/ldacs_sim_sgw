@@ -39,11 +39,10 @@ func (authzPlaneApi *AuthzPlaneApi) CreateAuthzPlane(c *gin.Context) {
 
 	for _, authz_n := range authzPlaneMulti.AuthzAuthzs {
 		authzPlaneSingal := model.AuthzPlane{
-			AuthzPlaneId: authzPlaneMulti.AuthzPlaneId,
-			AuthzAuthz:   authz_n,
+			AuthzAs:    authzPlaneMulti.AuthzAs,
+			AuthzAuthz: authz_n,
 		}
 
-		fmt.Println(authzPlaneSingal.AuthzPlaneId)
 		if err := authzPlaneService.CreateAuthzPlane(&authzPlaneSingal); err != nil {
 			global.LOGGER.Error("创建失败!", zap.Error(err))
 			response.FailWithMessage("创建失败", c)

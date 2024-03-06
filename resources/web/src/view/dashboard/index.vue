@@ -3,7 +3,10 @@
     <div class="gva-card-box">
       <div class="gva-card gva-top-card">
         <div class="gva-top-card-left">
+<!--
           <div class="gva-top-card-left-title">早安，管理员，请开始一天的工作吧</div>
+-->
+          <div class="gva-top-card-left-title">欢迎进入地面安全网关管理系统</div>
           <div class="gva-top-card-left-dot">{{ weatherInfo }}</div>
           <el-row class="my-8 w-[500px]">
             <el-col
@@ -15,7 +18,9 @@
                 <el-icon class="dashboard-icon">
                   <sort />
                 </el-icon>
+<!--
                 今日流量 (1231231)
+-->
               </div>
             </el-col>
             <el-col
@@ -27,7 +32,9 @@
                 <el-icon class="dashboard-icon">
                   <avatar />
                 </el-icon>
+<!--
                 总用户数 (24001)
+-->
               </div>
             </el-col>
             <el-col
@@ -39,32 +46,37 @@
                 <el-icon class="dashboard-icon">
                   <comment />
                 </el-icon>
+<!--
                 好评率 (99%)
+-->
               </div>
             </el-col>
           </el-row>
           <div>
             <div class="gva-top-card-left-item">
+<!--
               使用教学：
               <a
                 style="color:#409EFF"
                 target="view_window"
                 href="https://www.bilibili.com/video/BV1Rg411u7xH/"
               >https://www.bilibili.com/video/BV1Rg411u7xH</a>
+-->
+              研发基地：中国民航大学海航科技大厦
             </div>
             <div class="gva-top-card-left-item">
-              插件仓库：
+              相关详情：
               <a
                 style="color:#409EFF"
                 target="view_window"
-                href="https://plugin.gin-vue-admin.com/#/layout/home"
-              >https://plugin.gin-vue-admin.com</a>
+                href="https://www.cauc.edu.cn/zhv4"
+              >https://www.cauc.edu.cn/zhv4</a>
             </div>
           </div>
         </div>
         <img
-          src="@/assets/dashboard.png"
-          class="gva-top-card-right"
+          src="@/assets/kf.webp"
+          class="gva-top-card-left"
           alt
         >
       </div>

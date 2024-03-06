@@ -15,7 +15,10 @@
       <a
         class="text-gray-800 font-bold"
         href="https://github.com/flipped-aurora"
+      >中国民航大学海航科技大厦E304团队</a>
+      <!--
       >flipped-aurora团队</a>
+      -->
     </span>
   </div>
 </template>

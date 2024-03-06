@@ -23,7 +23,7 @@ export const formatDate = (time, ...pattern) => {
     var date = new Date(time)
     return formatTimeToStr(date, pat)
   } else {
-    return ''
+    return '-'
   }
 }
 

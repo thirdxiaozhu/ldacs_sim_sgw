@@ -3,8 +3,8 @@
  */
 
 const config = {
-  appName: 'Gin-Vue-Admin',
-  appLogo: 'https://www.gin-vue-admin.com/img/logo.png',
+  appName: '地面安全网关',
+  appLogo: './src/assets/cauc.jpg',
   showViteLogo: false,
   logs: [],
 }

@@ -44,7 +44,7 @@ func (authzPlaneService *AuthzPlaneService) UpdateAuthzPlane(authzPlane model.Au
 // GetAuthzPlane 根据id获取飞机业务授权记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (authzPlaneService *AuthzPlaneService) GetAuthzPlane(id string) (authzPlane model.AuthzPlane, err error) {
-	err = global.DB.Where("id = ?", id).First(&authzPlane).Error
+	err = global.DB.Preload("AccountAs.State").Joins("Authz").Where(fmt.Sprintf("`%v`.`id` = ?", model.AuthzPlane{}.TableName()), id).First(&authzPlane).Error
 	return
 }
 
@@ -60,11 +60,14 @@ func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw
 	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
 		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
 	}
-	if info.Authz_planeId != nil {
-		db = db.Where("authz_plane_id = ?", info.Authz_planeId)
-	}
-	if info.Authz_autz != nil {
-		db = db.Where("authz_autz = ?", info.Authz_autz)
+	//if info.Authz_planeId != nil {
+	//	db = db.Where("authz_plane_id = ?", info.Authz_planeId)
+	//}
+	//if info.Authz_autz != nil {
+	//	db = db.Where("authz_autz = ?", info.Authz_autz)
+	//}
+	if info.Authz_as != nil {
+		db = db.Where("authz_as = ?", info.Authz_as)
 	}
 	if info.Authz_state != nil {
 		db = db.Where("authz_state = ?", info.Authz_state)
@@ -79,7 +82,7 @@ func (authzPlaneService *AuthzPlaneService) GetAuthzPlaneInfoList(info ldacs_sgw
 	//}
 
 	//err = db.Find(&authzPlanes).Error
-	err = db.Joins("Planeid").Joins("Authz").Limit(limit).Offset(offset).Find(&authzPlanes).Error
+	err = db.Preload("AccountAs.State").Joins("Authz").Limit(limit).Offset(offset).Find(&authzPlanes).Error
 	return authzPlanes, total, err
 }
 

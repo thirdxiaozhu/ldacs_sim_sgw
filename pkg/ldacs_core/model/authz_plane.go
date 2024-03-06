@@ -6,19 +6,18 @@ import (
 )
 
 type AuthzPlaneMulti struct {
-	AuthzPlaneId int   `json:"authz_PlaneId"  `
-	AuthzFlight  int   `json:"authz_flight" `
-	AuthzAuthzs  []int `json:"authz_authz" `
+	AuthzAs     int   `json:"authz_as" `
+	AuthzAuthzs []int `json:"authz_authz" `
 }
 
 // 飞机业务授权 结构体  AuthzPlane
 type AuthzPlane struct {
 	global.PREFIX_MODEL
-	AuthzPlaneId int          `json:"authz_PlaneId" form:"authz_PlaneId" gorm:"column:authz_plane_id;comment:;"` //被授权飞机
-	AuthzAuthz   int          `json:"authz_autz" form:"authz_autz" gorm:"column:authz_autz;comment:;"`           //权限
-	AuthzState   int          `json:"authz_state" form:"authz_state" gorm:"column:authz_state;comment:;"`        //授权状态
-	Planeid      AccountPlane `json:"plane_id" form:"plane_id" gorm:"foreignKey:AuthzPlaneId;references:ID;"`
-	Authz        AccountAuthz `json:"authz" form:"authz" gorm:"foreignKey:AuthzAuthz;references:ID;"`
+	AuthzAs    int          `json:"authz_as" form:"authz_as" gorm:"column:authz_as;comment:;"`          //被授权飞机
+	AuthzAuthz int          `json:"authz_autz" form:"authz_autz" gorm:"column:authz_autz;comment:;"`    //权限
+	AuthzState int          `json:"authz_state" form:"authz_state" gorm:"column:authz_state;comment:;"` //授权状态
+	AccountAs  AccountAs    `json:"as" form:"as" gorm:"foreignKey:AuthzAs;references:ID;"`
+	Authz      AccountAuthz `json:"authz" form:"authz" gorm:"foreignKey:AuthzAuthz;references:ID;"`
 }
 
 type AuthzOptions struct {

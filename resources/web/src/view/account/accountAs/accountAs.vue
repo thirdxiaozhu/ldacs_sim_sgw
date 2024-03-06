@@ -39,23 +39,19 @@
           label="飞机注册号"
           prop="as_plane_id"
         >
-
           <el-input
             v-model.number="searchInfo.as_plane_id"
             placeholder="搜索条件"
           />
-
         </el-form-item>
         <el-form-item
           label="执飞航班号"
           prop="as_flight"
         >
-
           <el-input
             v-model.number="searchInfo.as_flight"
             placeholder="搜索条件"
           />
-
         </el-form-item>
         <el-form-item
           label="执飞日期"
@@ -187,6 +183,13 @@
           prop="state.as_sac"
           width="120"
         />
+        <el-table-column
+          align="center"
+          label="弃用日期"
+          width="120"
+        >
+          <template #default="scope">{{ formatDate(scope.row.deprecated_time, dpattern ) }}</template>
+        </el-table-column>
         <el-table-column
           align="left"
           label="操作"
@@ -479,6 +482,9 @@
           </el-descriptions-item>
           <el-descriptions-item label="序列号">
             {{ formData.state.sqn }}
+          </el-descriptions-item>
+          <el-descriptions-item label="弃用日期">
+            {{ formatDate(formData.deprecated_time, Spattern) }}
           </el-descriptions-item>
         </el-descriptions>
       </el-scrollbar>

@@ -191,7 +191,6 @@ func (accountAsApi *AccountAsApi) SetStateChange(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	fmt.Printf("STATE %d\n", accountAs.AsCurrState)
 
 	if err := accountAsService.StateChange(&accountAs); err != nil {
 		global.LOGGER.Error("授权启动失败!", zap.Error(err))
@@ -204,5 +203,18 @@ func (accountAsApi *AccountAsApi) SetStateChange(c *gin.Context) {
 		//	retMap["state"] = 0
 		//}
 		response.OkWithData(retMap, c)
+	}
+}
+
+func (accountAsApi *AccountAsApi) GetAsByIdFlight(c *gin.Context) {
+	plane_id := c.Query("authz_PlaneId")
+	flight := c.Query("authz_flight")
+
+	fmt.Println(plane_id, flight)
+	if Ass, err := accountAsService.GetAsByIdFlight(plane_id, flight); err != nil {
+		global.LOGGER.Error("查询失败!", zap.Error(err))
+		response.FailWithMessage("查询失败", c)
+	} else {
+		response.OkWithData(gin.H{"Ass": Ass}, c)
 	}
 }
