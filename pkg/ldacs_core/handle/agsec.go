@@ -69,7 +69,6 @@ type sharedInfo struct {
 }
 
 func genSharedInfo(st *model.State) error {
-
 	keyOcts := make([]uint8, 4)
 	C.generate_rand((*C.uchar)(unsafe.Pointer(&keyOcts[0])))
 	st.RandV = binary.BigEndian.Uint32(keyOcts)
