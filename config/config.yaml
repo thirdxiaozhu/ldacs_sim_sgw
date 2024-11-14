@@ -1,7 +1,7 @@
 system:
     db-type: mysql
     forward-addr: 8888
-    backward-addr: 7777
+    backward-addr: 6666
 zap:
     level: info
     prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'

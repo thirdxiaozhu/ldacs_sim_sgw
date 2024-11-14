@@ -18,7 +18,7 @@ import (
 
 // handler 是应用层服务器的抽象
 type Handler interface {
-	ServeGSC(msg []byte, conn *GscConn)
+	Serve(msg []byte, conn *GscConn)
 	Close(conn *GscConn)
 }
 
@@ -49,9 +49,9 @@ type serverHandler struct {
 	srv *SgwServer
 }
 
-func (sh serverHandler) ServeGSC(msg []byte, conn *GscConn) {
+func (sh serverHandler) Serve(msg []byte, conn *GscConn) {
 	handler := sh.srv.Handler
-	handler.ServeGSC(msg, conn)
+	handler.Serve(msg, conn)
 }
 
 func (sh serverHandler) CloseGSC(conn *GscConn) {
@@ -128,7 +128,7 @@ func (s *SgwServer) ListenAndServeWithSignal() {
 	if err != nil {
 		return
 	}
-	logger.Info(fmt.Sprintf("bind: %s, start listening...", ":8888"))
+	logger.Info(fmt.Sprintf("bind: %s, start listening...", s.Addr))
 	s.Serve(listener, closeChan)
 }
 
@@ -157,7 +157,7 @@ func (c *GscConn) serve(ctx context.Context) {
 			}
 			return
 		}
-		handler.ServeGSC(msg[:n], c)
+		handler.Serve(msg[:n], c)
 	}
 }
 

@@ -12,10 +12,10 @@ import (
 	"syscall"
 )
 
-// #cgo CFLAGS: -I /usr/local/include/ldacs
-// #cgo LDFLAGS:  -lldacscore -lldacsmsgcore  -lldacsnetcore -lldacsutilcore -lldacsrolecore -lgmssl -lm -lyaml -lcjson -lbase64
-// #include <ldacs_core/ldacs_core.h>
-import "C"
+//// #cgo CFLAGS: -I /usr/local/include/ldacs
+//// #cgo LDFLAGS:  -lldacscore -lldacsmsgcore  -lldacsnetcore -lldacsutilcore -lldacsrolecore -lgmssl -lm -lyaml -lcjson -lbase64
+//// #include <ldacs_core/ldacs_core.h>
+//import "C"
 
 func systemTeardown() {
 }
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	/* run backward module */
-	go backward.ListenAndServe(":7777", ldacscore.MakeLdacsHandler())
+	go backward.ListenAndServe(":6666", ldacscore.MakeLdacsHandler())
 	/* run forward module */
 	go forward.RunForward()
 

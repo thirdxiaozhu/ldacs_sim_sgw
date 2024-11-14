@@ -78,7 +78,7 @@ type LdacsHandler struct {
 	ldacsConn sync.Map //as_sac <-> ld_u_c_node  map
 }
 
-func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
+func (l *LdacsHandler) Serve(msg []byte, conn *backward_module.GscConn) {
 	var unit LdacsUnit
 	err := json.Unmarshal(msg, &unit)
 	if err != nil {

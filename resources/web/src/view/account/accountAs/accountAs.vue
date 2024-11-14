@@ -518,7 +518,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 import { Grid, InfoFilled } from '@element-plus/icons-vue'
 import { getAuditAsRawList } from '@/api/auditAsRaw'
-import {getAuthcStateList} from "@/api/authcState";
+import {getAuthcStateList} from '@/api/authcState';
 
 defineOptions({
   name: 'AccountAs'
