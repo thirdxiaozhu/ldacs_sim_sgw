@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/hdt3213/godis/lib/logger"
 	"github.com/hdt3213/godis/lib/sync/atomic"
 	"github.com/hdt3213/godis/lib/sync/wait"
@@ -16,15 +17,16 @@ import (
 	"time"
 )
 
-// handler 是应用层服务器的抽象
-type Handler interface {
-	Serve(msg []byte, conn *GscConn)
+type ServiceHandler interface {
+	Serve(msg []byte, id uint32)
 	Close(conn *GscConn)
 }
 
 // 客户端连接的抽象
 type GscConn struct {
 	// tcp 连接
+	Id uint32
+
 	Conn   net.Conn
 	Server *SgwServer
 
@@ -41,39 +43,36 @@ type SgwServer struct {
 	// 需使用并发安全的容器
 	activeConn sync.Map
 	Addr       string
-	Handler    Handler
+	Handler    ServiceHandler
 	closing    atomic.Boolean // 关闭状态标识位
 }
 
-type serverHandler struct {
-	srv *SgwServer
+func (c *GscConn) Serve(msg []byte) {
+	handler := c.Server.Handler
+	handler.Serve(msg, c.Id)
 }
 
-func (sh serverHandler) Serve(msg []byte, conn *GscConn) {
-	handler := sh.srv.Handler
-	handler.Serve(msg, conn)
-}
-
-func (sh serverHandler) CloseGSC(conn *GscConn) {
-	handler := sh.srv.Handler
+func (c *GscConn) Close(conn *GscConn) {
+	handler := c.Server.Handler
 	handler.Close(conn)
 }
 
-func ListenAndServe(addr string, handler Handler) {
+func ListenAndServe(addr string, handler ServiceHandler) {
 	server := &SgwServer{Addr: addr, Handler: handler}
 	server.ListenAndServeWithSignal()
 }
 
 func (s *SgwServer) NewConn(conn net.Conn) *GscConn {
 	c := &GscConn{
+		Id:     uuid.New().ID(),
 		Conn:   conn,
 		Server: s,
 	}
 	return c
 }
 
-// Serve 监听并提供服务，并在收到 closeChan 发来的关闭通知后关闭
-func (s *SgwServer) Serve(listener net.Listener, closeChan <-chan struct{}) {
+// ServeNewConnection 监听并提供服务，并在收到 closeChan 发来的关闭通知后关闭
+func (s *SgwServer) ServeNewConnection(listener net.Listener, closeChan <-chan struct{}) {
 	// 监听关闭通知
 	go func() {
 		<-closeChan
@@ -129,7 +128,7 @@ func (s *SgwServer) ListenAndServeWithSignal() {
 		return
 	}
 	logger.Info(fmt.Sprintf("bind: %s, start listening...", s.Addr))
-	s.Serve(listener, closeChan)
+	s.ServeNewConnection(listener, closeChan)
 }
 
 func (c *GscConn) serve(ctx context.Context) {
@@ -139,41 +138,38 @@ func (c *GscConn) serve(ctx context.Context) {
 		return
 	}
 
-	c.Server.activeConn.Store(c, struct{}{}) // 记住仍然存活的连接
+	//c.Server.activeConn.Store(c, struct{}{}) // 记住仍然存活的连接
+	c.Server.activeConn.Store(c.Id, c) // 记住仍然存活的连接
 
 	c.bufr = bufio.NewReader(c.Conn)
 	c.buft = bufio.NewWriter(c.Conn)
 	var msg [1024]byte
-	handler := serverHandler{c.Server}
 	for {
 		n, err := c.bufr.Read(msg[:])
 		if err != nil {
 			if err == io.EOF {
 				logger.Info("connection close")
-				handler.CloseGSC(c)
-				c.Server.activeConn.Delete(c.Conn)
+				c.Close(c)
+				c.Server.activeConn.Delete(c.Id)
 			} else {
 				logger.Warn(err)
 			}
 			return
 		}
-		handler.Serve(msg[:n], c)
+		c.Serve(msg[:n])
 	}
 }
 
 func (c *GscConn) SendPkt(pktJ []byte) {
 	// 发送数据前先置为waiting状态，阻止连接被关闭
 	c.Waiting.Add(1)
-	//_, err := c.buft.Write(pktJ)
-	//if err != nil {
-	//	return
-	//}
+
 	c.Conn.Write(pktJ)
 	c.Waiting.Done()
 }
 
 // 关闭客户端连接
-func (c *GscConn) Close() error {
+func (c *GscConn) CloseConnection() error {
 	// 等待数据发送完成或超时
 	c.Waiting.WaitWithTimeout(10 * time.Second)
 	_ = c.Conn.Close()
@@ -186,8 +182,8 @@ func (s *SgwServer) Close() error {
 	s.closing.Set(true)
 	// 逐个关闭连接
 	s.activeConn.Range(func(key interface{}, val interface{}) bool {
-		client := key.(*GscConn)
-		_ = client.Close()
+		client := val.(*GscConn)
+		_ = client.CloseConnection()
 		return true
 	})
 	return nil

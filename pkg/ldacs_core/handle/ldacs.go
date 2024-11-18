@@ -78,31 +78,32 @@ type LdacsHandler struct {
 	ldacsConn sync.Map //as_sac <-> ld_u_c_node  map
 }
 
-func (l *LdacsHandler) Serve(msg []byte, conn *backward_module.GscConn) {
-	var unit LdacsUnit
-	err := json.Unmarshal(msg, &unit)
-	if err != nil {
-		return
-	}
-
-	/* add a new audit raw msg */
-	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriRl), string(msg)); err != nil {
-		return
-	}
-
-	v, _ := l.ldacsConn.Load(unit.AsSac)
-	if v == nil {
-		v = newUnitNode(&unit, conn)
-		l.ldacsConn.Store(unit.AsSac, v)
-	}
-
-	/* Process new msg */
-	ProcessInputMsg(&unit, v.(*LdacsStateConnNode))
-
-	/* Update new service into database */
-	if err = service.StateSer.UpdateState(v.(*LdacsStateConnNode).State); err != nil {
-		global.LOGGER.Error("错误！", zap.Error(err))
-	}
+func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
+	global.LOGGER.Info(string(msg), zap.Uint32("ID ", connId))
+	//var unit LdacsUnit
+	//err := json.Unmarshal(msg, &unit)
+	//if err != nil {
+	//	return
+	//}
+	//
+	///* add a new audit raw msg */
+	//if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriRl), string(msg)); err != nil {
+	//	return
+	//}
+	//
+	//v, _ := l.ldacsConn.Load(unit.AsSac)
+	//if v == nil {
+	//	v = newUnitNode(&unit, conn)
+	//	l.ldacsConn.Store(unit.AsSac, v)
+	//}
+	//
+	///* Process new msg */
+	//ProcessInputMsg(&unit, v.(*LdacsStateConnNode))
+	//
+	///* Update new service into database */
+	//if err = service.StateSer.UpdateState(v.(*LdacsStateConnNode).State); err != nil {
+	//	global.LOGGER.Error("错误！", zap.Error(err))
+	//}
 }
 
 func (l *LdacsHandler) Close(conn *backward_module.GscConn) {
