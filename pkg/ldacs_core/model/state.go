@@ -23,8 +23,6 @@ type State struct {
 	Sqn        uint32               `json:"sqn"  form:"sqn" gorm:"column:sqn;type:int;default:0;"`
 	KdfLen     uint32               `json:"kdf_len" form:"kdf_len"  gorm:"column:kdf_len;type:int;default:0;"`
 	SharedKey  string               `json:"shared_key" form:"shared_key" gorm:"column:shared_key;"`
-	SharedKeyB []uint8              `gorm:"-"`
-	KdfK       string               `json:"kdf_k" form:"kdf_k" gorm:"column:kdf_k;"`
 	KdfKB      []uint8              `gorm:"-"`
 	IsSuccess  int                  `json:"is_success" form:"is_success" gorm:"column:is_success;type:int;default:0;"`
 }

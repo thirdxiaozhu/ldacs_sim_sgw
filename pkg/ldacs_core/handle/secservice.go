@@ -123,3 +123,129 @@ type SecPldKdf struct {
 type SecPldKdfCon struct {
 	IsOK int `json:"is_ok"`
 }
+
+/* ============================= */
+
+type STYPE uint8
+
+const (
+	AUC_RQST     STYPE = 0x41
+	AUC_RESP     STYPE = 0x42
+	AUC_KEY_EXEC STYPE = 0x43
+)
+
+func (f STYPE) GetString() string {
+	return [...]string{
+		"AUC_RQST",
+		"AUC_RESP",
+		"AUC_KEY_EXEC",
+	}[f-AUC_RQST]
+}
+
+func (f STYPE) CheckValid() bool {
+	return f >= AUC_RQST && f <= AUC_KEY_EXEC
+}
+
+type PID uint8
+
+const (
+	PID_RESERVED PID = 0x0
+	PID_SIGN     PID = 0x1
+	PID_MAC      PID = 0x2
+	PID_BOTH     PID = 0x3
+)
+
+func (f PID) GetString() string {
+	return [...]string{
+		"PID_RESERVED",
+		"PID_SIGN",
+		"PID_MAC",
+		"PID_BOTH",
+	}[f-PID_RESERVED]
+}
+
+func (f PID) CheckValid() bool {
+	return f <= PID_BOTH
+}
+
+type MacLen uint8
+
+const (
+	AUTHC_MACLEN_INVALID MacLen = 0x0
+	AUTHC_MACLEN_96      MacLen = 0x1
+	AUTHC_MACLEN_128     MacLen = 0x2
+	AUTHC_MACLEN_64      MacLen = 0x3
+	AUTHC_MACLEN_256     MacLen = 0x4
+)
+
+func (f MacLen) GetString() string {
+	return [...]string{
+		"AUTHC_MACLEN_INVALID",
+		"AUTHC_MACLEN_96",
+		"AUTHC_MACLEN_128",
+		"AUTHC_MACLEN_64",
+		"AUTHC_MACLEN_256",
+	}[f-AUTHC_MACLEN_INVALID]
+}
+
+func (f MacLen) CheckValid() bool {
+	return f <= AUTHC_MACLEN_256
+}
+
+type AuthID uint8
+
+const (
+	AUTHC_AUTH_INVALID      AuthID = 0x0
+	AUTHC_AUTH_SM3HMAC      AuthID = 0x1
+	AUTHC_AUTH_SM2_WITH_SM3 AuthID = 0x2
+)
+
+func (f AuthID) GetString() string {
+	return [...]string{
+		"AUTHC_AUTH_INVALID",
+		"AUTHC_AUTH_SM3HMAC",
+		"AUTHC_AUTH_SM2_WITH_SM3",
+	}[f-AUTHC_AUTH_INVALID]
+}
+
+func (f AuthID) CheckValid() bool {
+	return f <= AUTHC_AUTH_SM2_WITH_SM3
+}
+
+type EncID uint8
+
+const (
+	AUTHC_ENC_INVALID EncID = 0x0
+	AUTHC_ENC_SM4_CBC EncID = 0x1
+	AUTHC_ENC_SM4_CFB EncID = 0x2
+	AUTHC_ENC_SM4_OFB EncID = 0x3
+	AUTHC_ENC_SM4_ECB EncID = 0x4
+	AUTHC_ENC_SM4_CTR EncID = 0x5
+)
+
+func (f EncID) GetString() string {
+	return [...]string{
+		"AUTHC_ENC_INVALID",
+		"AUTHC_ENC_SM4_CBC",
+		"AUTHC_ENC_SM4_CFB",
+		"AUTHC_ENC_SM4_OFB",
+		"AUTHC_ENC_SM4_ECB",
+		"AUTHC_ENC_SM4_CTR",
+	}[f-AUTHC_ENC_INVALID]
+}
+
+func (f EncID) CheckValid() bool {
+	return f <= AUTHC_ENC_SM4_CTR
+}
+
+type AucRqst struct {
+	Stype  STYPE  `ldacs:"name:S_TYPE; size:8; type:enum"`
+	Ver    uint8  `ldacs:"name:VER; size:3; type:set"`
+	PID    PID    `ldacs:"name:PID; size:2; type:enum"`
+	ASSac  uint16 `ldacs:"name:as_sac; size:12; type:set"`
+	GSSac  uint16 `ldacs:"name:gs_sac; size:12; type:set"`
+	MacLen MacLen `ldacs:"name:maclen; size:4; type:enum"`
+	AuthID AuthID `ldacs:"name:authid; size:4; type:enum"`
+	EncID  EncID  `ldacs:"name:encid; size:4; type:enum"`
+	N1     []byte `ldacs:"name:N1; bytes_size: 16; type:fbytes"`
+}

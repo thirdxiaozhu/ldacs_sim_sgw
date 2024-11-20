@@ -14,7 +14,11 @@ import (
 )
 
 type LdacsUnit struct {
-	AsSac uint64          `json:"as_sac"`
+	AsSac  uint16 `json:"as_sac"`
+	GsSac  uint16 `json:"gs_sac"`
+	ConnID uint32
+	State  LdacsStateConnNode
+
 	UaGs  uint64          `json:"ua_gs"`
 	UaGsc uint64          `json:"ua_gsc"`
 	Head  SecHead         `json:"head"`
@@ -24,6 +28,20 @@ type LdacsUnit struct {
 	pldKdf    SecPldKdf
 	pldKdfCon SecPldKdfCon
 }
+
+func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
+
+	var aucRqst AucRqst
+
+	err := util.UnmarshalLdacsPkt(gsnfMsg, &aucRqst)
+	if err != nil {
+		return
+	}
+
+	global.LOGGER.Info("AucRqst Packet", zap.Any("11", aucRqst))
+}
+
+const GSNF_HEAD_LEN = 4
 
 type LdacsStateConnNode struct {
 	State   *model.State
@@ -35,7 +53,7 @@ type LdacsStateConnNode struct {
 func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConnNode {
 	ctx := context.Background()
 
-	st, err := service.StateSer.FindStateByAsSac(unit.AsSac)
+	st, err := service.StateSer.FindStateByAsSac(uint64(unit.AsSac))
 	if err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
@@ -44,7 +62,7 @@ func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConn
 	st.AuthState = global.AUTH_STAGE_G0
 	st.GsSac = unit.UaGs
 	st.GscSac = unit.UaGsc
-	st.SharedKey = util.GetShardKey(unit.AsSac)
+	st.SharedKey = util.GetShardKey(uint64(unit.AsSac))
 
 	unitnodeP := &LdacsStateConnNode{
 		State:   &st,
@@ -53,7 +71,7 @@ func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConn
 	}
 
 	ctx = context.WithValue(ctx, "node", unitnodeP)
-	if err = unitnodeP.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.String()); err != nil {
+	if err = unitnodeP.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
@@ -67,7 +85,7 @@ func (node *LdacsStateConnNode) ToSendPkt(unit *LdacsUnit) {
 		return
 	}
 
-	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriFl), string(pktJ)); err != nil {
+	if err := service.AuditAsRawSer.NewAuditRaw(uint64(unit.AsSac), int(global.OriFl), string(pktJ)); err != nil {
 		return
 	}
 
@@ -75,11 +93,25 @@ func (node *LdacsStateConnNode) ToSendPkt(unit *LdacsUnit) {
 }
 
 type LdacsHandler struct {
-	ldacsConn sync.Map //as_sac <-> ld_u_c_node  map
+	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
 }
 
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
 	global.LOGGER.Info(string(msg), zap.Uint32("ID ", connId))
+
+	gsnfPkt := ParseGsnfPkt(msg)
+
+	unit, _ := l.ldacsUnits.LoadOrStore(gsnfPkt.ASSac, &LdacsUnit{
+		ConnID: connId,
+		AsSac:  gsnfPkt.ASSac,
+		GsSac:  0xABD,
+	})
+
+	//global.LOGGER.Info("GSNF Packet", zap.Any("22", gsnfMsg))
+
+	ldacsUnitPtr := unit.(*LdacsUnit)
+	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
+
 	//var unit LdacsUnit
 	//err := json.Unmarshal(msg, &unit)
 	//if err != nil {
@@ -106,12 +138,13 @@ func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
 	//}
 }
 
-func (l *LdacsHandler) Close(conn *backward_module.GscConn) {
-	l.ldacsConn.Range(func(key, value interface{}) bool {
+func (l *LdacsHandler) Close(id uint32) {
+
+	l.ldacsUnits.Range(func(key, value interface{}) bool {
 		asSac := key
-		node := value.(*LdacsStateConnNode)
-		if node.Conn == conn {
-			l.ldacsConn.Delete(asSac)
+		node := value.(*LdacsUnit)
+		if node.ConnID == id {
+			l.ldacsUnits.Delete(asSac)
 		}
 		return true
 	})
@@ -138,7 +171,7 @@ func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 		st.AuthId = unit.pldA1.AuthID
 		st.EncId = unit.pldA1.EncID
 
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
 			return
 		}
 
@@ -149,7 +182,7 @@ func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
 
 		st.IsSuccess = unit.pldKdfCon.IsOK
 
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.String()); err != nil {
+		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
 	}

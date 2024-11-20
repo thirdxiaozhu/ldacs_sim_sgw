@@ -19,7 +19,7 @@ import (
 
 type ServiceHandler interface {
 	Serve(msg []byte, id uint32)
-	Close(conn *GscConn)
+	Close(id uint32)
 }
 
 // 客户端连接的抽象
@@ -52,9 +52,9 @@ func (c *GscConn) Serve(msg []byte) {
 	handler.Serve(msg, c.Id)
 }
 
-func (c *GscConn) Close(conn *GscConn) {
+func (c *GscConn) Close(id uint32) {
 	handler := c.Server.Handler
-	handler.Close(conn)
+	handler.Close(id)
 }
 
 func ListenAndServe(addr string, handler ServiceHandler) {
@@ -149,7 +149,7 @@ func (c *GscConn) serve(ctx context.Context) {
 		if err != nil {
 			if err == io.EOF {
 				logger.Info("connection close")
-				c.Close(c)
+				c.Close(c.Id)
 				c.Server.activeConn.Delete(c.Id)
 			} else {
 				logger.Warn(err)
