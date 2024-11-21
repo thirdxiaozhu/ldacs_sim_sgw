@@ -3,7 +3,6 @@ package model
 import "C"
 import (
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/internal/util"
 )
 
 /* belong to AS_SAC */
@@ -19,6 +18,8 @@ type State struct {
 	MacLen     uint8                `json:"mac_len" form:"mac_len" gorm:"column:mac_len;type:int;default:0;"`
 	AuthId     uint8                `json:"auth_id" form:"auth_id"  gorm:"column:auth_id;type:int;default:0;"`
 	EncId      uint8                `json:"enc_id" form:"enc_id" gorm:"column:enc_id;type:int;default:0;"`
+	Ver        uint8                `json:"version" form:"version" gorm:"column:version;type:int;default:0;"`
+	PID        uint8                `json:"pid" form:"pid" gorm:"column:pid;type:int;default:0;"`
 	RandV      uint32               `json:"rand_v" form:"rand_v" gorm:"column:rand_v;type:uint;default:0;"`
 	Sqn        uint32               `json:"sqn"  form:"sqn" gorm:"column:sqn;type:int;default:0;"`
 	KdfLen     uint32               `json:"kdf_len" form:"kdf_len"  gorm:"column:kdf_len;type:int;default:0;"`
@@ -29,9 +30,8 @@ type State struct {
 
 func NewState() *State {
 	return &State{
-		AsSac:     uint64(util.GenerateRandomInt(global.SAC_LEN)),
 		AuthState: global.AUTH_STAGE_UNDEFINED,
-		KdfLen:    19,
+		KdfLen:    uint32(global.AUTHC_KLEN_256),
 		IsTerm:    0,
 	}
 }

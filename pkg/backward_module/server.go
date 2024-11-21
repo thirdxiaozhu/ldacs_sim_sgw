@@ -3,6 +3,7 @@ package backward_module
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/hdt3213/godis/lib/logger"
@@ -17,6 +18,10 @@ import (
 	"time"
 )
 
+var (
+	server *SgwServer
+)
+
 type ServiceHandler interface {
 	Serve(msg []byte, id uint32)
 	Close(id uint32)
@@ -27,8 +32,8 @@ type GscConn struct {
 	// tcp 连接
 	Id uint32
 
-	Conn   net.Conn
-	Server *SgwServer
+	Conn net.Conn
+	//Server *SgwServer
 
 	bufr *bufio.Reader
 	buft *bufio.Writer
@@ -48,25 +53,25 @@ type SgwServer struct {
 }
 
 func (c *GscConn) Serve(msg []byte) {
-	handler := c.Server.Handler
+	handler := server.Handler
 	handler.Serve(msg, c.Id)
 }
 
 func (c *GscConn) Close(id uint32) {
-	handler := c.Server.Handler
+	handler := server.Handler
 	handler.Close(id)
 }
 
 func ListenAndServe(addr string, handler ServiceHandler) {
-	server := &SgwServer{Addr: addr, Handler: handler}
+	server = &SgwServer{Addr: addr, Handler: handler}
 	server.ListenAndServeWithSignal()
 }
 
 func (s *SgwServer) NewConn(conn net.Conn) *GscConn {
 	c := &GscConn{
-		Id:     uuid.New().ID(),
-		Conn:   conn,
-		Server: s,
+		Id:   uuid.New().ID(),
+		Conn: conn,
+		//Server: s,
 	}
 	return c
 }
@@ -133,13 +138,13 @@ func (s *SgwServer) ListenAndServeWithSignal() {
 
 func (c *GscConn) serve(ctx context.Context) {
 	// 关闭中的 handler 不会处理新连接
-	if c.Server.closing.Get() {
+	if server.closing.Get() {
 		_ = c.Conn.Close()
 		return
 	}
 
 	//c.Server.activeConn.Store(c, struct{}{}) // 记住仍然存活的连接
-	c.Server.activeConn.Store(c.Id, c) // 记住仍然存活的连接
+	server.activeConn.Store(c.Id, c) // 记住仍然存活的连接
 
 	c.bufr = bufio.NewReader(c.Conn)
 	c.buft = bufio.NewWriter(c.Conn)
@@ -150,7 +155,7 @@ func (c *GscConn) serve(ctx context.Context) {
 			if err == io.EOF {
 				logger.Info("connection close")
 				c.Close(c.Id)
-				c.Server.activeConn.Delete(c.Id)
+				server.activeConn.Delete(c.Id)
 			} else {
 				logger.Warn(err)
 			}
@@ -160,12 +165,18 @@ func (c *GscConn) serve(ctx context.Context) {
 	}
 }
 
-func (c *GscConn) SendPkt(pktJ []byte) {
+func SendPkt(pkt []byte, connId uint32) error {
 	// 发送数据前先置为waiting状态，阻止连接被关闭
-	c.Waiting.Add(1)
+	c, ok := server.activeConn.Load(connId)
+	if ok == false || c == nil {
+		return errors.New("connection not found")
+	}
+	conn := c.(*GscConn)
+	conn.Waiting.Add(1)
 
-	c.Conn.Write(pktJ)
-	c.Waiting.Done()
+	conn.Conn.Write(pkt)
+	conn.Waiting.Done()
+	return nil
 }
 
 // 关闭客户端连接

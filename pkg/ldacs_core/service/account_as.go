@@ -92,6 +92,13 @@ func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint64) (account
 	return
 }
 
+func (accountAsService *AccountAsService) GetAvialAccountAsByUA(ua uint32) (accountAs model.AccountAs, err error) {
+	//err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`%v`.`ua` = ?", model.AccountPlane{}.TableName()), ua).Joins("Planeid").First(&accountAs).Error
+	err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Joins("Planeid").Joins("State").First(&accountAs).Error
+
+	return
+}
+
 // GetAccountAsInfoList 分页获取飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) GetAccountAsInfoList(info ldacs_sgw_forwardReq.AccountAsSearch) (list []model.AccountAs, total int64, err error) {

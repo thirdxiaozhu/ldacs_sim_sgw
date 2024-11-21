@@ -135,6 +135,10 @@ func (e *InvalidUnmarshalError) Error() string {
 }
 
 func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
+
+	if v.Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
 	var bitsize = 0
 
 	for i := 0; i < v.NumField(); i++ {

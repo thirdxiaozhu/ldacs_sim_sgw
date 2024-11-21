@@ -2,11 +2,9 @@ package handle
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/looplab/fsm"
 	"ldacs_sim_sgw/internal/global"
-	"time"
 )
 
 type SecStateFsm struct {
@@ -23,30 +21,22 @@ func (s *SecStateFsm) beforeAuthStateG0(ctx context.Context, e *fsm.Event) error
 }
 
 func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
-	node := ctx.Value("node").(*LdacsStateConnNode)
-	st := node.State
+	unit := ctx.Value("unit").(*LdacsUnit)
+	st := unit.State
 
-	node.SecHead.Cmd = uint8(REGIONAL_ACCESS_RES)
+	_, N2 := GenerateSharedKey(st)
 
-	if err := genSharedInfo(st); err != nil {
-		return err
-	}
-
-	unitData, _ := json.Marshal(SecPldKdf{
-		MacLen: st.MacLen,
-		AuthID: st.AuthId,
-		EncID:  st.EncId,
-		RandV:  st.RandV,
-		TimeV:  uint64(time.Now().Unix()),
-		KdfKB:  st.KdfKB,
-	})
-
-	node.ToSendPkt(&LdacsUnit{
-		AsSac: uint16(st.AsSac),
-		UaGs:  st.GsSac,
-		UaGsc: st.GscSac,
-		Head:  *node.SecHead,
-		Data:  unitData,
+	unit.ToSendPkt(&AucResp{
+		Stype:  global.AUC_RESP,
+		Ver:    st.Ver,
+		PID:    global.PID(st.PID),
+		ASSac:  uint16(st.AsSac),
+		GSSac:  uint16(st.GsSac),
+		MacLen: global.MacLen(st.MacLen),
+		AuthID: global.AuthID(st.MacLen),
+		EncID:  global.EncID(st.MacLen),
+		N2:     N2,
+		KeyLen: global.KeyLen(st.KdfLen),
 	})
 
 	return nil
@@ -55,7 +45,7 @@ func (s *SecStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error
 	return nil
 }
 func (s *SecStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
-	node := ctx.Value("node").(*LdacsStateConnNode)
+	unit := ctx.Value("unit").(*LdacsUnit)
 
 	var authSt global.AuthStateKind
 
@@ -72,7 +62,7 @@ func (s *SecStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
 		return errors.New("wrong Para")
 	}
 
-	if err := TransState(node, authSt); err != nil {
+	if err := unit.TransState(authSt); err != nil {
 		return err
 	}
 	return nil
