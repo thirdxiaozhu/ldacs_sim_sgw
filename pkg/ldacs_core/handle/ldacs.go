@@ -174,7 +174,7 @@ func (u *LdacsUnit) ToSendPkt(v any) {
 		return
 	}
 
-	if err = service.AuditAsRawSer.NewAuditRaw(uint64(u.AsSac), int(global.OriFl), string(pdu)); err != nil {
+	if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), string(pdu)); err != nil {
 		return
 	}
 

@@ -86,7 +86,7 @@ func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs mod
 	return
 }
 
-func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint64) (accountAs model.AccountAs, err error) {
+func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint16) (accountAs model.AccountAs, err error) {
 	//err = global.DB.Model(&model.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
 	err = global.DB.Preload("State").Where(fmt.Sprintf("`%v`.`as_sac` = ?", model.State{}.TableNameU()), sac).Joins("State").First(&accountAs).Error
 	return
