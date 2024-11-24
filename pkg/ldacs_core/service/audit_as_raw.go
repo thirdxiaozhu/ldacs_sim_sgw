@@ -82,6 +82,7 @@ func (auditAsRawService *AuditAsRawService) NewAuditRaw(asSac uint16, ori int, m
 		global.LOGGER.Error("Failure", zap.Error(err))
 		return err
 	}
+
 	if err := auditAsRawService.CreateAuditAsRaw(&model.AuditAsRaw{
 		AsSac:        accountAs,
 		AuditLinkOri: ori,

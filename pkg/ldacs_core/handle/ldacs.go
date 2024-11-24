@@ -86,31 +86,6 @@ func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
 
 	}
 
-	//switch node.SecHead.Cmd {
-	//case uint8(REGIONAL_ACCESS_REQ):
-	//	if err := json.Unmarshal(unit.Data, &unit.pldA1); err != nil {
-	//		return
-	//	}
-	//
-	//	st.MacLen = unit.pldA1.MacLen
-	//	st.AuthId = unit.pldA1.AuthID
-	//	st.EncId = unit.pldA1.EncID
-	//
-	//	if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
-	//		return
-	//	}
-	//
-	//case uint8(REGIONAL_ACCESS_CONFIRM):
-	//	if err := json.Unmarshal(unit.Data, &unit.pldKdfCon); err != nil {
-	//		return
-	//	}
-	//
-	//	st.IsSuccess = unit.pldKdfCon.IsOK
-	//
-	//	if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
-	//		return
-	//	}
-	//}
 }
 
 func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
@@ -134,35 +109,6 @@ type LdacsStateConnNode struct {
 	AuthFsm fsm.FSM
 	Conn    *backward_module.GscConn
 }
-
-//func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConnNode {
-//	ctx := context.Background()
-//
-//	st, err := service.StateSer.FindStateByAsSac(uint64(unit.AsSac))
-//	if err != nil {
-//		global.LOGGER.Error("错误！", zap.Error(err))
-//		return nil
-//	}
-//
-//	st.AuthState = global.AUTH_STAGE_G0
-//	st.GsSac = unit.UaGs
-//	st.GscSac = unit.UaGsc
-//	st.SharedKey = util.GetShardKey(uint64(unit.AsSac))
-//
-//	unitnodeP := &LdacsStateConnNode{
-//		State:   &st,
-//		AuthFsm: *InitNewAuthFsm(),
-//		Conn:    conn,
-//	}
-//
-//	ctx = context.WithValue(ctx, "node", unitnodeP)
-//	if err = unitnodeP.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
-//		global.LOGGER.Error("错误！", zap.Error(err))
-//		return nil
-//	}
-//
-//	return unitnodeP
-//}
 
 func (u *LdacsUnit) ToSendPkt(v any) {
 	pdu, err := util.MarshalLdacsPkt(v)
