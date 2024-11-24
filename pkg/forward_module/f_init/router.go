@@ -94,6 +94,7 @@ func Routers() *gin.Engine {
 		ldacs_sgw_forwardRouter.InitAuthzPlaneRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAuthcStateRouter(PrivateGroup)
 		ldacs_sgw_forwardRouter.InitAuditAsRawRouter(PrivateGroup)
+		ldacs_sgw_forwardRouter.InitKeyEntityRouter(PrivateGroup)
 	}
 
 	global.LOGGER.Info("router register success")

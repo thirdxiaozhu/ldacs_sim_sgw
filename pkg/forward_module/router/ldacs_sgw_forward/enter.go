@@ -10,4 +10,5 @@ type RouterGroup struct {
 	AuthzPlaneRouter
 	AuthcStateRouter
 	AuditAsRawRouter
+	KeyEntityRouter
 }

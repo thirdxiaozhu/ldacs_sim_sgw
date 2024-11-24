@@ -10,4 +10,5 @@ type ApiGroup struct {
 	AuthzPlaneApi
 	AuthcStateApi
 	AuditAsRawApi
+	KeyEntityApi
 }

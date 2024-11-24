@@ -11,6 +11,7 @@ type ServiceGroup struct {
 	AuthcStateService
 	AuditAsRawService
 	StateService
+	KeyEntityService
 }
 
 var (
@@ -24,4 +25,5 @@ var (
 	AuthcStateSer    AuthcStateService
 	AuditAsRawSer    AuditAsRawService
 	StateSer         StateService
+	KeyEntitySer     KeyEntityService
 )

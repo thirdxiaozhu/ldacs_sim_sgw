@@ -19,6 +19,7 @@ func RegisterTables() {
 		AuthzPlane{},
 		AuthcState{},
 		State{},
+		KeyEntity{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))
