@@ -30,10 +30,6 @@ func mainloop() {
 
 func main() {
 
-	//para := make([]uint8, 4)
-	//C.generate_rand((*C.uchar)(unsafe.Pointer(&para[0])))
-	//fmt.Println(para, binary.BigEndian.Uint32(para))
-
 	global.VP = core.InitViper()   // 初始化Viper
 	global.LOGGER = core.InitZap() // 初始化zap日志库
 	global.DB = initialize.Gorm()  // gorm连接数据库

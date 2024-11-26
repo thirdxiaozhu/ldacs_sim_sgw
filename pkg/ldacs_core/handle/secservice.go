@@ -3,20 +3,13 @@ package handle
 import "C"
 import (
 	"crypto/rand"
+	gmssl "github.com/GmSSL/GmSSL-Go"
 	"github.com/hdt3213/godis/lib/logger"
+	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
-	//"unsafe"
-	//"ldacs_sim_sgw/internal/util"
-	//"encoding/binary"
-	//"errors"
 )
-
-//// #cgo CFLAGS: -I /usr/local/include/ldacs
-//// #cgo LDFLAGS: -L /usr/local/lib/ldacs -lldacscore
-//// #include <ldacs_core/ldacs_core.h>
-//import "C"
 
 type SEC_CMDS global.Constant
 
@@ -70,37 +63,6 @@ type sharedInfo struct {
 	UaGsc        uint8
 	KdfLen       uint
 	SharedKeyLen uint
-}
-
-func genSharedInfo(st *model.State) error {
-	return nil
-	//keyOcts := make([]uint8, 4)
-	//C.generate_rand((*C.uchar)(unsafe.Pointer(&keyOcts[0])))
-	//st.RandV = binary.BigEndian.Uint32(keyOcts)
-	//
-	//st.SharedKeyB = util.Base64Decode(st.SharedKey)
-	//st.KdfKB = make([]uint8, st.KdfLen)
-	//
-	//info := sharedInfo{
-	//	Constant:     0x01,
-	//	MacLen:       st.MacLen,
-	//	AuthId:       st.AuthId,
-	//	EncId:        st.EncId,
-	//	RandV:        st.RandV,
-	//	UaAs:         uint8(st.AsSac),
-	//	UaGsc:        uint8(st.GscSac),
-	//	KdfLen:       uint(st.KdfLen),
-	//	SharedKeyLen: uint(len(st.SharedKeyB)),
-	//}
-	//
-	//e := C.generate_kdf_by_info((*C.struct_shared_info_s)(unsafe.Pointer(&info)), (*C.uchar)(unsafe.Pointer(&st.SharedKeyB[0])), (*C.uchar)(unsafe.Pointer(&st.KdfKB[0])))
-	//st.KdfK = util.Base64Encode(st.KdfKB)
-	//
-	//if e == 0 {
-	//	return errors.New("fail")
-	//}
-	//
-	//return nil
 }
 
 type SecHead struct {
@@ -162,16 +124,41 @@ type AucResp struct {
 	KeyLen global.KeyLen `ldacs:"name:key_len; size:2; type:enum"`
 }
 
-func GenerateRandomBytes(size uint) []byte {
-	bytes := make([]byte, size)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return nil
-	}
-	return bytes
+var (
+	distro string
+)
+
+const (
+	KDF_ITER = 1024
+)
+
+func init() {
+	distro = config.GetLinuxDistroCommand()
+	logger.Warn(distro)
 }
 
-func GenerateSharedKey(st *model.State) (key, N2 []byte) {
+func GenerateRandomBytes(size uint) []byte {
+	switch distro {
+	case "Ubuntu":
+		key, err := gmssl.RandBytes(16)
+		if err != nil {
+			return nil
+		}
+		return key
+	case "CentOS":
+
+		return nil
+	default:
+		key := make([]byte, size)
+		_, err := rand.Read(key)
+		if err != nil {
+			return nil
+		}
+		return key
+	}
+}
+
+func GenerateSharedKey(st *model.State) (key, N2 []byte, err error) {
 	N2 = GenerateRandomBytes(16)
 
 	SharedInfo := AucSharedInfo{
@@ -184,12 +171,16 @@ func GenerateSharedKey(st *model.State) (key, N2 []byte) {
 		KeyLen: global.KeyLen(st.KdfLen),
 	}
 
-	pkt, err := util.MarshalLdacsPkt(SharedInfo)
+	random, err := util.MarshalLdacsPkt(SharedInfo)
 	if err != nil {
-		return nil, nil
+		return nil, nil, err
 	}
 
-	logger.Warn(SharedInfo)
-
-	return pkt[:SharedInfo.KeyLen], N2
+	logger.Warn(string(random))
+	var salt [32]byte
+	pbkdf2, err := gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, uint(SharedInfo.KeyLen))
+	if err != nil {
+		return nil, nil, err
+	}
+	return pbkdf2, N2, nil
 }

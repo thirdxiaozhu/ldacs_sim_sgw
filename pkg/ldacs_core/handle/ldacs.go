@@ -3,6 +3,7 @@ package handle
 import (
 	"context"
 	"encoding/json"
+	gmssl "github.com/GmSSL/GmSSL-Go"
 	"github.com/hdt3213/godis/lib/logger"
 	"github.com/looplab/fsm"
 	"go.uber.org/zap"
@@ -110,11 +111,20 @@ type LdacsStateConnNode struct {
 	Conn    *backward_module.GscConn
 }
 
-func (u *LdacsUnit) ToSendPkt(v any) {
+func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
 	pdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
 		return
 	}
+
+	hmac, err := gmssl.NewSm3Hmac(key)
+	if err != nil {
+		return
+	}
+	hmac.Update(pdu)
+	mac := hmac.GenerateMac()
+
+	pdu = append(pdu, mac...)
 
 	if err = backward_module.SendPkt(pdu, u.ConnID); err != nil {
 		return

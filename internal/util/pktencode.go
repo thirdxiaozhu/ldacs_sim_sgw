@@ -114,7 +114,7 @@ type UnsupportedValueError struct {
 }
 
 func (e *UnsupportedValueError) Error() string {
-	return "json: unsupported value: " + e.Str
+	return "ldacs: unsupported value: " + e.Str
 }
 
 // An InvalidUnmarshalError describes an invalid argument passed to Unmarshal.
@@ -158,7 +158,7 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 					if ldenum, ok := fv.Interface().(global.LdEnum); ok {
 						//fmt.Println(ldenum.CheckValid(), ldenum, fv.Interface())
 						if ldenum.CheckValid() == false {
-							return &UnsupportedValueError{v, ""}
+							return &UnsupportedValueError{v, f.name}
 						}
 					}
 				}
@@ -218,7 +218,7 @@ func (se structEncoder) decode(e *encodePkt, v reflect.Value) error {
 					if ldenum, ok := fv.Interface().(global.LdEnum); ok {
 						//fmt.Println(ldenum.CheckValid(), ldenum, fv.Interface())
 						if ldenum.CheckValid() == false {
-							return &UnsupportedValueError{v, ""}
+							return &UnsupportedValueError{v, f.name}
 						}
 					} else {
 						//global.LOGGER.Warn("ENUM CHECK ERROR", zap.GetString("Name", f.name), zap.GetString("is NOT enum =>", fv.Type().GetString()))

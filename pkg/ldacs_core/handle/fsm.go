@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/looplab/fsm"
+	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 )
 
@@ -24,7 +25,11 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
-	_, N2 := GenerateSharedKey(st)
+	key, N2, err := GenerateSharedKey(st)
+	if err != nil {
+		global.LOGGER.Error("Generate Shared key failed.", zap.Error(err))
+		return err
+	}
 
 	unit.ToSendPkt(&AucResp{
 		Stype:  global.AUC_RESP,
@@ -37,7 +42,7 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 		EncID:  global.EncID(st.MacLen),
 		N2:     N2,
 		KeyLen: global.KeyLen(st.KdfLen),
-	})
+	}, key)
 
 	return nil
 }
