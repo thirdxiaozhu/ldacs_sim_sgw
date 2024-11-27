@@ -16,6 +16,12 @@ import (
 	"sync"
 )
 
+const GSNF_HEAD_LEN = 4
+
+type LdacsHandler struct {
+	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
+}
+
 type LdacsUnit struct {
 	AsSac   uint16 `json:"as_sac"`
 	GsSac   uint16 `json:"gs_sac"`
@@ -103,15 +109,6 @@ func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
 	return nil
 }
 
-const GSNF_HEAD_LEN = 4
-
-type LdacsStateConnNode struct {
-	SecHead *SecHead
-	State   *model.State
-	AuthFsm fsm.FSM
-	Conn    *backward_module.GscConn
-}
-
 func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
 	sdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
@@ -151,46 +148,14 @@ func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
 	}
 
 }
-
-type LdacsHandler struct {
-	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
-}
-
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
 	global.LOGGER.Info(string(msg), zap.Uint32("ID ", connId))
 	gsnfPkt := ParseGsnfPkt(msg)
 
 	unit, _ := l.ldacsUnits.LoadOrStore(gsnfPkt.ASSac, InitLdacsUnit(connId, gsnfPkt.ASSac))
 
-	//global.LOGGER.Info("GSNF Packet", zap.Any("22", gsnfMsg))
-
 	ldacsUnitPtr := unit.(*LdacsUnit)
 	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
-
-	//var unit LdacsUnit
-	//err := json.Unmarshal(msg, &unit)
-	//if err != nil {
-	//	return
-	//}
-	//
-	///* add a new audit raw msg */
-	//if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriRl), string(msg)); err != nil {
-	//	return
-	//}
-	//
-	//v, _ := l.ldacsConn.Load(unit.AsSac)
-	//if v == nil {
-	//	v = newUnitNode(&unit, conn)
-	//	l.ldacsConn.Store(unit.AsSac, v)
-	//}
-	//
-	///* Process new msg */
-	//ProcessInputMsg(&unit, v.(*LdacsStateConnNode))
-	//
-	///* Update new service into database */
-	//if err = service.StateSer.UpdateState(v.(*LdacsStateConnNode).State); err != nil {
-	//	global.LOGGER.Error("错误！", zap.Error(err))
-	//}
 }
 
 func (l *LdacsHandler) Close(id uint32) {
@@ -203,42 +168,4 @@ func (l *LdacsHandler) Close(id uint32) {
 		}
 		return true
 	})
-}
-
-func UpdateState() {
-
-}
-
-func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
-	st := node.State
-	//st.SecHead = unit.Head
-	node.SecHead = &unit.Head
-
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, "node", node)
-	switch node.SecHead.Cmd {
-	case uint8(REGIONAL_ACCESS_REQ):
-		if err := json.Unmarshal(unit.Data, &unit.pldA1); err != nil {
-			return
-		}
-
-		st.MacLen = unit.pldA1.MacLen
-		st.AuthId = unit.pldA1.AuthID
-		st.EncId = unit.pldA1.EncID
-
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
-			return
-		}
-
-	case uint8(REGIONAL_ACCESS_CONFIRM):
-		if err := json.Unmarshal(unit.Data, &unit.pldKdfCon); err != nil {
-			return
-		}
-
-		st.IsSuccess = unit.pldKdfCon.IsOK
-
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
-			return
-		}
-	}
 }
