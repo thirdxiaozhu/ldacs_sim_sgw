@@ -28,7 +28,7 @@ func (stateService *StateService) UpdateState(state *model.State) (err error) {
 func InitState(sac uint16) *model.State {
 
 	//未来需要根据SAC找对应的UA
-	s1, err := AccountAsSer.GetAvialAccountAsByUA(654321)
+	s1, err := AccountAsSer.GetAvialAccountAsByUA(10010)
 
 	logger.Warn(s1)
 	if err != nil {

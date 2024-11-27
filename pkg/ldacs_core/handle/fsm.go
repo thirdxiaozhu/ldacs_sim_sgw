@@ -38,8 +38,8 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 		ASSac:  uint16(st.AsSac),
 		GSSac:  uint16(st.GsSac),
 		MacLen: global.MacLen(st.MacLen),
-		AuthID: global.AuthID(st.MacLen),
-		EncID:  global.EncID(st.MacLen),
+		AuthID: global.AuthID(st.AuthId),
+		EncID:  global.EncID(st.EncId),
 		N2:     N2,
 		KeyLen: global.KeyLen(st.KdfLen),
 	}, key)

@@ -129,7 +129,7 @@ var (
 )
 
 const (
-	KDF_ITER = 1024
+	KDF_ITER = 10000
 )
 
 func init() {
@@ -176,9 +176,8 @@ func GenerateSharedKey(st *model.State) (key, N2 []byte, err error) {
 		return nil, nil, err
 	}
 
-	logger.Warn(string(random))
 	var salt [32]byte
-	pbkdf2, err := gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, uint(SharedInfo.KeyLen))
+	pbkdf2, err := gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, SharedInfo.KeyLen.GetKeyLen())
 	if err != nil {
 		return nil, nil, err
 	}

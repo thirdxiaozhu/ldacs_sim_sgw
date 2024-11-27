@@ -114,17 +114,23 @@ type LdacsStateConnNode struct {
 func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
 	pdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
+		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 
+	logger.Warn(len(key), gmssl.Sm3HmacMaxKeySize)
 	hmac, err := gmssl.NewSm3Hmac(key)
 	if err != nil {
+		logger.Warn("===================")
+		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 	hmac.Update(pdu)
 	mac := hmac.GenerateMac()
 
 	pdu = append(pdu, mac...)
+
+	logger.Warn(pdu)
 
 	if err = backward_module.SendPkt(pdu, u.ConnID); err != nil {
 		return

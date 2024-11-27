@@ -49,11 +49,11 @@ func (f PID) CheckValid() bool {
 }
 
 type AucRqst struct {
-	Stype STYPE `ldacs:"name:S_TYPE; size:8; type:enum"`
-	Ver   uint8 `ldacs:"name:VER; size:3; type:set"`
-	PID   PID   `ldacs:"name:PID; size:2; type:enum"`
-	//N1    []byte `ldacs:"name:N1; bytes_size: 3; type:fbytes"`
-	N1 []byte `ldacs:"name:N1; type:dbytes"`
+	Stype STYPE  `ldacs:"name:S_TYPE; size:8; type:enum"`
+	Ver   uint8  `ldacs:"name:VER; size:3; type:set"`
+	PID   PID    `ldacs:"name:PID; size:2; type:enum"`
+	N1    []byte `ldacs:"name:N1; bytes_size: 3; type:fbytes"`
+	//N1 []byte `ldacs:"name:N1; type:dbytes"`
 	//ASSac  uint16 `ldacs:"required;minlength:8"`
 	//GSSac  uint16 `ldacs:"required;minlength:8"`
 	//MacLen uint8  `ldacs:"required;minlength:8"`

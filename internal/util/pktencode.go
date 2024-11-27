@@ -171,18 +171,23 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 			bitsize += sz
 
 		case "fbytes":
-			sz := int(f.bytesSize)
+			sz := uint64(f.bytesSize)
 			if bitsize%BITS_PER_BYTE != 0 {
 				// Pad
 				e.currByte++
 			}
 			copy(e.bytes[e.currByte:], fv.Bytes()[:sz])
+
+			e.currByte += sz
 		case "dbytes":
 			if bitsize%BITS_PER_BYTE != 0 {
 				// Pad
 				e.currByte++
 			}
 			copy(e.bytes[e.currByte:], fv.Bytes()[:])
+
+			e.currByte += uint64(len(fv.Bytes()))
+
 		default:
 
 		}
@@ -284,7 +289,7 @@ func MarshalLdacsPkt(v any) ([]byte, error) {
 		return nil, err
 	}
 
-	return e.bytes, nil
+	return e.bytes[:e.currByte], nil
 }
 
 func UnmarshalLdacsPkt(data []byte, v any) error {
