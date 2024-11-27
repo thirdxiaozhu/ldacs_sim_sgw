@@ -36,6 +36,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+replace (
+	github.com/GmSSL/GmSSL-Go => ./thirdparty/gmssl
+)
+
 require (
 	github.com/GmSSL/GmSSL-Go v1.3.1
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible

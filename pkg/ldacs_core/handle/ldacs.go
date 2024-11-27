@@ -2,6 +2,7 @@ package handle
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	gmssl "github.com/GmSSL/GmSSL-Go"
 	"github.com/hdt3213/godis/lib/logger"
@@ -38,7 +39,7 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 		AsSac:   asSac,
 		GsSac:   0xABD,
 		AuthFsm: InitNewAuthFsm(),
-		State:   service.InitState(asSac),
+		State:   service.InitState(asSac, 10010),
 	}
 
 	//初始化为G0
@@ -112,31 +113,40 @@ type LdacsStateConnNode struct {
 }
 
 func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
-	pdu, err := util.MarshalLdacsPkt(v)
+	sdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
 		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 
-	logger.Warn(len(key), gmssl.Sm3HmacMaxKeySize)
 	hmac, err := gmssl.NewSm3Hmac(key)
 	if err != nil {
-		logger.Warn("===================")
 		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
-	hmac.Update(pdu)
-	mac := hmac.GenerateMac()
+	hmac.Update(sdu)
+	sdu = append(sdu, hmac.GenerateMac()...)
 
-	pdu = append(pdu, mac...)
+	gsnfMsg := GsnfPkt{
+		GType:   0,
+		Version: 1,
+		ASSac:   u.AsSac,
+		EleType: 0,
+		Sdu:     sdu,
+	}
 
-	logger.Warn(pdu)
-
-	if err = backward_module.SendPkt(pdu, u.ConnID); err != nil {
+	gsnfPdu, err := util.MarshalLdacsPkt(gsnfMsg)
+	if err != nil {
+		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 
-	if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), string(pdu)); err != nil {
+	if err = backward_module.SendPkt(gsnfPdu, u.ConnID); err != nil {
+		global.LOGGER.Error("Failed Send", zap.Error(err))
+		return
+	}
+
+	if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), base64.StdEncoding.EncodeToString(sdu)); err != nil {
 		return
 	}
 

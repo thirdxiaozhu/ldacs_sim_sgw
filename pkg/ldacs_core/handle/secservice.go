@@ -4,7 +4,6 @@ import "C"
 import (
 	"crypto/rand"
 	gmssl "github.com/GmSSL/GmSSL-Go"
-	"github.com/hdt3213/godis/lib/logger"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
@@ -134,7 +133,6 @@ const (
 
 func init() {
 	distro = config.GetLinuxDistroCommand()
-	logger.Warn(distro)
 }
 
 func GenerateRandomBytes(size uint) []byte {

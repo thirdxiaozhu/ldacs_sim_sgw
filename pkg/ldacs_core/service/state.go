@@ -25,21 +25,28 @@ func (stateService *StateService) UpdateState(state *model.State) (err error) {
 	return err
 }
 
-func InitState(sac uint16) *model.State {
+func InitState(sac uint16, UA uint32) *model.State {
 
+	logger.Warn(UA)
 	//未来需要根据SAC找对应的UA
-	s1, err := AccountAsSer.GetAvialAccountAsByUA(10010)
+	accountAs, err := AccountAsSer.GetAvialAccountAsByUA(UA)
 
-	logger.Warn(s1)
+	logger.Warn(accountAs)
 	if err != nil {
-		global.LOGGER.Error("错误：%s", zap.Error(err))
+		global.LOGGER.Error("Fatal:%s", zap.Error(err))
 		return nil
 	}
 
-	s := s1.State
+	s := accountAs.State
 	s.AuthState = global.AUTH_STAGE_G0
+	s.AsSac = sac
 	s.GsSac = 0xABD
 	s.GscSac = 0xABC
+
+	if err = StateSer.UpdateState(s); err != nil {
+		global.LOGGER.Error("Fatal:%s", zap.Error(err))
+		return nil
+	}
 
 	return s
 }

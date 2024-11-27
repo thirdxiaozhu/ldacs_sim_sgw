@@ -93,8 +93,9 @@ func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint16) (account
 }
 
 func (accountAsService *AccountAsService) GetAvialAccountAsByUA(ua uint32) (accountAs model.AccountAs, err error) {
-	//err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`%v`.`ua` = ?", model.AccountPlane{}.TableName()), ua).Joins("Planeid").First(&accountAs).Error
-	err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Where(fmt.Sprintf("`%v`.`deprecated_time` IS NULL", model.AccountAs{}.TableName())).Joins("Planeid").Joins("State").First(&accountAs).Error
+	//err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Where(fmt.Sprintf("`%v`.`deprecated_time` IS NULL", model.AccountAs{}.TableName())).Joins("Planeid").Joins("State").First(&accountAs).Error
+	tx := global.DB.Preload("Planeid")
+	err = tx.Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Where(fmt.Sprintf("`%v`.`deprecated_time` IS NULL", model.AccountAs{}.TableName())).Joins("Planeid").Joins("State").First(&accountAs).Error
 
 	return
 }
