@@ -10,6 +10,7 @@ import (
 
 var (
 	DB     *gorm.DB
+	KeyDB  *gorm.DB
 	DBList map[string]*gorm.DB
 	LOGGER *zap.Logger
 	CONFIG config.SgwConfig

@@ -89,10 +89,10 @@ sqlite:
     prefix: ""
     port: ""
     config: ""
-    db-name: ""
+    db-name: ld_sql
     username: ""
     password: ""
-    path: ""
+    path: /home/jiaxv/go/src/ldacs_sim_sgw/resources/
     engine: ""
     log-mode: ""
     max-idle-conns: 10

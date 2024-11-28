@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/core"
 	"ldacs_sim_sgw/internal/global"
@@ -35,9 +34,9 @@ func main() {
 	global.VP = core.InitViper()   // 初始化Viper
 	global.LOGGER = core.InitZap() // 初始化zap日志库
 	global.DB = initialize.Gorm()  // gorm连接数据库
-	logger.Warn("!!!!!!!!!!!!1", global.DB)
+	global.KeyDB = initialize.KeyGorm()
 	initialize.DBList()
-	if global.DB != nil {
+	if global.DB != nil && global.KeyDB != nil {
 		//initialize.RegisterTables() // 初始化表
 		ldacscore.InitCoreModule()
 		// 程序结束前关闭数据库链接
