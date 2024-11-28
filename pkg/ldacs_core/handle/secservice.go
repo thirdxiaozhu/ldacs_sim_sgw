@@ -3,6 +3,7 @@ package handle
 import "C"
 import (
 	"crypto/rand"
+	"fmt"
 	gmssl "github.com/GmSSL/GmSSL-Go"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
@@ -104,10 +105,10 @@ type AucSharedInfo struct {
 	MacLen global.MacLen `ldacs:"name:maclen; size:4; type:enum"`
 	AuthID global.AuthID `ldacs:"name:authid; size:4; type:enum"`
 	EncID  global.EncID  `ldacs:"name:encid; size:4; type:enum"`
-	N2     []byte        `ldacs:"name:N2; bytes_size: 16; type:fbytes"`
 	ASSac  uint16        `ldacs:"name:as_sac; size:12; type:set"`
 	GSSac  uint16        `ldacs:"name:gs_sac; size:12; type:set"`
 	KeyLen global.KeyLen `ldacs:"name:key_len; size:2; type:enum"`
+	N2     []byte        `ldacs:"name:N2; bytes_size: 16; type:fbytes"`
 }
 
 type AucResp struct {
@@ -119,8 +120,8 @@ type AucResp struct {
 	MacLen global.MacLen `ldacs:"name:maclen; size:4; type:enum"`
 	AuthID global.AuthID `ldacs:"name:authid; size:4; type:enum"`
 	EncID  global.EncID  `ldacs:"name:encid; size:4; type:enum"`
-	N2     []byte        `ldacs:"name:N2; bytes_size: 16; type:fbytes"`
 	KeyLen global.KeyLen `ldacs:"name:key_len; size:2; type:enum"`
+	N2     []byte        `ldacs:"name:N2; bytes_size: 16; type:fbytes"`
 }
 
 var (
@@ -174,10 +175,15 @@ func GenerateSharedKey(st *model.State) (key, N2 []byte, err error) {
 		return nil, nil, err
 	}
 
+	// salt [0, 0, 0, 0, ..., 0]
 	var salt [32]byte
-	pbkdf2, err := gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, SharedInfo.KeyLen.GetKeyLen())
+	key, err = gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, SharedInfo.KeyLen.GetKeyLen())
 	if err != nil {
 		return nil, nil, err
 	}
-	return pbkdf2, N2, nil
+
+	fmt.Printf("Random:   % X\n", random)
+	fmt.Printf("Key:   % X\n", key[:SharedInfo.KeyLen.GetKeyLen()])
+
+	return key[:SharedInfo.KeyLen.GetKeyLen()], N2, nil
 }

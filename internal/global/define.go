@@ -177,9 +177,9 @@ func (f KeyLen) CheckValid() bool {
 func (f KeyLen) GetKeyLen() uint {
 	switch f {
 	case AUTHC_KLEN_256:
-		return 256
+		return 256 >> 3
 	case AUTHC_KLEN_128:
-		return 128
+		return 128 >> 3
 	default:
 		return 0
 	}
