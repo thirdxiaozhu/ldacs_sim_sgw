@@ -1,27 +1,29 @@
 // 自动生成模板KeyEntity
 package model
 
-import (
-	"ldacs_sim_sgw/internal/global"
-)
-
 // 密钥 结构体  KeyEntity
 type KeyEntity struct {
-	global.PREFIX_MODEL
-	KeyID      string `json:"key_id" form:"key_id" gorm:"column:key_id;comment:;"`                //ID
-	Kind       string `json:"kind" form:"kind" gorm:"column:kind;comment:;"`                      //密钥类型
-	User1      int    `json:"user1" form:"user1" gorm:"column:user1;comment:;"`                   //所有者1
-	User2      int    `json:"user2" form:"user2" gorm:"column:user2;comment:;"`                   //所有者2
-	Length     int    `json:"length" form:"length" gorm:"column:length;comment:;"`                //密钥长度
-	KeyStatus  string `json:"key_status" form:"key_status" gorm:"column:key_status;comment:;"`    //密钥状态
-	UpdateTime int    `json:"update_time" form:"update_time" gorm:"column:update_time;comment:;"` //更新间隔
-	Ciphertext string `json:"ciphertext" form:"ciphertext" gorm:"column:ciphertext;comment:;"`    //密钥密文
-	CreatedBy  uint   `gorm:"column:created_by;comment:创建者"`
-	UpdatedBy  uint   `gorm:"column:updated_by;comment:更新者"`
-	DeletedBy  uint   `gorm:"column:deleted_by;comment:删除者"`
+	//global.PREFIX_MODEL
+	KeyID       string `json:"id" form:"id" gorm:"column:id;comment:;"`
+	KeyType     string `json:"key_type" form:"key_type" gorm:"column:key_type;comment:;"`
+	Owner1      string `json:"owner1" form:"owner1" gorm:"column:owner1;comment:;"`
+	Owner2      string `json:"owner2" form:"owner2" gorm:"column:owner2;comment:;"`
+	KeyCipher   string `json:"key_cipher" form:"key_cipher" gorm:"column:key_cipher;comment:;"`
+	KeyLen      int    `json:"key_len" form:"key_len" gorm:"column:key_len;comment:;"`
+	KeyState    string `json:"key_state" form:"key_state" gorm:"column:key_state;comment:;"`
+	CreateTime  string `json:"creatime" form:"creatime" gorm:"column:creatime;comment:;"`
+	UpdateCycle int    `json:"updatecycle" form:"updatecycle" gorm:"column:updatecycle;comment:;"`
+	KekLen      int    `json:"kek_len" form:"kek_len" gorm:"column:kek_len;comment:;"`
+	KekCipher   string `json:"kek_cipher" form:"kek_cipher" gorm:"column:kek_cipher;comment:;"`
+	Iv          string `json:"iv" form:"iv" gorm:"column:iv;comment:;"`
+	IvLen       int    `json:"iv_len" form:"iv_len" gorm:"column:iv_len;comment:;"`
+	ChckAlgo    string `json:"chck_algo" form:"chck_algo" gorm:"column:chck_algo;comment:;"`
+	ChckLen     int    `json:"check_len" form:"check_len" gorm:"column:check_len;comment:;"`
+	ChckValue   string `json:"chck_value" form:"chck_value" gorm:"column:chck_value;comment:;"`
+	UpdateCount int    `json:"update_count" form:"update_count" gorm:"column:update_count;comment:;"`
 }
 
 // TableName 密钥 KeyEntity自定义表名 key
 func (KeyEntity) TableName() string {
-	return "key"
+	return "sgw_keystore"
 }
