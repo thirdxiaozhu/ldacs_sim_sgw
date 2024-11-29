@@ -1,0 +1,3 @@
+[submodule "thirdparty/gmssl"]
+    path = thirdparty/gmssl
+    url = https://github.com/thirdxiaozhu/GmSSL-Go.git
