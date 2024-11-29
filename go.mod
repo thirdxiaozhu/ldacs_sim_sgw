@@ -36,12 +36,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace (
-	github.com/GmSSL/GmSSL-Go => ./thirdparty/gmssl
-)
+replace github.com/thirdxiaozhu/GmSSL-Go => ./thirdparty/gmssl
 
 require (
-	github.com/GmSSL/GmSSL-Go v1.3.1
 	github.com/aliyun/aliyun-oss-go-sdk v2.2.7+incompatible
 	github.com/aws/aws-sdk-go v1.44.307
 	github.com/casbin/casbin/v2 v2.71.1
@@ -72,6 +69,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.42
+	github.com/thirdxiaozhu/GmSSL-Go v1.3.1
 	github.com/unrolled/secure v1.13.0
 	github.com/xuri/excelize/v2 v2.8.0
 	go.mongodb.org/mongo-driver v1.12.1

@@ -4,7 +4,7 @@ import "C"
 import (
 	"crypto/rand"
 	"fmt"
-	gmssl "github.com/GmSSL/GmSSL-Go"
+	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
