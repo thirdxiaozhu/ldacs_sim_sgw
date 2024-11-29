@@ -13,5 +13,5 @@ type AccountGsc struct {
 
 // TableName 地面控制站 AccountGsc自定义表名 account-gsc
 func (AccountGsc) TableName() string {
-	return "account-gsc"
+	return "account_gsc"
 }

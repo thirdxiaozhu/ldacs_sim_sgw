@@ -47,9 +47,9 @@ mysql:
     prefix: ""
     port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: ldacs_sgw
-    username: root
-    password: 9456123
+    db-name: ldacs_sim_sgw
+    username: e304
+    password: e304
     path: 127.0.0.1
     engine: ""
     log-mode: error
@@ -92,7 +92,7 @@ sqlite:
     db-name: ld_sql
     username: ""
     password: ""
-    path: /home/jiaxv/go/src/ldacs_sim_sgw/resources/
+    path: /root/ldacs/ldacs_sim_sgw/resources/
     engine: ""
     log-mode: ""
     max-idle-conns: 10
