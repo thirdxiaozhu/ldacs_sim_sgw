@@ -270,27 +270,27 @@
           label-width="80px"
         >
           <el-form-item
-            label="ID:"
-            prop="key_id"
-          >
-            <el-input
-              v-model="formData.key_id"
-              :clearable="true"
-              placeholder="请输入ID"
-            />
-          </el-form-item>
-          <el-form-item
             label="密钥类型:"
             prop="kind"
           >
-            <el-input
+            <el-select
               v-model="formData.kind"
+              filterable
+              placeholder="请选择密钥类型"
+              style="width:100%"
               :clearable="true"
-              placeholder="请输入密钥类型"
-            />
+            >
+              <el-option
+                v-for="(item, key) in keyTypeOptions"
+                :key="key"
+                :label="item.label"
+                :value="item.value"
+              />
+            </el-select>
+
           </el-form-item>
           <el-form-item
-            label="所有者1:"
+            label="AS UA:"
             prop="user1"
           >
             <el-input
@@ -300,7 +300,7 @@
             />
           </el-form-item>
           <el-form-item
-            label="所有者2:"
+            label="SGW ID:"
             prop="user2"
           >
             <el-input
@@ -320,24 +320,6 @@
             />
           </el-form-item>
           <el-form-item
-            label="密钥状态:"
-            prop="key_status"
-          >
-            <el-select
-              v-model="formData.key_status"
-              placeholder="请选择密钥状态"
-              style="width:100%"
-              :clearable="true"
-            >
-              <el-option
-                v-for="item in []"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item
             label="更新间隔:"
             prop="update_time"
           >
@@ -345,16 +327,6 @@
               v-model.number="formData.update_time"
               :clearable="true"
               placeholder="请输入更新间隔"
-            />
-          </el-form-item>
-          <el-form-item
-            label="密钥密文:"
-            prop="ciphertext"
-          >
-            <el-input
-              v-model="formData.ciphertext"
-              :clearable="true"
-              placeholder="请输入密钥密文"
             />
           </el-form-item>
         </el-form>
@@ -442,7 +414,8 @@ const formData = ref({
   update_time: 0,
   ciphertext: '',
 })
-
+const keyTypeOptions = ref([])
+const keyStateOptions = ref([])
 // 验证规则
 const rule = reactive({
   key_id: [{
@@ -564,6 +537,8 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
+  keyTypeOptions.value = await getDictFunc('KeyType')
+  keyStateOptions.value = await getDictFunc('KeyState')
 }
 
 // 获取需要的字典 可能为空 按需保留

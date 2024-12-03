@@ -5,6 +5,7 @@ import (
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
+	//"ldacs_sim_sgw/internal/util"
 )
 
 type AccountPlaneService struct {
@@ -17,6 +18,9 @@ func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane 
 	logger.Warn(accountplane)
 	/*TODO: 应有唯一性检查 */
 	err = global.DB.Create(accountplane).Error
+
+	//util.GenerateRootKey(accountplane.UA, global.CONFIG.System.SgwUA, )
+
 	return err
 }
 

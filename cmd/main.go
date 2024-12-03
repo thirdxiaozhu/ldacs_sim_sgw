@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/core"
 	"ldacs_sim_sgw/internal/global"
@@ -10,6 +11,7 @@ import (
 	ldacscore "ldacs_sim_sgw/pkg/ldacs_core"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 )
 
@@ -48,6 +50,8 @@ func main() {
 		global.LOGGER.Error("Fatal:", zap.String("Reason", "The database has not initialize correctly."))
 		return
 	}
+
+	logger.Warn(strconv.FormatUint(uint64(global.CONFIG.System.SgwUA), 10))
 
 	/* run backward module */
 	go backward.ListenAndServe(":6666", ldacscore.MakeLdacsHandler())

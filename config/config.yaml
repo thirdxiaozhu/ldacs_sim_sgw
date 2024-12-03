@@ -1,7 +1,10 @@
 system:
+    sgw-ua: 10010
     db-type: mysql
     forward-addr: 8888
     backward-addr: 6666
+key:
+    
 zap:
     level: info
     prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'

@@ -3,7 +3,6 @@ package handle
 import (
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"github.com/hdt3213/godis/lib/logger"
 	"github.com/looplab/fsm"
 	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
@@ -28,15 +27,6 @@ type LdacsUnit struct {
 	ConnID  uint32
 	State   *model.State
 	AuthFsm *fsm.FSM
-
-	UaGs  uint64          `json:"ua_gs"`
-	UaGsc uint64          `json:"ua_gsc"`
-	Head  SecHead         `json:"head"`
-	Data  json.RawMessage `json:"data"`
-
-	pldA1     SecPldA1
-	pldKdf    SecPldKdf
-	pldKdfCon SecPldKdfCon
 }
 
 func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {

@@ -6,8 +6,8 @@ type KeyEntity struct {
 	//global.PREFIX_MODEL
 	KeyID       string `json:"id" form:"id" gorm:"column:id;comment:;"`
 	KeyType     string `json:"key_type" form:"key_type" gorm:"column:key_type;comment:;"`
-	Owner1      string `json:"owner1" form:"owner1" gorm:"column:owner1;comment:;"`
-	Owner2      string `json:"owner2" form:"owner2" gorm:"column:owner2;comment:;"`
+	Owner1      string `json:"owner1" form:"owner1" gorm:"column:owner1;comment:AS_UA;"`
+	Owner2      string `json:"owner2" form:"owner2" gorm:"column:owner2;comment:SGW_UA;"`
 	KeyCipher   string `json:"key_cipher" form:"key_cipher" gorm:"column:key_cipher;comment:;"`
 	KeyLen      int    `json:"key_len" form:"key_len" gorm:"column:key_len;comment:;"`
 	KeyState    string `json:"key_state" form:"key_state" gorm:"column:key_state;comment:;"`
