@@ -10,37 +10,11 @@
         @keyup.enter="onSubmit"
       >
         <el-form-item
-          label="创建日期"
-          prop="createdAt"
-        >
-          <template #label>
-            <span>
-              创建日期
-              <el-tooltip content="搜索范围是开始日期（包含）至结束日期（不包含）">
-                <el-icon><QuestionFilled /></el-icon>
-              </el-tooltip>
-            </span>
-          </template>
-          <el-date-picker
-            v-model="searchInfo.startCreatedAt"
-            type="datetime"
-            placeholder="开始日期"
-            :disabled-date="time=> searchInfo.endCreatedAt ? time.getTime() > searchInfo.endCreatedAt.getTime() : false"
-          />
-          —
-          <el-date-picker
-            v-model="searchInfo.endCreatedAt"
-            type="datetime"
-            placeholder="结束日期"
-            :disabled-date="time=> searchInfo.startCreatedAt ? time.getTime() < searchInfo.startCreatedAt.getTime() : false"
-          />
-        </el-form-item>
-        <el-form-item
           label="ID"
-          prop="key_id"
+          prop="id"
         >
           <el-input
-            v-model="searchInfo.key_id"
+            v-model="searchInfo.id"
             placeholder="搜索条件"
           />
 
@@ -159,57 +133,45 @@
         />
         <el-table-column
           align="left"
-          label="日期"
+          label="密钥ID"
           width="180"
+          prop="id"
         >
-          <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         <el-table-column
           align="left"
-          label="ID"
-          prop="key_id"
-          width="120"
-        />
-        <el-table-column
-          align="left"
           label="密钥类型"
-          prop="kind"
+          prop="key_type"
           width="120"
         />
         <el-table-column
           align="left"
           label="所有者1"
-          prop="user1"
+          prop="owner1"
           width="120"
         />
         <el-table-column
           align="left"
           label="所有者2"
-          prop="user2"
+          prop="owner2"
           width="120"
         />
         <el-table-column
           align="left"
           label="密钥长度"
-          prop="length"
+          prop="key_len"
           width="120"
         />
         <el-table-column
           align="left"
           label="密钥状态"
-          prop="key_status"
+          prop="key_state"
           width="120"
         />
         <el-table-column
           align="left"
           label="更新间隔"
-          prop="update_time"
-          width="120"
-        />
-        <el-table-column
-          align="left"
-          label="密钥密文"
-          prop="ciphertext"
+          prop="updatecycle"
           width="120"
         />
         <el-table-column
@@ -274,7 +236,7 @@
             prop="kind"
           >
             <el-select
-              v-model="formData.kind"
+              v-model="formData.key_type"
               filterable
               placeholder="请选择密钥类型"
               style="width:100%"
@@ -284,7 +246,7 @@
                 v-for="(item, key) in keyTypeOptions"
                 :key="key"
                 :label="item.label"
-                :value="item.value"
+                :value="item.label"
               />
             </el-select>
 
@@ -293,18 +255,27 @@
             label="AS UA:"
             prop="user1"
           >
-            <el-input
-              v-model.number="formData.user1"
+            <el-select
+              v-model="formData.owner1"
+              filterable
+              placeholder="请选择"
+              style="width:100%"
               :clearable="true"
-              placeholder="请输入所有者1"
-            />
+            >
+              <el-option
+                v-for="(item,key) in plane_opts"
+                :key="key"
+                :label="item.company + ' - ' + item.plane_id + ' - ' +item.ua"
+                :value="item.ua.toString()"
+              />
+            </el-select>
           </el-form-item>
           <el-form-item
             label="SGW ID:"
             prop="user2"
           >
             <el-input
-              v-model.number="formData.user2"
+              v-model="formData.owner2"
               :clearable="true"
               placeholder="请输入所有者2"
             />
@@ -314,7 +285,7 @@
             prop="length"
           >
             <el-input
-              v-model.number="formData.length"
+              v-model.number="formData.key_len"
               :clearable="true"
               placeholder="请输入密钥长度"
             />
@@ -324,7 +295,7 @@
             prop="update_time"
           >
             <el-input
-              v-model.number="formData.update_time"
+              v-model.number="formData.updatecycle"
               :clearable="true"
               placeholder="请输入更新间隔"
             />
@@ -392,7 +363,8 @@ import {
   deleteKeyEntityByIds,
   updateKeyEntity,
   findKeyEntity,
-  getKeyEntityList
+  getKeyEntityList,
+  getOptions
 } from '@/api/key_management'
 
 // 全量引入格式化工具 请按需保留
@@ -406,64 +378,63 @@ defineOptions({
 
 // 自动化生成的字典（可能为空）以及字段
 const formData = ref({
-  key_id: '',
-  kind: '',
-  user1: 0,
-  user2: 0,
-  length: 0,
-  update_time: 0,
-  ciphertext: '',
+  key_type: '',
+  owner1: '',
+  owner2: '10010',
+  key_len: 16,
+  updatecycle: 365,
 })
 const keyTypeOptions = ref([])
 const keyStateOptions = ref([])
+const plane_opts = ref([])
 // 验证规则
 const rule = reactive({
-  key_id: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  {
-    whitespace: true,
-    message: '不能只输入空格',
-    trigger: ['input', 'blur'],
-  }
-  ],
-  kind: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  {
-    whitespace: true,
-    message: '不能只输入空格',
-    trigger: ['input', 'blur'],
-  }
-  ],
-  user1: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  ],
-  user2: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  ],
-  length: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  ],
-  key_status: [{
-    required: true,
-    message: '',
-    trigger: ['input', 'blur'],
-  },
-  ],
+  // key_id: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // {
+  //   whitespace: true,
+  //   message: '不能只输入空格',
+  //   trigger: ['input', 'blur'],
+  // }
+  // ],
+  // kind: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // {
+  //   whitespace: true,
+  //   message: '不能只输入空格',
+  //   trigger: ['input', 'blur'],
+  // }
+  // ],
+  // user1: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // ],
+  // user2: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // ],
+  // length: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // ],
+  // key_status: [{
+  //   required: true,
+  //   message: '',
+  //   trigger: ['input', 'blur'],
+  // },
+  // ],
 })
 
 const searchRule = reactive({
@@ -526,6 +497,7 @@ const getTableData = async() => {
   if (table.code === 0) {
     tableData.value = table.data.list
     total.value = table.data.total
+    console.log(tableData.value, total.value)
     page.value = table.data.page
     pageSize.value = table.data.pageSize
   }
@@ -537,6 +509,13 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
+  const res = await getOptions()
+
+  if (res.code === 0) {
+    // options.value = res.data.options
+    plane_opts.value = res.data.options.plane_ids
+    console.log(plane_opts.value)
+  }
   keyTypeOptions.value = await getDictFunc('KeyType')
   keyStateOptions.value = await getDictFunc('KeyState')
 }
@@ -680,6 +659,7 @@ const enterDialog = async() => {
   elFormRef.value?.validate(async(valid) => {
     if (!valid) return
     let res
+    console.log(formData.value)
     switch (type.value) {
       case 'create':
         res = await createKeyEntity(formData.value)

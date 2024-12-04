@@ -23,5 +23,6 @@ func (s *KeyEntityRouter) InitKeyEntityRouter(Router *gin.RouterGroup) {
 	{
 		kmRouterWithoutRecord.GET("findKeyEntity", kmApi.FindKeyEntity)       // 根据ID获取密钥
 		kmRouterWithoutRecord.GET("getKeyEntityList", kmApi.GetKeyEntityList) // 获取密钥列表
+		kmRouterWithoutRecord.GET("getOptions", kmApi.GetOptions)             // 获取密钥列表
 	}
 }

@@ -93,6 +93,7 @@ export default ({
       preprocessorOptions: {
         scss: {
           additionalData: `@use "@/style/element/index.scss" as *;`,
+          api: 'modern-compiler',
         }
       }
     },

@@ -23,6 +23,10 @@ type KeyEntity struct {
 	UpdateCount int    `json:"update_count" form:"update_count" gorm:"column:update_count;comment:;"`
 }
 
+type KeyEntityOptions struct {
+	AsPlaneIds []AccountPlane `json:"plane_ids"`
+}
+
 // TableName 密钥 KeyEntity自定义表名 key
 func (KeyEntity) TableName() string {
 	return "sgw_keystore"

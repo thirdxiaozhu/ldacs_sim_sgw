@@ -1,11 +1,17 @@
 package service
 
 import (
+	"fmt"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
+)
 
-	"gorm.io/gorm"
+const (
+	defaultBinPath = "/root/ldacs/ldacs_sim_sgw/resources/keystore/rootkey.bin"
 )
 
 type KeyEntityService struct {
@@ -14,8 +20,14 @@ type KeyEntityService struct {
 // CreateKeyEntity 创建密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) CreateKeyEntity(km *model.KeyEntity) (err error) {
-	err = global.DB.Create(km).Error
-	return err
+	err = util.GenerateRootKey(km.Owner1, km.Owner2, km.KeyLen, km.UpdateCycle, global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), defaultBinPath)
+	if err != nil {
+		global.LOGGER.Error("Can not generate root key:", zap.Error(err))
+	}
+	//util.QueryID()
+	err = util.EnableKey(global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), "")
+	//err = global.DB.Create(km).Error
+	return nil
 }
 
 // DeleteKeyEntity 删除密钥记录
@@ -51,14 +63,14 @@ func (kmService *KeyEntityService) DeleteKeyEntityByIds(ids []string, deleted_by
 // UpdateKeyEntity 更新密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) UpdateKeyEntity(km model.KeyEntity) (err error) {
-	err = global.DB.Save(&km).Error
+	err = global.KeyDB.Save(&km).Error
 	return err
 }
 
 // GetKeyEntity 根据id获取密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) GetKeyEntity(id string) (km model.KeyEntity, err error) {
-	err = global.DB.Where("id = ?", id).First(&km).Error
+	err = global.KeyDB.Where("id = ?", id).First(&km).Error
 	return
 }
 
@@ -68,12 +80,9 @@ func (kmService *KeyEntityService) GetKeyEntityInfoList(info ldacs_sgw_forwardRe
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
-	db := global.DB.Model(&model.KeyEntity{})
+	db := global.KeyDB.Model(&model.KeyEntity{})
 	var kms []model.KeyEntity
 	// 如果有条件搜索 下方会自动创建搜索语句
-	if info.StartCreatedAt != nil && info.EndCreatedAt != nil {
-		db = db.Where("created_at BETWEEN ? AND ?", info.StartCreatedAt, info.EndCreatedAt)
-	}
 	if info.KeyID != "" {
 		db = db.Where("key_id = ?", info.KeyID)
 	}
@@ -103,4 +112,22 @@ func (kmService *KeyEntityService) GetKeyEntityInfoList(info ldacs_sgw_forwardRe
 
 	err = db.Find(&kms).Error
 	return kms, total, err
+}
+
+func (kmService *KeyEntityService) GetOptions() (*model.KeyEntityOptions, error) {
+	db := global.DB
+	var keyOpts model.KeyEntityOptions
+	var find *gorm.DB
+
+	for {
+		find = db.Order("ID asc").Find(&keyOpts.AsPlaneIds)
+		if find.Error != nil {
+			break
+		}
+		return &keyOpts, find.Error
+	}
+
+	fmt.Printf("find查询失败，err：%v\n", find.Error)
+
+	return nil, find.Error
 }

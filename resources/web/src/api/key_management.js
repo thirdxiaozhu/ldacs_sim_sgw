@@ -95,3 +95,10 @@ export const getKeyEntityList = (params) => {
     params
   })
 }
+export const getOptions = (params) => {
+  return service({
+    url: '/km/getOptions',
+    method: 'get',
+    params
+  })
+}

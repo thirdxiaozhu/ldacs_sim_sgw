@@ -2,6 +2,7 @@ package ldacs_sgw_forward
 
 import (
 	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
 
 	"github.com/gin-gonic/gin"
@@ -26,20 +27,18 @@ var kmService = service.ServiceGroupApp.Ldacs_sgw_forwardServiceGroup.KeyEntityS
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"创建成功"}"
 // @Router /km/createKeyEntity [post]
 func (kmApi *KeyEntityApi) CreateKeyEntity(c *gin.Context) {
-	//var km model.KeyEntity
-	//err := c.ShouldBindJSON(&km)
-	//if err != nil {
-	//	response.FailWithMessage(err.Error(), c)
-	//	return
-	//}
-	////km.CreatedBy = utils.GetUserID(c)
-	//
-	//if err := kmService.CreateKeyEntity(&km); err != nil {
-	//	global.LOGGER.Error("创建失败!", zap.Error(err))
-	//	response.FailWithMessage("创建失败", c)
-	//} else {
-	//	response.OkWithMessage("创建成功", c)
-	//}
+	var km model.KeyEntity
+	err := c.ShouldBindJSON(&km)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	if err := kmService.CreateKeyEntity(&km); err != nil {
+		global.LOGGER.Error("创建失败!", zap.Error(err))
+		response.FailWithMessage("创建失败", c)
+	} else {
+		response.OkWithMessage("创建成功", c)
+	}
 }
 
 // DeleteKeyEntity 删除密钥
@@ -153,5 +152,14 @@ func (kmApi *KeyEntityApi) GetKeyEntityList(c *gin.Context) {
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
 		}, "获取成功", c)
+	}
+}
+
+func (kmApi *KeyEntityApi) GetOptions(c *gin.Context) {
+	if opts, err := kmService.GetOptions(); err != nil {
+		global.LOGGER.Error("获取失败!", zap.Error(err))
+		response.FailWithMessage("获取失败", c)
+	} else {
+		response.OkWithData(gin.H{"options": opts}, c)
 	}
 }

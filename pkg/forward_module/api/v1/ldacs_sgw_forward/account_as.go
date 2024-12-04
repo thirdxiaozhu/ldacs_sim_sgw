@@ -169,11 +169,6 @@ func (accountAsApi *AccountAsApi) GetAccountAsList(c *gin.Context) {
 	}
 }
 func (accountAsApi *AccountAsApi) GetOptions(c *gin.Context) {
-	//err := c.ShouldBindQuery(&troq)
-	//if err != nil {
-	//	response.FailWithMessage(err.Error(), c)
-	//	return
-	//}
 
 	if opts, err := accountAsService.GetOptions(); err != nil {
 		global.LOGGER.Error("获取失败!", zap.Error(err))
