@@ -3,12 +3,14 @@ package handle
 import "C"
 import (
 	"crypto/rand"
-	"fmt"
 	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
+	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
+	"ldacs_sim_sgw/pkg/ldacs_core/service"
+	"unsafe"
 )
 
 type SEC_CMDS global.Constant
@@ -157,7 +159,8 @@ func GenerateRandomBytes(size uint) []byte {
 	}
 }
 
-func GenerateSharedKey(st *model.State) (key, N2 []byte, err error) {
+func GenerateSharedKey(unit *LdacsUnit) (handlerAsSgw unsafe.Pointer, keyAsGs, N2 []byte, err error) {
+	st := unit.State
 	N2 = GenerateRandomBytes(16)
 
 	SharedInfo := AucSharedInfo{
@@ -171,19 +174,57 @@ func GenerateSharedKey(st *model.State) (key, N2 []byte, err error) {
 	}
 
 	random, err := util.MarshalLdacsPkt(SharedInfo)
+	handlerAsSgw, keyAsGs, err = SGWDeriveKey("10010", "10086", "10010", uint32(SharedInfo.KeyLen.GetKeyLen()), random)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return
+}
+
+func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Pointer, []byte, error) {
+
+	dbName := global.CONFIG.Sqlite.Dsn()
+	tableName := model.KeyEntity{}.TableName()
+
+	km, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: "ACTIVE",
+		KeyType:  "ROOT_KEY",
+		Owner1:   asUa,
+		Owner2:   sgwUa,
+	})
+
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// salt [0, 0, 0, 0, ..., 0]
-	var salt [32]byte
-	key, err = gmssl.Sm3Pbkdf2(string(random), salt[:], KDF_ITER, SharedInfo.KeyLen.GetKeyLen())
+	err = util.DeriveKey(dbName, tableName, km.KeyID, gsUa, keyLen, n)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	fmt.Printf("Random:   % X\n", random)
-	fmt.Printf("Key:   % X\n", key[:SharedInfo.KeyLen.GetKeyLen()])
+	mkeyAsSgw, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: "ACTIVE",
+		KeyType:  "MASTER_KEY_AS_SGW",
+		Owner1:   asUa,
+		Owner2:   sgwUa,
+	})
 
-	return key[:SharedInfo.KeyLen.GetKeyLen()], N2, nil
+	mkeyHandleAsSgw, err := util.GetKeyHandle(dbName, tableName, mkeyAsSgw.KeyID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mkeyAsGs, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: "ACTIVE",
+		KeyType:  "MASTER_KEY_AS_GS",
+		Owner1:   asUa,
+		Owner2:   gsUa,
+	})
+
+	mkeyHandleAsGs, err := util.QueryKeyValue(dbName, tableName, mkeyAsGs.KeyID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return mkeyHandleAsSgw, mkeyHandleAsGs.Key, nil
 }

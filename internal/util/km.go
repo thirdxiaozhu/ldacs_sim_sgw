@@ -434,3 +434,26 @@ func RevokeKey(dbname, tablename, id string) error {
 	}
 	return nil
 }
+
+func GetKeyHandle(dbname, tablename, id string) (unsafe.Pointer, error) {
+	//cPtr := (*unsafe.Pointer)(unsafe.Pointer(handler))
+	handler := unsafe.Pointer(nil)
+
+	cDbname := C.CString(dbname)
+	cTablename := C.CString(tablename)
+	cId := C.CString(id)
+	defer C.free(unsafe.Pointer(cDbname))
+	defer C.free(unsafe.Pointer(cTablename))
+	defer C.free(unsafe.Pointer(cId))
+
+	errCode := C.get_handle_from_db(
+		(*C.uint8_t)(unsafe.Pointer(cDbname)),
+		(*C.uint8_t)(unsafe.Pointer(cTablename)),
+		(*C.uint8_t)(unsafe.Pointer(cId)),
+		&handler)
+
+	if errCode != 0 {
+		return nil, fmt.Errorf("GetKeyHandle failed with error code %d", errCode)
+	}
+	return handler, nil
+}

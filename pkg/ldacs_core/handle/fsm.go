@@ -25,7 +25,7 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
-	key, N2, err := GenerateSharedKey(st)
+	handlerAsSgw, _, N2, err := GenerateSharedKey(unit)
 	if err != nil {
 		global.LOGGER.Error("Generate Shared key failed.", zap.Error(err))
 		return err
