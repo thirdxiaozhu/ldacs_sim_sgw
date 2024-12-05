@@ -380,7 +380,7 @@ defineOptions({
 const formData = ref({
   key_type: '',
   owner1: '',
-  owner2: '10010',
+  owner2: '10000',
   key_len: 16,
   updatecycle: 365,
 })
@@ -556,7 +556,7 @@ const onDelete = async() => {
   }
   multipleSelection.value &&
         multipleSelection.value.map(item => {
-          ids.push(item.ID)
+          ids.push(item.id)
         })
   const res = await deleteKeyEntityByIds({ ids })
   if (res.code === 0) {
@@ -587,7 +587,7 @@ const updateKeyEntityFunc = async(row) => {
 
 // 删除行
 const deleteKeyEntityFunc = async(row) => {
-  const res = await deleteKeyEntity({ ID: row.ID })
+  const res = await deleteKeyEntity({ id: row.id })
   if (res.code === 0) {
     ElMessage({
       type: 'success',

@@ -51,9 +51,9 @@ func (kmApi *KeyEntityApi) CreateKeyEntity(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"删除成功"}"
 // @Router /km/deleteKeyEntity [delete]
 func (kmApi *KeyEntityApi) DeleteKeyEntity(c *gin.Context) {
-	id := c.Query("ID")
-	userID := utils.GetUserID(c)
-	if err := kmService.DeleteKeyEntity(id, userID); err != nil {
+	id := c.Query("id")
+	//userID := utils.GetUserID(c)
+	if err := kmService.DeleteKeyEntity(id); err != nil {
 		global.LOGGER.Error("删除失败!", zap.Error(err))
 		response.FailWithMessage("删除失败", c)
 	} else {
@@ -118,7 +118,7 @@ func (kmApi *KeyEntityApi) UpdateKeyEntity(c *gin.Context) {
 // @Router /km/findKeyEntity [get]
 func (kmApi *KeyEntityApi) FindKeyEntity(c *gin.Context) {
 	id := c.Query("ID")
-	if rekm, err := kmService.GetKeyEntity(id); err != nil {
+	if rekm, err := kmService.GetKeyEntityByID(id); err != nil {
 		global.LOGGER.Error("查询失败!", zap.Error(err))
 		response.FailWithMessage("查询失败", c)
 	} else {

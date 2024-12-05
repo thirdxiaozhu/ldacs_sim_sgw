@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/internal/global"
@@ -20,21 +21,34 @@ type KeyEntityService struct {
 // CreateKeyEntity 创建密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) CreateKeyEntity(km *model.KeyEntity) (err error) {
-	err = util.GenerateRootKey(km.Owner1, km.Owner2, km.KeyLen, km.UpdateCycle, global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), defaultBinPath)
-	if err != nil {
-		global.LOGGER.Error("Can not generate root key:", zap.Error(err))
+	if km.KeyType == "ROOT_KEY" {
+		err = util.GenerateRootKey(km.Owner1, km.Owner2, km.KeyLen, km.UpdateCycle, global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), defaultBinPath)
+		if err != nil {
+			global.LOGGER.Error("Can not generate root key:", zap.Error(err))
+		}
 	}
-	//util.QueryID()
-	err = util.EnableKey(global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), "")
-	//err = global.DB.Create(km).Error
+
+	new_km, err := kmService.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: "PRE_ACTIVATION",
+		KeyType:  km.KeyType,
+		Owner1:   km.Owner1,
+		Owner2:   km.Owner2,
+	})
+
+	logger.Warn(new_km)
+	if err != nil {
+		return err
+	}
+
+	err = util.EnableKey(global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), new_km.KeyID)
 	return nil
 }
 
 // DeleteKeyEntity 删除密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (kmService *KeyEntityService) DeleteKeyEntity(id string, userID uint) (err error) {
-	err = global.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.KeyEntity{}).Where("id = ?", id).Update("deleted_by", userID).Error; err != nil {
+func (kmService *KeyEntityService) DeleteKeyEntity(id string) (err error) {
+	err = global.KeyDB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.KeyEntity{}).Where("id = ?", id).Error; err != nil {
 			return err
 		}
 		if err = tx.Delete(&model.KeyEntity{}, "id = ?", id).Error; err != nil {
@@ -48,7 +62,7 @@ func (kmService *KeyEntityService) DeleteKeyEntity(id string, userID uint) (err 
 // DeleteKeyEntityByIds 批量删除密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) DeleteKeyEntityByIds(ids []string, deleted_by uint) (err error) {
-	err = global.DB.Transaction(func(tx *gorm.DB) error {
+	err = global.KeyDB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&model.KeyEntity{}).Where("id in ?", ids).Update("deleted_by", deleted_by).Error; err != nil {
 			return err
 		}
@@ -67,10 +81,36 @@ func (kmService *KeyEntityService) UpdateKeyEntity(km model.KeyEntity) (err erro
 	return err
 }
 
-// GetKeyEntity 根据id获取密钥记录
+// GetKeyEntityByID 根据id获取密钥记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (kmService *KeyEntityService) GetKeyEntity(id string) (km model.KeyEntity, err error) {
+func (kmService *KeyEntityService) GetKeyEntityByID(id string) (km model.KeyEntity, err error) {
 	err = global.KeyDB.Where("id = ?", id).First(&km).Error
+	return
+}
+
+// GetKeyEntityByID 根据内容获取密钥记录
+// Author [piexlmax](https://github.com/piexlmax)
+func (kmService *KeyEntityService) GetKeyEntityByContent(info ldacs_sgw_forwardReq.KeyEntitySearch) (km model.KeyEntity, err error) {
+	//err = global.KeyDB.Where("id = ?", id).First(&km).Error
+	db := global.KeyDB.Model(&model.KeyEntity{})
+
+	if info.KeyID != "" {
+		db = db.Where("key_id = ?", info.KeyID)
+	}
+	if info.KeyType != "" {
+		db = db.Where("key_type = ?", info.KeyType)
+	}
+	if info.Owner1 != "" {
+		db = db.Where("owner1 = ?", info.Owner1)
+	}
+	if info.Owner2 != "" {
+		db = db.Where("owner2 = ?", info.Owner2)
+	}
+	if info.KeyState != "" {
+		db = db.Where("key_state = ?", info.KeyState)
+	}
+
+	err = db.First(&km).Error
 	return
 }
 
@@ -86,20 +126,17 @@ func (kmService *KeyEntityService) GetKeyEntityInfoList(info ldacs_sgw_forwardRe
 	if info.KeyID != "" {
 		db = db.Where("key_id = ?", info.KeyID)
 	}
-	if info.Kind != "" {
-		db = db.Where("kind = ?", info.Kind)
+	if info.KeyType != "" {
+		db = db.Where("key_type = ?", info.KeyType)
 	}
-	if info.User1 != nil {
-		db = db.Where("user1 = ?", info.User1)
+	if info.Owner1 != "" {
+		db = db.Where("owner1 = ?", info.Owner1)
 	}
-	if info.User2 != nil {
-		db = db.Where("user2 = ?", info.User2)
+	if info.Owner2 != "" {
+		db = db.Where("owner2 = ?", info.Owner2)
 	}
-	if info.KeyStatus != "" {
-		db = db.Where("key_status = ?", info.KeyStatus)
-	}
-	if info.Ciphertext != "" {
-		db = db.Where("ciphertext = ?", info.Ciphertext)
+	if info.KeyState != "" {
+		db = db.Where("key_state = ?", info.KeyState)
 	}
 	err = db.Count(&total).Error
 	if err != nil {

@@ -1,23 +1,19 @@
 package util
 
+/*
+#cgo CFLAGS: -I/usr/local/include/ldacs -I/usr/local/include/km
+#cgo LDFLAGS:  -lsqlite3 -lsdf -luuid -lkm_src -L/usr/local/lib/ldacs -lldacsutils
+#include "key_manage.h"
+#include "kmdb.h"
+#include "km_field.h"
+#include <utils/ld_log.h>
+#include <utils/ld_buffer.h>
+*/
 import "C"
 import (
 	"fmt"
-	"github.com/hdt3213/godis/lib/logger"
-	"ldacs_sim_sgw/internal/global"
 	"unsafe"
 )
-
-/*
-   #cgo CFLAGS: -I/usr/local/include/ldacs -I/usr/local/include/km
-   #cgo LDFLAGS:  -lsqlite3 -lsdf -luuid -lkm_src -L/usr/local/lib/ldacs -lldacsutils
-   #include "key_manage.h"
-   #include "kmdb.h"
-   #include "km_field.h"
-   #include <utils/ld_log.h>
-   #include <utils/ld_buffer.h>
-*/
-import "C"
 
 /*
 @author:wencheng
@@ -64,7 +60,6 @@ func GenerateRootKey(asName, sgwName string, keyLen, validityPeriod int,
 
 	// 调用 C 函数
 	result := int(C.km_rkey_gen_export(cAsName, cSgwName, cKeyLen, cValidityPeriod, cDbname, cTablename, cFilePath))
-	logger.Error("RRRRRRRRRRRRRRESULT", result, exportFilePath, dbname, tablename, global.CONFIG.Sqlite.Dsn())
 	if result != C.LD_KM_OK {
 		return fmt.Errorf("failed to write file to cryptocard, error code: %d", int(result))
 	}
@@ -131,16 +126,32 @@ func RootKeyImport(dbname, tablename, rkeyFilenameInCcard string) error {
 
 /*
 // Convert Go string to C string
-
-	func goStringToCString(s string) *C.char {
-	    return C.CString(s)
-	}
+func goStringToCString(s string) *C.char {
+    return C.CString(s)
+}
 
 // Convert C string to Go string
+func cStringToGoString(s *C.char) string {
+    return C.GoString(s)
+}
+*/
 
-	func cStringToGoString(s *C.char) string {
-	    return C.GoString(s)
-	}
+/*
+// QueryResult struct to wrap C struct
+type QueryIDResult struct {
+    queryId int
+    // other fields
+}
+
+//go:generate CGO_LDFLAGS_ALLOW=.-lcgo_example
+
+// NewQueryResult creates a new QueryResult from C struct
+func NewQueryResult(cRes *C.QueryResult_for_queryid) *QueryResult {
+    return &QueryResult{
+        queryId: int(cRes.query_id),
+        // initialize other fields
+    }
+}
 
 // QueryID 封装了 C 语言的 query_id 函数，用于根据给定的数据库名、表名、所有者、密钥类型和状态查询密钥标识。
 // 参数：
@@ -154,51 +165,27 @@ func RootKeyImport(dbname, tablename, rkeyFilenameInCcard string) error {
 // - 字符串类型的密钥标识，如果未找到结果返回空字符串
 // - 错误信息，若调用过程中出现错误则返回该错误
 
-	func QueryID(dbName, tableName, owner1, owner2 string, keyType int, state int) (string, error) {
-		cDbName := goStringToCString(dbName)
-	    cTableName := goStringToCString(tableName)
-	    cOwner1 := goStringToCString(owner1)
-	    cOwner2 := goStringToCString(owner2)
-	    defer C.free(unsafe.Pointer(cDbName))
-	    defer C.free(unsafe.Pointer(cTableName))
-	    defer C.free(unsafe.Pointer(cOwner1))
-	    defer C.free(unsafe.Pointer(cOwner2))
+func QueryID(dbName, tableName, owner1, owner2 string, keyType KeyType, state State) (*QueryResult, error) {
+    cDBName := C.CString(dbName)
+    cTableName := C.CString(tableName)
+    cOwner1 := C.CString(owner1)
+    cOwner2 := C.CString(owner2)
 
-	    cKeyType := C.KEY_TYPE(keyType) // 将 Go int 转换为 C 枚举
-	    cState := C.STATE(state) // 将 Go int 转换为 C 枚举
+    defer C.free(unsafe.Pointer(cDBName))
+    defer C.free(unsafe.Pointer(cTableName))
+    defer C.free(unsafe.Pointer(cOwner1))
+    defer C.free(unsafe.Pointer(cOwner2))
 
-	    // 假设 query_id 是一个示例函数
-	    result := C.query_id(cDbName, cTableName, cOwner1, cOwner2, cKeyType, cState)
-	    if result == nil {
-	        return "", nil
-	    }
-	    id := cStringToGoString(result)
-	    return id, nil
-	}
-*/
-func QueryID(dbName, tableName, owner1, owner2, keyType, state string) (string, error) {
-	cDbName := C.CString(dbName)
-	cTableName := C.CString(tableName)
-	cOwner1 := C.CString(owner1)
-	cOwner2 := C.CString(owner2)
-	cKeyType := C.CString(keyType)
-	cState := C.CString(state)
-	defer C.free(unsafe.Pointer(cDbName))
-	defer C.free(unsafe.Pointer(cTableName))
-	defer C.free(unsafe.Pointer(cOwner1))
-	defer C.free(unsafe.Pointer(cOwner2))
-	defer C.free(unsafe.Pointer(cKeyType))
-	defer C.free(unsafe.Pointer(cState))
+    cResult := C.query_id(cDBName, cTableName, cOwner1, cOwner2, C.enum_KEY_TYPE(keyType), C.enum_STATE(state))
 
-	// 假设 query_id 是一个示例函数
-	result := C.query_id(cDbName, cTableName, cOwner1, cOwner2, cKeyType, cState)
-	if result == nil {
-		return "", nil
-	}
-	id := C.CString(result)
-	return id, nil
+    if cResult == nil {
+        return nil, fmt.Errorf("query_id returned nil")
+    }
+
+    result := NewQueryResult(cResult)
+    return result, nil
 }
-
+*/
 // EnableKey 调用 C 语言的 enable_key 函数
 func EnableKey(dbName, tableName, id string) error {
 	cDbName := C.CString(dbName)
