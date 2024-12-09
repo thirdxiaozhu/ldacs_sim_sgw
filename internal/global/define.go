@@ -108,6 +108,21 @@ func (f MacLen) CheckValid() bool {
 	return f <= AUTHC_MACLEN_256
 }
 
+func (f MacLen) GetMacLen() uint32 {
+	switch f {
+	case AUTHC_MACLEN_64:
+		return 64 >> 3
+	case AUTHC_MACLEN_96:
+		return 96 >> 3
+	case AUTHC_MACLEN_128:
+		return 128 >> 3
+	case AUTHC_MACLEN_256:
+		return 256 >> 3
+	default:
+		return 0
+	}
+}
+
 type AuthID uint8
 
 const (

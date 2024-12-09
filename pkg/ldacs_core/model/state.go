@@ -31,9 +31,10 @@ type State struct {
 func NewState() *State {
 	return &State{
 		AuthState: global.AUTH_STAGE_UNDEFINED,
-		KdfLen:    uint8(global.AUTHC_KLEN_256),
+		KdfLen:    uint8(global.AUTHC_KLEN_128),
 		IsTerm:    0,
 	}
+
 }
 
 func (State) TableName() string {

@@ -457,3 +457,26 @@ func GetKeyHandle(dbname, tablename, id string) (unsafe.Pointer, error) {
 	}
 	return handler, nil
 }
+
+func CalcHMAC(handler unsafe.Pointer, data []byte, limit uint32) ([]byte, error) {
+	hmacResult := make([]byte, limit)
+
+	//cData := C.CBytes(data)
+	//defer C.free(cData)
+	//cResult := C.CBytes(hmacResult)
+	//defer C.free(cResult)
+	//cResultLen := C.uint32_t(hmacLen)
+	cHmacLen := C.uint32_t(0)
+
+	errCode := C.km_hmac_with_keyhandle(
+		handler,
+		(*C.uint8_t)(unsafe.Pointer(&data[0])),
+		C.uint32_t(len(data)),
+		(*C.uint8_t)(unsafe.Pointer(&hmacResult[0])),
+		&cHmacLen)
+	if errCode != 0 {
+		return nil, fmt.Errorf("GetKeyHandle failed with error code %d", errCode)
+	}
+
+	return hmacResult, nil
+}

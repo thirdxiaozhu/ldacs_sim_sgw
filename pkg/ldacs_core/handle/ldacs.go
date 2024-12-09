@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"github.com/hdt3213/godis/lib/logger"
 	"github.com/looplab/fsm"
-	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
@@ -13,6 +12,7 @@ import (
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
+	"unsafe"
 )
 
 const GSNF_HEAD_LEN = 4
@@ -22,11 +22,13 @@ type LdacsHandler struct {
 }
 
 type LdacsUnit struct {
-	AsSac   uint16 `json:"as_sac"`
-	GsSac   uint16 `json:"gs_sac"`
-	ConnID  uint32
-	State   *model.State
-	AuthFsm *fsm.FSM
+	AsSac        uint16 `json:"as_sac"`
+	GsSac        uint16 `json:"gs_sac"`
+	ConnID       uint32
+	State        *model.State
+	AuthFsm      *fsm.FSM
+	HandlerAsSgw unsafe.Pointer
+	KeyAsGs      []byte
 }
 
 func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
@@ -99,20 +101,21 @@ func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
 	return nil
 }
 
-func (u *LdacsUnit) ToSendPkt(v any, key []byte) {
+func (u *LdacsUnit) SendPkt(v any) {
 	sdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
 		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 
-	hmac, err := gmssl.NewSm3Hmac(key)
-	if err != nil {
-		global.LOGGER.Error("Failed Send", zap.Error(err))
-		return
-	}
-	hmac.Update(sdu)
-	sdu = append(sdu, hmac.GenerateMac()...)
+	//hmac, err := gmssl.NewSm3Hmac(key)
+	//if err != nil {
+	//	global.LOGGER.Error("Failed Send", zap.Error(err))
+	//	return
+	//}
+	//hmac.Update(sdu)
+	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
+	sdu = append(sdu, hmac...)
 
 	gsnfMsg := GsnfPkt{
 		GType:   0,

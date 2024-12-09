@@ -25,13 +25,13 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
-	handlerAsSgw, _, N2, err := GenerateSharedKey(unit)
+	N2, err := GenerateSharedKey(unit)
 	if err != nil {
 		global.LOGGER.Error("Generate Shared key failed.", zap.Error(err))
 		return err
 	}
 
-	unit.ToSendPkt(&AucResp{
+	unit.SendPkt(&AucResp{
 		Stype:  global.AUC_RESP,
 		Ver:    st.Ver,
 		PID:    global.PID(st.PID),
@@ -42,7 +42,7 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 		EncID:  global.EncID(st.EncId),
 		N2:     N2,
 		KeyLen: global.KeyLen(st.KdfLen),
-	}, key)
+	})
 
 	return nil
 }
