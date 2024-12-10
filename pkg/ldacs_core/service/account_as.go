@@ -43,7 +43,6 @@ func (accountAsService *AccountAsService) DeleteAccountAs(id string, userID uint
 // DeleteAccountAs 弃用飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) DeprecateAccountAs(id string, userID uint) (err error) {
-	fmt.Println()
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&model.AccountAs{}).Where("id = ?", id).Update("deprecated_by", userID).Error; err != nil {
 			return err

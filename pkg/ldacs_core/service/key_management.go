@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"ldacs_sim_sgw/internal/global"
@@ -13,6 +12,7 @@ import (
 
 const (
 	defaultBinPath = "/root/ldacs/ldacs_sim_sgw/resources/keystore/rootkey.bin"
+	ccardBinPath   = "rootkey.bin"
 )
 
 type KeyEntityService struct {
@@ -22,20 +22,23 @@ type KeyEntityService struct {
 // Author [piexlmax](https://github.com/piexlmax)
 func (kmService *KeyEntityService) CreateKeyEntity(km *model.KeyEntity) (err error) {
 	if km.KeyType == "ROOT_KEY" {
-		err = util.GenerateRootKey(km.Owner1, km.Owner2, km.KeyLen, km.UpdateCycle, global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), defaultBinPath)
+		err = util.GenerateRootKey(util.UAformat(km.Owner1), util.UAformat(km.Owner2), km.KeyLen, km.UpdateCycle, global.CONFIG.Sqlite.Dsn(), model.KeyEntity{}.TableName(), defaultBinPath)
 		if err != nil {
 			global.LOGGER.Error("Can not generate root key:", zap.Error(err))
+		}
+
+		err = util.KmWriteFileToCryptocard(defaultBinPath, ccardBinPath)
+		if err != nil {
+			global.LOGGER.Error("Can not import root key into crypto card:", zap.Error(err))
 		}
 	}
 
 	new_km, err := kmService.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
 		KeyState: "PRE_ACTIVATION",
 		KeyType:  km.KeyType,
-		Owner1:   km.Owner1,
-		Owner2:   km.Owner2,
+		Owner1:   util.UAformat(km.Owner1),
+		Owner2:   util.UAformat(km.Owner2),
 	})
-
-	logger.Warn(new_km)
 	if err != nil {
 		return err
 	}
@@ -101,10 +104,10 @@ func (kmService *KeyEntityService) GetKeyEntityByContent(info ldacs_sgw_forwardR
 		db = db.Where("key_type = ?", info.KeyType)
 	}
 	if info.Owner1 != "" {
-		db = db.Where("owner1 = ?", info.Owner1)
+		db = db.Where("owner1 = ?", util.UAformat(info.Owner1))
 	}
 	if info.Owner2 != "" {
-		db = db.Where("owner2 = ?", info.Owner2)
+		db = db.Where("owner2 = ?", util.UAformat(info.Owner2))
 	}
 	if info.KeyState != "" {
 		db = db.Where("key_state = ?", info.KeyState)
@@ -130,10 +133,10 @@ func (kmService *KeyEntityService) GetKeyEntityInfoList(info ldacs_sgw_forwardRe
 		db = db.Where("key_type = ?", info.KeyType)
 	}
 	if info.Owner1 != "" {
-		db = db.Where("owner1 = ?", info.Owner1)
+		db = db.Where("owner1 = ?", util.UAformat(info.Owner1))
 	}
 	if info.Owner2 != "" {
-		db = db.Where("owner2 = ?", info.Owner2)
+		db = db.Where("owner2 = ?", util.UAformat(info.Owner2))
 	}
 	if info.KeyState != "" {
 		db = db.Where("key_state = ?", info.KeyState)

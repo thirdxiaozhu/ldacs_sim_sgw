@@ -235,6 +235,7 @@ func DeriveKey(dbName, tableName, id, gsName string, keyLen uint32, rand []byte)
 		(*C.uint8_t)(unsafe.Pointer(cRand)),
 		C.uint32_t(len(rand)),
 	)
+	fmt.Println()
 
 	// 检查 C 函数的返回结果
 	if result != C.LD_KM_OK { // 确保与实际错误码匹配
@@ -467,6 +468,7 @@ func CalcHMAC(handler unsafe.Pointer, data []byte, limit uint32) ([]byte, error)
 	//defer C.free(cResult)
 	//cResultLen := C.uint32_t(hmacLen)
 	cHmacLen := C.uint32_t(0)
+	//logger.Warn("??????????")
 
 	errCode := C.km_hmac_with_keyhandle(
 		handler,
@@ -479,4 +481,30 @@ func CalcHMAC(handler unsafe.Pointer, data []byte, limit uint32) ([]byte, error)
 	}
 
 	return hmacResult, nil
+}
+
+func Encrypt(handler unsafe.Pointer) {
+	iv := make([]byte, 16)
+	data := make([]byte, 16)
+	res := make([]byte, 256)
+	cResLen := C.uint32_t(0)
+	errCode := C.km_encrypt(
+		handler,
+		C.uint32_t(0x00000402),
+		(*C.uint8_t)(unsafe.Pointer(&iv[0])),
+		(*C.uint8_t)(unsafe.Pointer(&data[0])),
+		C.uint32_t(16),
+		(*C.uint8_t)(unsafe.Pointer(&res[0])),
+		&cResLen)
+
+	for i := range res {
+		if i > 0 {
+			fmt.Print(" ")
+		}
+		fmt.Printf("%02x", res[i])
+	}
+	fmt.Println()
+	if errCode != 0 {
+		fmt.Printf("GetKeyHandle failed with error code %d", errCode)
+	}
 }

@@ -108,12 +108,6 @@ func (u *LdacsUnit) SendPkt(v any) {
 		return
 	}
 
-	//hmac, err := gmssl.NewSm3Hmac(key)
-	//if err != nil {
-	//	global.LOGGER.Error("Failed Send", zap.Error(err))
-	//	return
-	//}
-	//hmac.Update(sdu)
 	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
 	sdu = append(sdu, hmac...)
 

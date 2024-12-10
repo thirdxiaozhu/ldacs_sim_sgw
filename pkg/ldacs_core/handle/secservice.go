@@ -4,7 +4,6 @@ import "C"
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/hdt3213/godis/lib/logger"
 	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
@@ -177,14 +176,7 @@ func GenerateSharedKey(unit *LdacsUnit) (N2 []byte, err error) {
 
 	random, err := util.MarshalLdacsPkt(SharedInfo)
 
-	for i := range random {
-		if i > 0 {
-			fmt.Print(" ")
-		}
-		fmt.Printf("%02x", random[i])
-	}
-	fmt.Println()
-	unit.HandlerAsSgw, unit.KeyAsGs, err = SGWDeriveKey("10010", "10086", "10000", uint32(SharedInfo.KeyLen.GetKeyLen()), random)
+	unit.HandlerAsSgw, unit.KeyAsGs, err = SGWDeriveKey(util.UAformat(10010), util.UAformat(10086), util.UAformat(10000), uint32(SharedInfo.KeyLen.GetKeyLen()), random)
 	if err != nil {
 		return nil, err
 	}
@@ -199,26 +191,25 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 	km, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
 		KeyState: "ACTIVE",
 		KeyType:  "ROOT_KEY",
-		Owner1:   asUa,
-		Owner2:   sgwUa,
+		Owner1:   util.UAformat(asUa),
+		Owner2:   util.UAformat(sgwUa),
 	})
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	logger.Warn("!!!!!!!!!!!!!!", keyLen)
-
-	err = util.DeriveKey(dbName, tableName, km.KeyID, gsUa, 16, n)
+	err = util.DeriveKey(dbName, tableName, km.KeyID, gsUa, keyLen, n)
 	if err != nil {
 		return nil, nil, err
 	}
+	fmt.Println("")
 
 	mkeyAsSgw, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
 		KeyState: "ACTIVE",
 		KeyType:  "MASTER_KEY_AS_SGW",
-		Owner1:   asUa,
-		Owner2:   sgwUa,
+		Owner1:   util.UAformat(asUa),
+		Owner2:   util.UAformat(sgwUa),
 	})
 
 	mkeyHandleAsSgw, err := util.GetKeyHandle(dbName, tableName, mkeyAsSgw.KeyID)
@@ -229,8 +220,8 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 	mkeyAsGs, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
 		KeyState: "ACTIVE",
 		KeyType:  "MASTER_KEY_AS_GS",
-		Owner1:   asUa,
-		Owner2:   gsUa,
+		Owner1:   util.UAformat(asUa),
+		Owner2:   util.UAformat(gsUa),
 	})
 
 	mkeyHandleAsGs, err := util.QueryKeyValue(dbName, tableName, mkeyAsGs.KeyID)
