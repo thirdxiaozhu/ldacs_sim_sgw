@@ -15,7 +15,7 @@ import (
 	"unsafe"
 )
 
-const GSNF_HEAD_LEN = 4
+const GSNF_HEAD_LEN = 2
 
 type LdacsHandler struct {
 	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
@@ -57,6 +57,7 @@ func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
 
 	ctx = context.WithValue(ctx, "unit", u)
 	logger.Warn(u.AuthFsm.Current())
+	logger.Warn("!!!!!!!!!!!!!!!!!!!!!", gsnfMsg[0])
 
 	switch global.STYPE(gsnfMsg[0]) {
 	case global.AUC_RQST:
@@ -112,11 +113,9 @@ func (u *LdacsUnit) SendPkt(v any) {
 	sdu = append(sdu, hmac...)
 
 	gsnfMsg := GsnfPkt{
-		GType:   0,
-		Version: 1,
-		ASSac:   u.AsSac,
-		EleType: 0,
-		Sdu:     sdu,
+		GType: 0,
+		ASSac: u.AsSac,
+		Sdu:   sdu,
 	}
 
 	gsnfPdu, err := util.MarshalLdacsPkt(gsnfMsg)
