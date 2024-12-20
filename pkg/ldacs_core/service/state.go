@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
@@ -27,11 +26,9 @@ func (stateService *StateService) UpdateState(state *model.State) (err error) {
 
 func InitState(sac uint16, UA uint32) *model.State {
 
-	logger.Warn(UA)
 	//未来需要根据SAC找对应的UA
 	accountAs, err := AccountAsSer.GetAvialAccountAsByUA(UA)
 
-	logger.Warn(accountAs)
 	if err != nil {
 		global.LOGGER.Error("Fatal:%s", zap.Error(err))
 		return nil

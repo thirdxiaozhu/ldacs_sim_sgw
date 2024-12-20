@@ -2,9 +2,10 @@ package handle
 
 import "C"
 import (
+	"bytes"
 	"crypto/rand"
-	"fmt"
 	gmssl "github.com/thirdxiaozhu/GmSSL-Go"
+	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/config"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
@@ -160,6 +161,39 @@ func GenerateRandomBytes(size uint) []byte {
 	}
 }
 
+func CalcHMac(handler unsafe.Pointer, data []byte, limit uint32) (res []byte) {
+	res, err := util.CalcHMAC(handler, data, limit)
+	if err != nil {
+		global.LOGGER.Error("Unable calc hmac", zap.Error(err))
+		return nil
+	}
+	return
+}
+
+func VerifyHmac(handler unsafe.Pointer, data, toVerify []byte, limit uint32) bool {
+	hmac := CalcHMac(handler, data, limit)
+
+	return bytes.Equal(hmac, toVerify)
+}
+
+func GetKeyHandle(state, ktype string, owner1, owner2 uint32) (unsafe.Pointer, error) {
+	dbName := global.CONFIG.Sqlite.Dsn()
+	tableName := model.KeyEntity{}.TableName()
+
+	km, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: state,
+		KeyType:  ktype,
+		Owner1:   util.UAformat(owner1),
+		Owner2:   util.UAformat(owner2),
+	})
+
+	handle, err := util.GetKeyHandle(dbName, tableName, km.KeyID)
+	if err != nil {
+		return nil, err
+	}
+	return handle, nil
+}
+
 func GenerateSharedKey(unit *LdacsUnit) (N2 []byte, err error) {
 	st := unit.State
 	N2 = GenerateRandomBytes(16)
@@ -177,6 +211,7 @@ func GenerateSharedKey(unit *LdacsUnit) (N2 []byte, err error) {
 	random, err := util.MarshalLdacsPkt(SharedInfo)
 
 	unit.HandlerAsSgw, unit.KeyAsGs, err = SGWDeriveKey(util.UAformat(10010), util.UAformat(10086), util.UAformat(10000), uint32(SharedInfo.KeyLen.GetKeyLen()), random)
+
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +238,6 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("")
 
 	mkeyAsSgw, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
 		KeyState: "ACTIVE",

@@ -8,50 +8,7 @@
 -->
           <div class="gva-top-card-left-title">欢迎进入地面安全网关管理系统</div>
           <div class="gva-top-card-left-dot">{{ weatherInfo }}</div>
-          <el-row class="my-8 w-[500px]">
-            <el-col
-              :span="8"
-              :xs="24"
-              :sm="8"
-            >
-              <div class="flex items-center">
-                <el-icon class="dashboard-icon">
-                  <sort />
-                </el-icon>
-<!--
-                今日流量 (1231231)
--->
-              </div>
-            </el-col>
-            <el-col
-              :span="8"
-              :xs="24"
-              :sm="8"
-            >
-              <div class="flex items-center">
-                <el-icon class="dashboard-icon">
-                  <avatar />
-                </el-icon>
-<!--
-                总用户数 (24001)
--->
-              </div>
-            </el-col>
-            <el-col
-              :span="8"
-              :xs="24"
-              :sm="8"
-            >
-              <div class="flex items-center">
-                <el-icon class="dashboard-icon">
-                  <comment />
-                </el-icon>
-<!--
-                好评率 (99%)
--->
-              </div>
-            </el-col>
-          </el-row>
+          
           <div>
             <div class="gva-top-card-left-item">
 <!--
@@ -109,9 +66,28 @@
             </div>
           </el-col>
         </el-row>
+        <el-row :gutter="20">
+          <el-col
+            v-for="(card, key) in toolCards2"
+            :key="key"
+            :span="4"
+            :xs="8"
+            class="quick-entrance-items"
+            @click="toTarget(card.name)"
+          >
+            <div class="quick-entrance-item">
+              <div class="quick-entrance-item-icon" :style="{ backgroundColor: card.bg }">
+                <el-icon>
+                  <component :is="card.icon" :style="{ color: card.color }" />
+                </el-icon>
+              </div>
+              <p>{{ card.label }}</p>
+            </div>
+          </el-col>
+        </el-row>
       </div>
     </div>
-    <div class="gva-card-box">
+    <!-- <div class="gva-card-box">
       <div class="gva-card">
         <div class="gva-card-title">数据统计</div>
         <div class="p-4">
@@ -131,7 +107,7 @@
           </el-row>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -149,50 +125,76 @@ defineOptions({
 const weatherInfo = useWeatherInfo()
 
 const toolCards = ref([
-  {
+{
     label: '用户管理',
-    icon: 'monitor',
+    icon: 'user',
     name: 'user',
     color: '#ff9c6e',
     bg: 'rgba(255, 156, 110,.3)'
   },
   {
-    label: '角色管理',
-    icon: 'setting',
-    name: 'authority',
+    label: '账户管理',
+    icon: 'promotion',
+    name: 'account',
     color: '#69c0ff',
-    bg: 'rgba(105, 192, 255,.3)'
+    bg: 'rgba(105, 120, 255,.3)'
   },
   {
-    label: '菜单管理',
-    icon: 'menu',
-    name: 'menu',
+    label: '权限管理',
+    icon: 'setting',
+    name: 'authz-plane',
     color: '#b37feb',
     bg: 'rgba(179, 127, 235,.3)'
   },
   {
-    label: '代码生成器',
-    icon: 'cpu',
-    name: 'autoCode',
+    label: '审计管理',
+    icon: 'document',
+    name: 'audit-as-rawmsg',
     color: '#ffd666',
     bg: 'rgba(255, 214, 102,.3)'
   },
   {
-    label: '表单生成器',
-    icon: 'document-checked',
-    name: 'formCreate',
+    label: '认证管理',
+    icon: 'check',
+    name: 'authc-state',
     color: '#ff85c0',
     bg: 'rgba(255, 133, 192,.3)'
   },
   {
-    label: '关于我们',
-    icon: 'user',
-    name: 'about',
+    label: '密钥管理',
+    icon: 'key',
+    name: 'key_management',
     color: '#5cdbd3',
     bg: 'rgba(92, 219, 211,.3)'
   }
 ])
 
+
+const toolCards2 = ref([
+  
+  {
+    label: '服务器状态',
+    icon: 'cloudy',
+    name: 'state',
+    color: '#69c0ff',
+    bg: 'rgba(50, 150, 255,.3)'
+  },
+  // {
+  //   label: '菜单管理',
+  //   icon: 'expand',
+  //   name: 'menu',
+  //   color: '#5cdbd3',
+  //   bg: 'rgba(15, 593, 418,.3)'
+  // },
+  {
+    label: '角色管理',
+    icon: 'stamp',
+    name: 'authority',
+    color: '#69c0ff',
+    bg: 'rgba(100, 200, 255,.3)'
+  }
+  
+])
 const router = useRouter()
 
 const toTarget = (name) => {

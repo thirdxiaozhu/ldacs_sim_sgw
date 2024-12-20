@@ -81,7 +81,7 @@ func TestTag(t *testing.T) {
 	rqst2 := AucRqst{
 		N1: make([]byte, 3),
 	}
-	err = util.UnmarshalLdacsPkt(bytes, &rqst2)
+	_, err = util.UnmarshalLdacsPkt(bytes, &rqst2)
 	if err != nil {
 		logger.Error(err)
 	}

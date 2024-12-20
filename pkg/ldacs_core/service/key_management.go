@@ -113,7 +113,7 @@ func (kmService *KeyEntityService) GetKeyEntityByContent(info ldacs_sgw_forwardR
 		db = db.Where("key_state = ?", info.KeyState)
 	}
 
-	err = db.First(&km).Error
+	err = db.Order("creatime desc").First(&km).Error
 	return
 }
 

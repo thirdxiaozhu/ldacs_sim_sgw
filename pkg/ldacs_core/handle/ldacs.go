@@ -3,9 +3,6 @@ package handle
 import (
 	"context"
 	"encoding/base64"
-	"github.com/hdt3213/godis/lib/logger"
-	"github.com/looplab/fsm"
-	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
@@ -13,6 +10,9 @@ import (
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
 	"unsafe"
+
+	"github.com/looplab/fsm"
+	"go.uber.org/zap"
 )
 
 const GSNF_HEAD_LEN = 2
@@ -22,22 +22,30 @@ type LdacsHandler struct {
 }
 
 type LdacsUnit struct {
-	AsSac        uint16 `json:"as_sac"`
-	GsSac        uint16 `json:"gs_sac"`
-	ConnID       uint32
-	State        *model.State
-	AuthFsm      *fsm.FSM
-	HandlerAsSgw unsafe.Pointer
-	KeyAsGs      []byte
+	AsSac          uint16 `json:"as_sac"`
+	GsSac          uint16 `json:"gs_sac"`
+	ConnID         uint32
+	State          *model.State
+	AuthFsm        *fsm.FSM
+	HandlerRootKey unsafe.Pointer
+	HandlerAsSgw   unsafe.Pointer
+	KeyAsGs        []byte
 }
 
 func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
+	var err error
 	unit := &LdacsUnit{
 		ConnID:  connId,
 		AsSac:   asSac,
 		GsSac:   0xABD,
 		AuthFsm: InitNewAuthFsm(),
 		State:   service.InitState(asSac, 10010),
+	}
+
+	unit.HandlerRootKey, err = GetKeyHandle("ACTIVE", "ROOT_KEY", 10010, 10000)
+	if err != nil {
+		global.LOGGER.Error("错误！", zap.Error(err))
+		return nil
 	}
 
 	//初始化为G0
@@ -51,24 +59,28 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 }
 
 func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
-
 	ctx := context.Background()
 	st := u.State
-
 	ctx = context.WithValue(ctx, "unit", u)
-	logger.Warn(u.AuthFsm.Current())
-	logger.Warn("!!!!!!!!!!!!!!!!!!!!!", gsnfMsg[0])
+	//logger.Warn(u.AuthFsm.Current())
+	//for i := range gsnfMsg {
+	//	fmt.Printf("%02x ", gsnfMsg[i])
+	//}
+	//fmt.Println()
 
 	switch global.STYPE(gsnfMsg[0]) {
 	case global.AUC_RQST:
 		var aucRqst AucRqst
 
-		err := util.UnmarshalLdacsPkt(gsnfMsg, &aucRqst)
+		tail, err := util.UnmarshalLdacsPkt(gsnfMsg, &aucRqst)
 		if err != nil {
 			return
 		}
 
-		global.LOGGER.Info("AucRqst Packet", zap.Any("11", aucRqst))
+		isSuccess := VerifyHmac(u.HandlerRootKey, gsnfMsg[:tail], gsnfMsg[tail:], 32)
+		if isSuccess == false {
+			return
+		}
 
 		st.Ver = uint8(aucRqst.Ver)
 		st.PID = uint8(aucRqst.PID)
@@ -79,8 +91,6 @@ func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
 		if err := u.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
 			return
 		}
-
-		logger.Warn(u.AuthFsm.Current())
 
 	case global.AUC_RESP:
 	case global.AUC_KEY_EXEC:
@@ -112,6 +122,11 @@ func (u *LdacsUnit) SendPkt(v any) {
 	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
 	sdu = append(sdu, hmac...)
 
+	//for i := range hmac {
+	//	fmt.Printf("%02x ", hmac[i])
+	//}
+	//fmt.Println()
+
 	gsnfMsg := GsnfPkt{
 		GType: 0,
 		ASSac: u.AsSac,
@@ -135,7 +150,6 @@ func (u *LdacsUnit) SendPkt(v any) {
 
 }
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
-	global.LOGGER.Info(string(msg), zap.Uint32("ID ", connId))
 	gsnfPkt := ParseGsnfPkt(msg)
 
 	unit, _ := l.ldacsUnits.LoadOrStore(gsnfPkt.ASSac, InitLdacsUnit(connId, gsnfPkt.ASSac))

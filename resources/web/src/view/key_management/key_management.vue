@@ -168,6 +168,7 @@
           prop="key_state"
           width="120"
         />
+    
         <el-table-column
           align="left"
           label="更新间隔"
@@ -355,7 +356,77 @@
     </el-dialog>
   </div>
 </template>
+<script>
+  export default {
+    name: 'Key_management',
+    data(){
+    return{
+            options:[{
+                value:1,
+                label:1
+            },
+            {
+                value:7,
+                label:7 
+            },
+            {
+                value:30,
+                label:30 
+            },
+            {
+                value:180,
+                label:180 
+            },
+            {
+                value:365,
+                label:365
+            }],
+            options5:[{
+                value:'AS1',
+                label:'AS1'
+            },{
+                value:'AS2',
+                label:'AS2'
+            },{
+                value:'Berry',
+                label:'Berry'
+            }],
+            options3: [{
+               value: 16,
+               label: 16
+             }, {
+              value: 32,
+              label: 32
+            }],
+           options4: [{
+            value: 'ROOT_KEY',
+            label: 'ROOT_KEY'
+            }],
+        options6: [{
+               value: 'ACTIVE',
+               label: 'ACTIVE'
+             },{
+               value: 'PRE_ACTIVATION',
+               label: 'PRE_ACTIVATION'
+             }],
+            
+             options7:[{
+                value:'GS1',
+                label:'GS1'
+            },
+            {
+                value:'GSt',
+                label:'GSt' 
+            },{
+                value:'SGW',
+                label:'SGW' 
+            }],
+            value: ''
+        }
+    },
+};
 
+</script>
 <script setup>
 import {
   createKeyEntity,

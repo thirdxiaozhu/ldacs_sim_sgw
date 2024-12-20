@@ -242,6 +242,7 @@ func (se structEncoder) decode(e *encodePkt, v reflect.Value) error {
 				e.currByte++
 			}
 			fv.SetBytes(e.bytes[e.currByte : e.currByte+sz])
+			e.currByte += sz
 		case "dbytes":
 			sz := uint64(len(fv.Bytes()))
 			if sz == 0 {
@@ -252,6 +253,7 @@ func (se structEncoder) decode(e *encodePkt, v reflect.Value) error {
 				e.currByte++
 			}
 			fv.SetBytes(e.bytes[e.currByte : e.currByte+sz])
+			e.currByte += sz
 		default:
 
 		}
@@ -292,13 +294,13 @@ func MarshalLdacsPkt(v any) ([]byte, error) {
 	return e.bytes[:e.currByte], nil
 }
 
-func UnmarshalLdacsPkt(data []byte, v any) error {
+func UnmarshalLdacsPkt(data []byte, v any) (uint64, error) {
 	e := encodePkt{
 		bytes:    data,
 		currByte: 0,
 	}
 
-	return e.unmarshal(v)
+	return e.currByte, e.unmarshal(v)
 }
 
 func Atoi(in string) (out int) {

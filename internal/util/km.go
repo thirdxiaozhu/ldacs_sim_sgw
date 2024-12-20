@@ -235,7 +235,6 @@ func DeriveKey(dbName, tableName, id, gsName string, keyLen uint32, rand []byte)
 		(*C.uint8_t)(unsafe.Pointer(cRand)),
 		C.uint32_t(len(rand)),
 	)
-	fmt.Println()
 
 	// 检查 C 函数的返回结果
 	if result != C.LD_KM_OK { // 确保与实际错误码匹配
@@ -497,13 +496,6 @@ func Encrypt(handler unsafe.Pointer) {
 		(*C.uint8_t)(unsafe.Pointer(&res[0])),
 		&cResLen)
 
-	for i := range res {
-		if i > 0 {
-			fmt.Print(" ")
-		}
-		fmt.Printf("%02x", res[i])
-	}
-	fmt.Println()
 	if errCode != 0 {
 		fmt.Printf("GetKeyHandle failed with error code %d", errCode)
 	}
