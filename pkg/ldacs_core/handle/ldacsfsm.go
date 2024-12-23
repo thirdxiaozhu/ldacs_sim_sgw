@@ -8,20 +8,16 @@ import (
 	"ldacs_sim_sgw/internal/global"
 )
 
-type SecStateFsm struct {
+type LdacsStateFsm struct {
 	Name string
-	FSM  *fsm.FSM
+	Fsm  *fsm.FSM
 }
 
-var (
-	SecStates SecStateFsm
-)
-
-func (s *SecStateFsm) beforeAuthStateG0(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) beforeAuthStateG0(ctx context.Context, e *fsm.Event) error {
 	return nil
 }
 
-func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
@@ -46,10 +42,10 @@ func (s *SecStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) error
 
 	return nil
 }
-func (s *SecStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
 	return nil
 }
-func (s *SecStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 
 	var authSt global.AuthStateKind
@@ -73,7 +69,7 @@ func (s *SecStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
 	return nil
 }
 
-func (s *SecStateFsm) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) error {
 
 	return nil
 }
@@ -86,17 +82,20 @@ func getFSMEvents(dst string, src ...string) *fsm.EventDesc {
 	}
 }
 
-func (s *SecStateFsm) handleErrEvent(ctx context.Context, err error) {
+func (s *LdacsStateFsm) handleErrEvent(ctx context.Context, err error) {
 	if err != nil {
-		err := s.FSM.Event(ctx, global.AUTH_STAGE_UNDEFINED.GetString())
+		err := s.Fsm.Event(ctx, global.AUTH_STAGE_UNDEFINED.GetString())
 		if err != nil {
 			return
 		}
 	}
 }
 
-func InitNewAuthFsm() *fsm.FSM {
-	return fsm.NewFSM(global.AUTH_STAGE_UNDEFINED.GetString(),
+func InitNewAuthFsm() *LdacsStateFsm {
+	LdacsFsm := &LdacsStateFsm{
+		Name: "LdacsStateFsm",
+	}
+	LdacsFsm.Fsm = fsm.NewFSM(global.AUTH_STAGE_UNDEFINED.GetString(),
 		fsm.Events{
 			*getFSMEvents(global.AUTH_STAGE_G0.GetString(), global.AUTH_STAGE_UNDEFINED.GetString()),
 			*getFSMEvents(global.AUTH_STAGE_G1.GetString(), global.AUTH_STAGE_G0.GetString()),
@@ -107,20 +106,21 @@ func InitNewAuthFsm() *fsm.FSM {
 		},
 		fsm.Callbacks{
 			"before_" + global.AUTH_STAGE_G0.GetString(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG0(ctx, e))
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG0(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_G1.GetString(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG1(ctx, e))
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG1(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_G2.GetString(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateG2(ctx, e))
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG2(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_UNDEFINED.GetString(): func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.beforeAuthStateUndef(ctx, e))
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateUndef(ctx, e))
 			},
 			"after_event": func(ctx context.Context, e *fsm.Event) {
-				SecStates.handleErrEvent(ctx, SecStates.afterEvent(ctx, e))
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.afterEvent(ctx, e))
 			},
 		},
 	)
+	return LdacsFsm
 }

@@ -12,7 +12,6 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/looplab/fsm"
 	"go.uber.org/zap"
 )
 
@@ -27,7 +26,7 @@ type LdacsUnit struct {
 	GsSac          uint16 `json:"gs_sac"`
 	ConnID         uint32
 	State          *model.State
-	AuthFsm        *fsm.FSM
+	AuthFsm        *LdacsStateFsm
 	HandlerRootKey unsafe.Pointer
 	HandlerAsSgw   unsafe.Pointer
 	KeyAsGs        []byte
@@ -52,7 +51,7 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 	//初始化为G0
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "unit", unit)
-	if err := unit.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
+	if err := unit.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
@@ -90,13 +89,12 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.AuthId = uint8(aucRqst.AuthID)
 		st.EncId = uint8(aucRqst.EncID)
 
-		if err := u.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
+		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
 			return
 		}
 
 	case global.AUC_KEY_EXEC:
 		var aucKeyExec AucKeyExec
-		logger.Warn("++++++++++++++==================")
 
 		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &aucKeyExec)
 		if err != nil {
@@ -116,9 +114,10 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.AuthId = uint8(aucKeyExec.AuthID)
 		st.EncId = uint8(aucKeyExec.EncID)
 
-		if err := u.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
+		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
+		logger.Warn("++++++++++++++==================", u.AuthFsm.Fsm.Current())
 	}
 
 }
@@ -151,19 +150,27 @@ func (u *LdacsUnit) SendPkt(v any) {
 	//}
 	//fmt.Println()
 
-	gsnfMsg := GsnfPkt{
+	//gsnfPkt := GsnfPkt{
+	//	GType: 0,
+	//	ASSac: u.AsSac,
+	//	Sdu:   sdu,
+	//}
+
+	//gsnfPdu := AssembleGsnfPkt(&GsnfPkt{
+	//GType: 0,
+	//	ASSac: u.AsSac,
+	//		Sdu:   sdu,
+	//})
+	//if gsnfPdu == nil {
+	//	global.LOGGER.Error("Failed Assemble", zap.Error(err))
+	//	return
+	//}
+
+	if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
 		GType: 0,
 		ASSac: u.AsSac,
 		Sdu:   sdu,
-	}
-
-	gsnfPdu, err := util.MarshalLdacsPkt(gsnfMsg)
-	if err != nil {
-		global.LOGGER.Error("Failed Send", zap.Error(err))
-		return
-	}
-
-	if err = backward_module.SendPkt(gsnfPdu, u.ConnID); err != nil {
+	}), u.ConnID); err != nil {
 		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
@@ -176,7 +183,11 @@ func (u *LdacsUnit) SendPkt(v any) {
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
 	gsnfPkt := ParseGsnfPkt(msg)
 
-	unit, _ := l.ldacsUnits.LoadOrStore(gsnfPkt.ASSac, InitLdacsUnit(connId, gsnfPkt.ASSac))
+	unit, ok := l.ldacsUnits.Load(gsnfPkt.ASSac)
+	if ok == false {
+		unit = InitLdacsUnit(connId, gsnfPkt.ASSac)
+		l.ldacsUnits.Store(gsnfPkt.ASSac, unit)
+	}
 
 	ldacsUnitPtr := unit.(*LdacsUnit)
 	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)

@@ -1,6 +1,10 @@
 package handle
 
-import "ldacs_sim_sgw/internal/util"
+import (
+	"go.uber.org/zap"
+	"ldacs_sim_sgw/internal/global"
+	"ldacs_sim_sgw/internal/util"
+)
 
 type GsnfPkt struct {
 	GType uint8  `ldacs:"name:G_TYPE; size:4; type:set"`
@@ -17,4 +21,14 @@ func ParseGsnfPkt(msg []byte) *GsnfPkt {
 		return nil
 	}
 	return &gsnfMsg
+}
+
+func AssembleGsnfPkt(pkt *GsnfPkt) []byte {
+	gsnfPdu, err := util.MarshalLdacsPkt(pkt)
+	if err != nil {
+		global.LOGGER.Error("Failed Assemble Pkt", zap.Error(err))
+		return nil
+	}
+
+	return gsnfPdu
 }
