@@ -128,6 +128,18 @@ type AucResp struct {
 	N2     []byte        `ldacs:"name:N2; bytes_size: 16; type:fbytes"`
 }
 
+type AucKeyExec struct {
+	Stype  global.STYPE  `ldacs:"name:S_TYPE; size:8; type:enum"`
+	Ver    uint8         `ldacs:"name:VER; size:3; type:set"`
+	PID    global.PID    `ldacs:"name:PID; size:2; type:enum"`
+	ASSac  uint16        `ldacs:"name:as_sac; size:12; type:set"`
+	GSSac  uint16        `ldacs:"name:gs_sac; size:12; type:set"`
+	MacLen global.MacLen `ldacs:"name:maclen; size:4; type:enum"`
+	AuthID global.AuthID `ldacs:"name:authid; size:4; type:enum"`
+	EncID  global.EncID  `ldacs:"name:encid; size:4; type:enum"`
+	N3     []byte        `ldacs:"name:N3; bytes_size: 16; type:fbytes"`
+}
+
 var (
 	distro string
 )

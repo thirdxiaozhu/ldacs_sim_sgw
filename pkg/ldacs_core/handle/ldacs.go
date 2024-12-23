@@ -3,6 +3,7 @@ package handle
 import (
 	"context"
 	"encoding/base64"
+	"github.com/hdt3213/godis/lib/logger"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
@@ -58,27 +59,28 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 	return unit
 }
 
-func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
+func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 	ctx := context.Background()
 	st := u.State
 	ctx = context.WithValue(ctx, "unit", u)
 	//logger.Warn(u.AuthFsm.Current())
-	//for i := range gsnfMsg {
-	//	fmt.Printf("%02x ", gsnfMsg[i])
+	//for i := range gsnfSdu {
+	//	fmt.Printf("%02x ", gsnfSdu[i])
 	//}
 	//fmt.Println()
 
-	switch global.STYPE(gsnfMsg[0]) {
+	switch global.STYPE(gsnfSdu[0]) {
 	case global.AUC_RQST:
 		var aucRqst AucRqst
 
-		tail, err := util.UnmarshalLdacsPkt(gsnfMsg, &aucRqst)
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &aucRqst)
 		if err != nil {
 			return
 		}
 
-		isSuccess := VerifyHmac(u.HandlerRootKey, gsnfMsg[:tail], gsnfMsg[tail:], 32)
+		isSuccess := VerifyHmac(u.HandlerRootKey, gsnfSdu[:tail], gsnfSdu[tail:], 32)
 		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
 			return
 		}
 
@@ -92,9 +94,31 @@ func (u *LdacsUnit) HandleMsg(gsnfMsg []byte) {
 			return
 		}
 
-	case global.AUC_RESP:
 	case global.AUC_KEY_EXEC:
+		var aucKeyExec AucKeyExec
+		logger.Warn("++++++++++++++==================")
 
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &aucKeyExec)
+		if err != nil {
+			global.LOGGER.Error("Unmarshel ldacs error", zap.Error(err))
+			return
+		}
+
+		isSuccess := VerifyHmac(u.HandlerAsSgw, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
+			return
+		}
+
+		st.Ver = uint8(aucKeyExec.Ver)
+		st.PID = uint8(aucKeyExec.PID)
+		st.MacLen = uint8(aucKeyExec.MacLen)
+		st.AuthId = uint8(aucKeyExec.AuthID)
+		st.EncId = uint8(aucKeyExec.EncID)
+
+		if err := u.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
+			return
+		}
 	}
 
 }
@@ -156,6 +180,10 @@ func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
 
 	ldacsUnitPtr := unit.(*LdacsUnit)
 	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
+
+	if err := service.AuditAsRawSer.NewAuditRaw(gsnfPkt.ASSac, int(global.OriRl), base64.StdEncoding.EncodeToString(gsnfPkt.Sdu)); err != nil {
+		return
+	}
 }
 
 func (l *LdacsHandler) Close(id uint32) {
