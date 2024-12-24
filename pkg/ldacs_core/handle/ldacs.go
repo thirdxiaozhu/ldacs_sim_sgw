@@ -2,167 +2,186 @@ package handle
 
 import (
 	"context"
-	"encoding/json"
-	"github.com/looplab/fsm"
-	"go.uber.org/zap"
+	"encoding/base64"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	"ldacs_sim_sgw/pkg/ldacs_core/service"
 	"sync"
+	"unsafe"
+
+	"go.uber.org/zap"
 )
 
-type LdacsUnit struct {
-	AsSac uint64          `json:"as_sac"`
-	UaGs  uint64          `json:"ua_gs"`
-	UaGsc uint64          `json:"ua_gsc"`
-	Head  SecHead         `json:"head"`
-	Data  json.RawMessage `json:"data"`
-
-	pldA1     SecPldA1
-	pldKdf    SecPldKdf
-	pldKdfCon SecPldKdfCon
-}
-
-type LdacsStateConnNode struct {
-	State   *model.State
-	SecHead *SecHead
-	AuthFsm fsm.FSM
-	Conn    *backward_module.GscConn
-}
-
-func newUnitNode(unit *LdacsUnit, conn *backward_module.GscConn) *LdacsStateConnNode {
-	ctx := context.Background()
-
-	st, err := service.StateSer.FindStateByAsSac(unit.AsSac)
-	if err != nil {
-		global.LOGGER.Error("错误！", zap.Error(err))
-		return nil
-	}
-
-	st.AuthState = global.AUTH_STAGE_G0
-	st.GsSac = unit.UaGs
-	st.GscSac = unit.UaGsc
-	st.SharedKey = util.GetShardKey(unit.AsSac)
-
-	unitnodeP := &LdacsStateConnNode{
-		State:   &st,
-		AuthFsm: *InitNewAuthFsm(),
-		Conn:    conn,
-	}
-
-	ctx = context.WithValue(ctx, "node", unitnodeP)
-	if err = unitnodeP.AuthFsm.Event(ctx, global.AUTH_STAGE_G0.String()); err != nil {
-		global.LOGGER.Error("错误！", zap.Error(err))
-		return nil
-	}
-
-	return unitnodeP
-}
-
-func (node *LdacsStateConnNode) ToSendPkt(unit *LdacsUnit) {
-	pktJ, err := json.Marshal(unit)
-	if err != nil {
-		return
-	}
-
-	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriFl), string(pktJ)); err != nil {
-		return
-	}
-
-	node.Conn.SendPkt(pktJ)
-}
+const GSNF_HEAD_LEN = 2
 
 type LdacsHandler struct {
-	ldacsConn sync.Map //as_sac <-> ld_u_c_node  map
+	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
 }
 
-func (l *LdacsHandler) ServeGSC(msg []byte, conn *backward_module.GscConn) {
-	var unit LdacsUnit
-	err := json.Unmarshal(msg, &unit)
+type LdacsUnit struct {
+	AsSac          uint16 `json:"as_sac"`
+	GsSac          uint16 `json:"gs_sac"`
+	ConnID         uint32
+	State          *model.State
+	AuthFsm        *LdacsStateFsm
+	HandlerRootKey unsafe.Pointer
+	HandlerAsSgw   unsafe.Pointer
+	KeyAsGs        []byte
+}
+
+func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
+	var err error
+	unit := &LdacsUnit{
+		ConnID:  connId,
+		AsSac:   asSac,
+		GsSac:   0xABD,
+		AuthFsm: InitNewAuthFsm(),
+		State:   service.InitState(asSac, 10010),
+	}
+
+	unit.HandlerRootKey, err = GetKeyHandle("ACTIVE", "ROOT_KEY", 10010, 10000)
 	if err != nil {
-		return
-	}
-
-	/* add a new audit raw msg */
-	if err := service.AuditAsRawSer.NewAuditRaw(unit.AsSac, int(global.OriRl), string(msg)); err != nil {
-		return
-	}
-
-	v, _ := l.ldacsConn.Load(unit.AsSac)
-	if v == nil {
-		v = newUnitNode(&unit, conn)
-		l.ldacsConn.Store(unit.AsSac, v)
-	}
-
-	/* Process new msg */
-	ProcessInputMsg(&unit, v.(*LdacsStateConnNode))
-
-	/* Update new service into database */
-	if err = service.StateSer.UpdateState(v.(*LdacsStateConnNode).State); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
+		return nil
 	}
-}
 
-func (l *LdacsHandler) Close(conn *backward_module.GscConn) {
-	l.ldacsConn.Range(func(key, value interface{}) bool {
-		asSac := key
-		node := value.(*LdacsStateConnNode)
-		if node.Conn == conn {
-			l.ldacsConn.Delete(asSac)
-		}
-		return true
-	})
-}
-
-func UpdateState() {
-
-}
-
-func ProcessInputMsg(unit *LdacsUnit, node *LdacsStateConnNode) {
+	//初始化为G0
 	ctx := context.Background()
-	st := node.State
-	//st.SecHead = unit.Head
-	node.SecHead = &unit.Head
+	ctx = context.WithValue(ctx, "unit", unit)
+	if err := unit.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
+		global.LOGGER.Error("错误！", zap.Error(err))
+		return nil
+	}
+	return unit
+}
 
-	ctx = context.WithValue(ctx, "node", node)
-	switch node.SecHead.Cmd {
-	case uint8(REGIONAL_ACCESS_REQ):
-		if err := json.Unmarshal(unit.Data, &unit.pldA1); err != nil {
+func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
+	ctx := context.Background()
+	st := u.State
+	ctx = context.WithValue(ctx, "unit", u)
+	//logger.Warn(u.AuthFsm.Current())
+	//for i := range gsnfSdu {
+	//	fmt.Printf("%02x ", gsnfSdu[i])
+	//}
+	//fmt.Println()
+
+	switch global.STYPE(gsnfSdu[0]) {
+	case global.AUC_RQST:
+		var aucRqst AucRqst
+
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &aucRqst)
+		if err != nil {
 			return
 		}
 
-		st.MacLen = unit.pldA1.MacLen
-		st.AuthId = unit.pldA1.AuthID
-		st.EncId = unit.pldA1.EncID
-
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G1.String()); err != nil {
+		isSuccess := VerifyHmac(u.HandlerRootKey, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
 			return
 		}
 
-	case uint8(REGIONAL_ACCESS_CONFIRM):
-		if err := json.Unmarshal(unit.Data, &unit.pldKdfCon); err != nil {
+		st.Ver = uint8(aucRqst.Ver)
+		st.PID = uint8(aucRqst.PID)
+		st.MacLen = uint8(aucRqst.MacLen)
+		st.AuthId = uint8(aucRqst.AuthID)
+		st.EncId = uint8(aucRqst.EncID)
+
+		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
 			return
 		}
 
-		st.IsSuccess = unit.pldKdfCon.IsOK
+	case global.AUC_KEY_EXEC:
+		var aucKeyExec AucKeyExec
 
-		if err := node.AuthFsm.Event(ctx, global.AUTH_STAGE_G2.String()); err != nil {
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &aucKeyExec)
+		if err != nil {
+			global.LOGGER.Error("Unmarshel ldacs error", zap.Error(err))
+			return
+		}
+
+		isSuccess := VerifyHmac(u.HandlerAsSgw, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
+			return
+		}
+
+		st.Ver = uint8(aucKeyExec.Ver)
+		st.PID = uint8(aucKeyExec.PID)
+		st.MacLen = uint8(aucKeyExec.MacLen)
+		st.AuthId = uint8(aucKeyExec.AuthID)
+		st.EncId = uint8(aucKeyExec.EncID)
+
+		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
 	}
+
 }
 
-func TransState(node *LdacsStateConnNode, newState global.AuthStateKind) error {
-	node.State.AuthState = newState
+func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
+	u.State.AuthState = newState
 	err := service.AuthcStateSer.NewAuthcStateTrans(
-		node.State.AsSac,
-		node.State.GsSac,
-		node.State.GscSac,
+		u.State.AsSac,
+		u.State.GsSac,
+		u.State.GscSac,
 		newState)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func (u *LdacsUnit) SendPkt(v any) {
+	sdu, err := util.MarshalLdacsPkt(v)
+	if err != nil {
+		global.LOGGER.Error("Failed Send", zap.Error(err))
+		return
+	}
+
+	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
+	sdu = append(sdu, hmac...)
+
+	if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
+		GType: 0,
+		ASSac: u.AsSac,
+		Sdu:   sdu,
+	}), u.ConnID); err != nil {
+		global.LOGGER.Error("Failed Send", zap.Error(err))
+		return
+	}
+
+	if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), base64.StdEncoding.EncodeToString(sdu)); err != nil {
+		return
+	}
+
+}
+func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
+	gsnfPkt := ParseGsnfPkt(msg)
+
+	unit, ok := l.ldacsUnits.Load(gsnfPkt.ASSac)
+	if ok == false {
+		unit = InitLdacsUnit(connId, gsnfPkt.ASSac)
+		l.ldacsUnits.Store(gsnfPkt.ASSac, unit)
+	}
+
+	ldacsUnitPtr := unit.(*LdacsUnit)
+	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
+
+	if err := service.AuditAsRawSer.NewAuditRaw(gsnfPkt.ASSac, int(global.OriRl), base64.StdEncoding.EncodeToString(gsnfPkt.Sdu)); err != nil {
+		return
+	}
+}
+
+func (l *LdacsHandler) Close(id uint32) {
+
+	l.ldacsUnits.Range(func(key, value interface{}) bool {
+		asSac := key
+		node := value.(*LdacsUnit)
+		if node.ConnID == id {
+			l.ldacsUnits.Delete(asSac)
+		}
+		return true
+	})
 }

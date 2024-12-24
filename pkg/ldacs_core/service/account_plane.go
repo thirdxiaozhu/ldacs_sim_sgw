@@ -1,10 +1,11 @@
 package service
 
 import (
+	"github.com/hdt3213/godis/lib/logger"
 	"ldacs_sim_sgw/internal/global"
-	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/ldacs_core/model"
 	ldacs_sgw_forwardReq "ldacs_sim_sgw/pkg/ldacs_core/model/request"
+	//"ldacs_sim_sgw/internal/util"
 )
 
 type AccountPlaneService struct {
@@ -13,9 +14,13 @@ type AccountPlaneService struct {
 // CreateAccountPlane 创建飞机账户管理记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountplaneService *AccountPlaneService) CreateAccountPlane(accountplane *model.AccountPlane) (err error) {
-	accountplane.UA = util.GenerateRandomInt(global.UA_LEN)
+	//accountplane.UA = util.GenerateRandomInt(global.UA_LEN)
+	logger.Warn(accountplane)
 	/*TODO: 应有唯一性检查 */
 	err = global.DB.Create(accountplane).Error
+
+	//util.GenerateRootKey(accountplane.UA, global.CONFIG.System.SgwUA, )
+
 	return err
 }
 

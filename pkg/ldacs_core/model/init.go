@@ -7,8 +7,7 @@ import (
 )
 
 func RegisterTables() {
-	db := global.DB
-	err := db.AutoMigrate(
+	err := global.DB.AutoMigrate(
 		AccountPlane{},
 		AccountFlight{},
 		AccountAuthz{},
@@ -19,6 +18,16 @@ func RegisterTables() {
 		AuthzPlane{},
 		AuthcState{},
 		State{},
+		//KeyEntity{},
+	)
+
+	if err != nil {
+		global.LOGGER.Error("register table failed", zap.Error(err))
+		os.Exit(0)
+	}
+
+	err = global.KeyDB.AutoMigrate(
+		KeyEntity{},
 	)
 	if err != nil {
 		global.LOGGER.Error("register table failed", zap.Error(err))

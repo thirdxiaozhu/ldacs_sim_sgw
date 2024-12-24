@@ -21,3 +21,7 @@ func Gorm() *gorm.DB {
 		return GormMysql()
 	}
 }
+
+func KeyGorm() *gorm.DB {
+	return GormSqlite()
+}

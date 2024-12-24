@@ -43,7 +43,6 @@ func (accountAsService *AccountAsService) DeleteAccountAs(id string, userID uint
 // DeleteAccountAs 弃用飞机站账户记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (accountAsService *AccountAsService) DeprecateAccountAs(id string, userID uint) (err error) {
-	fmt.Println()
 	err = global.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Model(&model.AccountAs{}).Where("id = ?", id).Update("deprecated_by", userID).Error; err != nil {
 			return err
@@ -86,9 +85,17 @@ func (accountAsService *AccountAsService) GetAccountAs(id string) (accountAs mod
 	return
 }
 
-func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint64) (accountAs model.AccountAs, err error) {
+func (accountAsService *AccountAsService) GetAccountAsBySac(sac uint16) (accountAs model.AccountAs, err error) {
 	//err = global.DB.Model(&model.AccountAs{}).Where("as_sac = ?", sac).Unscoped().Count(&count).Error
 	err = global.DB.Preload("State").Where(fmt.Sprintf("`%v`.`as_sac` = ?", model.State{}.TableNameU()), sac).Joins("State").First(&accountAs).Error
+	return
+}
+
+func (accountAsService *AccountAsService) GetAvialAccountAsByUA(ua uint32) (accountAs model.AccountAs, err error) {
+	//err = global.DB.Preload("Planeid").Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Where(fmt.Sprintf("`%v`.`deprecated_time` IS NULL", model.AccountAs{}.TableName())).Joins("Planeid").Joins("State").First(&accountAs).Error
+	tx := global.DB.Preload("Planeid")
+	err = tx.Where(fmt.Sprintf("`Planeid`.`ua` = ?"), ua).Where(fmt.Sprintf("`%v`.`deprecated_time` IS NULL", model.AccountAs{}.TableName())).Joins("Planeid").Joins("State").First(&accountAs).Error
+
 	return
 }
 

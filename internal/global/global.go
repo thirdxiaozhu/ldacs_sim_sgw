@@ -10,6 +10,7 @@ import (
 
 var (
 	DB     *gorm.DB
+	KeyDB  *gorm.DB
 	DBList map[string]*gorm.DB
 	LOGGER *zap.Logger
 	CONFIG config.SgwConfig
@@ -20,7 +21,7 @@ var (
 
 const (
 	UA_LEN  = 28
-	SAC_LEN = 12
+	SAC_LEN = 8
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db

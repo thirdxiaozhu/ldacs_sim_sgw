@@ -361,7 +361,7 @@ defineOptions({
 })
 
 // 自动化生成的字典（可能为空）以及字段
-//const AuthenticationOptions = ref([])
+// const AuthenticationOptions = ref([])
 const AuthstageOptions = ref([])
 const formData = ref({
   authc_as_sac: 0,
@@ -488,7 +488,7 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async() => {
-  //AuthenticationOptions.value = await getDictFunc('Authentication')
+  // AuthenticationOptions.value = await getDictFunc('Authentication')
   AuthstageOptions.value = await getDictFunc('Authstage')
 }
 

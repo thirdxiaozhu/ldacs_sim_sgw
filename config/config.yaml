@@ -1,7 +1,10 @@
 system:
+    sgw-ua: 10010
     db-type: mysql
     forward-addr: 8888
-    backward-addr: 7777
+    backward-addr: 6666
+key:
+    
 zap:
     level: info
     prefix: '[github.com/flipped-aurora/gin-vue-admin/server]'
@@ -47,9 +50,9 @@ mysql:
     prefix: ""
     port: "3306"
     config: charset=utf8mb4&parseTime=True&loc=Local
-    db-name: ldacs_sgw
-    username: root
-    password: 9456123
+    db-name: ldacs_sim_sgw
+    username: e304
+    password: e304
     path: 127.0.0.1
     engine: ""
     log-mode: error
@@ -89,10 +92,10 @@ sqlite:
     prefix: ""
     port: ""
     config: ""
-    db-name: ""
+    db-name: ld_sql
     username: ""
     password: ""
-    path: ""
+    path: /root/ldacs/ldacs_sim_sgw/resources/
     engine: ""
     log-mode: ""
     max-idle-conns: 10

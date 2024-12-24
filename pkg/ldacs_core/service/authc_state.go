@@ -86,7 +86,7 @@ func (authcStateService *AuthcStateService) GetAuthcStateInfoList(info ldacs_sgw
 	return authcStates, total, err
 }
 
-func (authcStateService *AuthcStateService) NewAuthcStateTrans(asSac, gsSac, gscSac uint64, newState global.AuthStateKind) error {
+func (authcStateService *AuthcStateService) NewAuthcStateTrans(asSac, gsSac, gscSac uint16, newState global.AuthStateKind) error {
 	accountAs, err := AccountAsSer.GetAccountAsBySac(asSac)
 	if err != nil {
 		global.LOGGER.Error("Failure", zap.Error(err))
