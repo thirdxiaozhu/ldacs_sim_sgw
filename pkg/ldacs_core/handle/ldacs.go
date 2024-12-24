@@ -3,7 +3,6 @@ package handle
 import (
 	"context"
 	"encoding/base64"
-	"github.com/hdt3213/godis/lib/logger"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
 	"ldacs_sim_sgw/pkg/backward_module"
@@ -117,7 +116,6 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
-		logger.Warn("++++++++++++++==================", u.AuthFsm.Fsm.Current())
 	}
 
 }
@@ -144,27 +142,6 @@ func (u *LdacsUnit) SendPkt(v any) {
 
 	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
 	sdu = append(sdu, hmac...)
-
-	//for i := range hmac {
-	//	fmt.Printf("%02x ", hmac[i])
-	//}
-	//fmt.Println()
-
-	//gsnfPkt := GsnfPkt{
-	//	GType: 0,
-	//	ASSac: u.AsSac,
-	//	Sdu:   sdu,
-	//}
-
-	//gsnfPdu := AssembleGsnfPkt(&GsnfPkt{
-	//GType: 0,
-	//	ASSac: u.AsSac,
-	//		Sdu:   sdu,
-	//})
-	//if gsnfPdu == nil {
-	//	global.LOGGER.Error("Failed Assemble", zap.Error(err))
-	//	return
-	//}
 
 	if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
 		GType: 0,
