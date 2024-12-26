@@ -177,7 +177,7 @@ type KUpdateKeyTransport struct {
     ElementLength  uint8   `ldacs:"name:Element_Length; size:4; type:enum"`
     KeyType        global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
     Key            []byte  `ldacs:"name:KEY; type:dbytes"` 
-    Nonce          []byte  `ldacs:"name:NONCE; bytes_size:16; type:fbytes"`
+    N4             []byte  `ldacs:"name:N4; bytes_size:16; type:fbytes"`
 }
 
 var (

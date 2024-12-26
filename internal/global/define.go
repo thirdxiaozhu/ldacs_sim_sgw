@@ -4,6 +4,7 @@ type LdEnum interface {
 	GetString() string
 	CheckValid() bool
 }
+/*================================*/
 
 type AuthStateKind uint16
 
@@ -39,7 +40,43 @@ func (f AuthStateKind) GetString() string {
 func (f AuthStateKind) CheckValid() bool {
 	return f <= AUTH_STAGE_OFF
 }
+/*==============密钥更新状态==============*/
 
+
+type KUpdateStateKind uint16
+
+const (
+	KUPDATE_STAGE_UNDEFINED KUpdateStateKind = iota /* 0 -- most likely accident */
+	KUPDATE_STAGE_DELETING                       /* indicates state is dead but not yet freed */
+
+	/* key update states */
+	KUPDATE_STAGE_A0
+	KUPDATE_STAGE_G0
+	KUPDATE_STAGE_A1
+	KUPDATE_STAGE_G1
+	KUPDATE_STAGE_A2
+	KUPDATE_STAGE_G2
+
+	KUPDATE_STAGE_OFF
+)
+
+func (k KUpdateStateKind) GetString() string {
+    return [...]string{
+        "KUPDATE_STAGE_UNDEFINED",
+        "KUPDATE_STAGE_DELETING",
+        "KUPDATE_STAGE_A0",
+        "KUPDATE_STAGE_G0",
+        "KUPDATE_STAGE_A1",
+        "KUPDATE_STAGE_G1",
+        "KUPDATE_STAGE_A2",
+        "KUPDATE_STAGE_G2",
+        "KUPDATE_STAGE_OFF",
+    }[k]
+}
+
+func (k KUpdateStateKind) CheckValid() bool {
+    return k <= KUPDATE_STAGE_OFF
+}
 /* ============================= */
 
 type STYPE uint8
@@ -66,7 +103,7 @@ func (f STYPE) CheckValid() bool {
 	return f >= AUC_RQST && f <= KUPDATE_RESPONSE 
 }
 
-/*----------------------------------------------------------------*/
+/*================================*/
 type GTYPE uint8
 
 const (
@@ -88,7 +125,7 @@ func (f G_TYPE) GetString() string {
 func (f G_TYPE) CheckValid() bool {
 	return f >= KEY_TRANSPORT && f <= KUPDATE_REMIND 
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type PID uint8
 
@@ -111,7 +148,7 @@ func (f PID) GetString() string {
 func (f PID) CheckValid() bool {
 	return f <= PID_BOTH
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type MacLen uint8
 
@@ -151,7 +188,7 @@ func (f MacLen) GetMacLen() uint32 {
 		return 0
 	}
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type AuthID uint8
 
@@ -172,7 +209,7 @@ func (f AuthID) GetString() string {
 func (f AuthID) CheckValid() bool {
 	return f <= AUTHC_AUTH_SM2_WITH_SM3
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type EncID uint8
 
@@ -199,7 +236,7 @@ func (f EncID) GetString() string {
 func (f EncID) CheckValid() bool {
 	return f <= AUTHC_ENC_SM4_CTR
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type KeyLen uint8
 
@@ -231,7 +268,7 @@ func (f KeyLen) GetKeyLen() uint {
 		return 0
 	}
 }
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type ElementType uint8
 
@@ -253,7 +290,7 @@ func (f ElementType) CheckValid() bool {
 	return f >= KEY_TRANPORT_AFTER_AKA && f <= KEY_UPDATE_REMIND
 }
 
-/*----------------------------------------------------------------*/
+/*================================*/
 
 type KeyType uint8
 
@@ -273,4 +310,4 @@ func (k KeyType)GetString() string {
 func (k KeyType) CheckValid() bool {
     return k >= MASTER_KEY_AS_GS_128 && k <= MASTER_KEY_AS_SGW_256
 }
-/*----------------------------------------------------------------*/
+

@@ -26,6 +26,7 @@ type LdacsUnit struct {
 	ConnID         uint32
 	State          *model.State
 	AuthFsm        *LdacsStateFsm
+	KUpdateFsm     *LdacsStateFsm // TODO: check this
 	HandlerRootKey unsafe.Pointer
 	HandlerAsSgw   unsafe.Pointer
 	KeyAsGs        []byte
@@ -38,6 +39,8 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 		AsSac:   asSac,
 		GsSac:   0xABD,
 		AuthFsm: InitNewAuthFsm(),
+		KUpdateFsm: InitNewKUpdateFsm(), // TODO: check this
+        KeyAsGs:    nil,
 		State:   service.InitState(asSac, 10010),
 	}
 
@@ -117,11 +120,54 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 			return
 		}
 
-	case global.KUPDATE_REQUEST:
-	case global.KUPDATE_RESPONSE:
-	}
-
+	case global.KUPDATE_REMIND:
+		var kUpdateRemind KUpdateRemind
 		
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &KUpdateRemind)
+		if err != nil {
+			global.LOGGER.Error("Unmarshel ldacs KUpdateRemind pkg error", zap.Error(err))
+			return
+		}
+		
+		isSuccess := VerifyHmac(u.HandlerAsSgw, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
+			return
+		}
+
+		st.Ver = uint8(kUpdateRemind.Ver)
+		st.PID = uint8(kUpdateRemind.PID)// TODO: check integrity
+		
+		// TODO: check state 
+		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G1.GetString()); err != nil {
+			return
+		}
+
+	case global.KUPDATE_RESPONSE:
+		var kUpdateResponse KUpdateResponse
+		
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &KUpdateResponse)
+		if err != nil {
+			global.LOGGER.Error("Unmarshel ldacs KUpdateResponse pkg error", zap.Error(err))
+			return
+		}
+		
+		isSuccess := VerifyHmac(u.HandlerAsSgw, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
+			return
+		}
+
+		st.Ver = uint8(kUpdateResponse.Ver)
+		st.ElementType = uint8(kUpdateResponse.ElementType)
+		st.ElementLength = uint8(kUpdateResponse.ElementLength)
+		st.KeyType = uint8(kUpdateResponse.KeyType) // TODO: check integrity
+		
+		// TODO: check state 
+		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G2.GetString()); err != nil {
+			return
+		}
+	}		
 }
 
 func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
