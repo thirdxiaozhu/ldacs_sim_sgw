@@ -140,6 +140,46 @@ type AucKeyExec struct {
 	N3     []byte        `ldacs:"name:N3; bytes_size: 16; type:fbytes"`
 }
 
+type KUpdateRemind struct {
+    GType       global.GTYPE  `ldacs:"name:G_TYPE; size:8; type:enum"` 
+    Ver         uint8  `ldacs:"name:VER; size:3; type:set"`
+    ASSac       uint16 `ldacs:"name:as_sac; size:12; type:set"`
+    ElementType global.ElementType `ldacs:"name:Element_Type; size:4; type:enum"` 
+    SGSSac      uint16 `ldacs:"name:gs_s_sac; size:12; type:set"`
+    TGSSAC      uint16 `ldacs:"name:gs_t_sac; size:12; type:set"`
+}
+
+type KUpdateRequest struct {
+    SType    global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
+    Ver      uint8   `ldacs:"name:VER; size:3; type:set"` 
+    PID      global.PID   `ldacs:"name:PID; size:2; type:enum"` 
+    ASSac    uint16  `ldacs:"name:as_sac; size:12; type:set"`
+    KeyType  global.KeyType   `ldacs:"name:KEY_TYPE; size:4; type:enum"` 
+    SGSSac   uint16  `ldacs:"name:gs_s_sac; size:12; type:set"`
+    TGSSAC   uint16  `ldacs:"name:gs_t_sac; size:12; type:set"`
+    N4       []byte  `ldacs:"name:N4; bytes_size:16; type:fbytes"`
+}
+
+type KUpdateResponse struct {
+    SType    global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
+    Ver      uint8   `ldacs:"name:VER; size:3; type:set"`
+    PID      global.PID   `ldacs:"name:PID; size:2; type:set"`
+    ASSac    uint16  `ldacs:"name:as_sac; size:12; type:set"`
+    KeyType  global.KeyType   `ldacs:"name:KEY_TYPE; size:4; type:enum"`
+    TGSSAC   uint16  `ldacs:"name:gs_t_sac; size:12; type:set"`
+}
+
+type KUpdateKeyTransport struct {
+    GType          global.GTYPE   `ldacs:"name:G_TYPE; size:8; type:enum"`
+    Ver            uint8   `ldacs:"name:VER; size:3; type:set"`
+    ASSac          uint16  `ldacs:"name:as_sac; size:12; type:set"`
+    ElementType    global.ElementType `ldacs:"name:Element_Type; size:4; type:set"`
+    ElementLength  uint8   `ldacs:"name:Element_Length; size:4; type:enum"`
+    KeyType        global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
+    Key            []byte  `ldacs:"name:KEY; type:dbytes"` 
+    Nonce          []byte  `ldacs:"name:NONCE; bytes_size:16; type:fbytes"`
+}
+
 var (
 	distro string
 )

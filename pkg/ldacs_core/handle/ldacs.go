@@ -116,8 +116,12 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
+
+	case global.KUPDATE_REQUEST:
+	case global.KUPDATE_RESPONSE:
 	}
 
+		
 }
 
 func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
