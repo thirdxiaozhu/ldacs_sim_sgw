@@ -50,13 +50,19 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 		return nil
 	}
 
-	//初始化为G0
+	// 认证状态机初始化为G0
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "unit", unit)
 	if err := unit.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
+
+	// 密钥更新状态机初始化为G0
+	if err := unit.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G0.GetString()); err != nil {
+        global.LOGGER.Error("错误！", zap.Error(err))
+        return nil
+    }
 	return unit
 }
 
@@ -136,7 +142,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		}
 
 		st.Ver = uint8(kUpdateRemind.Ver)
-		st.PID = uint8(kUpdateRemind.PID)// TODO: check integrity
+		st.ElementType = uint8(kUpdateRemind.ElementType)// TODO: check integrity
 		
 		// TODO: check state 
 		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G1.GetString()); err != nil {
@@ -159,10 +165,10 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		}
 
 		st.Ver = uint8(kUpdateResponse.Ver)
-		st.ElementType = uint8(kUpdateResponse.ElementType)
-		st.ElementLength = uint8(kUpdateResponse.ElementLength)
-		st.KeyType = uint8(kUpdateResponse.KeyType) // TODO: check integrity
-		
+		st.PID = uint8(kUpdateResponse.PID)
+		st.KeyType = uint8(kUpdateResponse.KeyType) 
+		st.TGSSAC = uint16(kUpdateResponse.TGSSAC)// TODO: check integrity
+
 		// TODO: check state 
 		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G2.GetString()); err != nil {
 			return

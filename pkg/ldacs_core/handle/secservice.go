@@ -317,3 +317,22 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 
 	return mkeyHandleAsSgw, mkeyHandleAsGs.Key, nil
 }
+
+// sgw update master key
+func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) (error) {
+	dbName := global.CONFIG.Sqlite.Dsn()
+	tableName := model.KeyEntity{}.TableName()
+
+	km, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
+		KeyState: "ACTIVE",
+		KeyType:  "MASTER_KEY_AS_GS",
+		Owner1:   util.UAformat(asUa),
+		Owner2:   util.UAformat(gsUa),
+	})
+
+	err := util.SGWUpdateMasterKey(dbName, tableName, km.KeyID, sgwUa, gstUa, nonce)
+	if err != nil {
+		return  err
+	}
+	return nil
+}

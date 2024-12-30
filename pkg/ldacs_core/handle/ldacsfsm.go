@@ -110,6 +110,13 @@ func (s *LdacsStateFsm) beforeKUpdateStateG2(ctx context.Context, e *fsm.Event) 
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
+	// update masterkey kas-gs
+	err := SGWUpdateMK(asUa, gsUa, sgwUa, gstUa, nonce) // TODO: check - parameter source
+	if err != nil {
+		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
+		return err
+	}
+
 	// generate random N4
 	N4 = GenerateRandomBytes(16)
 
