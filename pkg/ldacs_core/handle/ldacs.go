@@ -21,11 +21,11 @@ type LdacsHandler struct {
 }
 
 type LdacsUnit struct {
-	AsSac   uint16 `json:"as_sac"`
-	GsSac   uint16 `json:"gs_sac"`
-	ConnID  uint32
-	State   *model.State
-	AuthFsm *LdacsStateFsm
+	AsSac  uint16 `json:"as_sac"`
+	GsSac  uint16 `json:"gs_sac"`
+	ConnID uint32
+	State  *model.State
+	Fsm    *LdacsStateFsm
 	//KUpdateFsm     *LdacsStateFsm // TODO: check this
 	HandlerRootKey unsafe.Pointer
 	HandlerAsSgw   unsafe.Pointer
@@ -36,10 +36,10 @@ type LdacsUnit struct {
 func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 	var err error
 	unit := &LdacsUnit{
-		ConnID:  connId,
-		AsSac:   asSac,
-		GsSac:   0xABD,
-		AuthFsm: InitNewAuthFsm(),
+		ConnID: connId,
+		AsSac:  asSac,
+		GsSac:  0xABD,
+		Fsm:    InitNewAuthFsm(),
 		//KUpdateFsm: InitNewKUpdateFsm(), // TODO: check this
 		KeyAsGs: nil,
 		State:   service.InitState(asSac, 10010),
@@ -54,7 +54,7 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 	// 认证状态机初始化为G0
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "unit", unit)
-	if err := unit.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
+	if err := unit.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G0.GetString()); err != nil {
 		global.LOGGER.Error("错误！", zap.Error(err))
 		return nil
 	}
@@ -71,7 +71,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 	ctx := context.Background()
 	st := u.State
 	ctx = context.WithValue(ctx, "unit", u)
-	//logger.Warn(u.AuthFsm.Current())
+	//logger.Warn(u.Fsm.Current())
 	//for i := range gsnfSdu {
 	//	fmt.Printf("%02x ", gsnfSdu[i])
 	//}
@@ -98,7 +98,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.AuthId = uint8(aucRqst.AuthID)
 		st.EncId = uint8(aucRqst.EncID)
 
-		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
+		if err := u.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G1.GetString()); err != nil {
 			return
 		}
 
@@ -123,7 +123,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.AuthId = uint8(aucKeyExec.AuthID)
 		st.EncId = uint8(aucKeyExec.EncID)
 
-		if err := u.AuthFsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
+		if err := u.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
 
@@ -146,7 +146,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.ElementType = uint8(kUpdateRemind.ElementType) // TODO: check integrity
 
 		// TODO: check state
-		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G1.GetString()); err != nil {
+		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G3.GetString()); err != nil {
 			return
 		}
 
@@ -171,7 +171,7 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 		st.TGSSAC = uint16(kUpdateResponse.TGSSAC) // TODO: check integrity
 
 		// TODO: check state
-		if err := u.KUpdateFsm.Fsm.Event(ctx, global.KUPDATE_STAGE_G2.GetString()); err != nil {
+		if err := u.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
 	}

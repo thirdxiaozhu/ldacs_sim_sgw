@@ -45,7 +45,7 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 
 	return nil
 }
-func (s *LdacsStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) afterAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 	unit.SendPkt(&GSKeyTrans{
 		Key:   unit.KeyAsGs,
@@ -58,21 +58,30 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
+	N4 := GenerateRandomBytes(16)
 	// update masterkey kas-gs
-	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), nonce) // TODO: check - parameter source
+	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4) // TODO: check - parameter source
 	if err != nil {
 		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
 		return err
 	}
 
 	// generate random N4
-	N4 = GenerateRandomBytes(16)
 
 	unit.SendPkt(&KUpdateRequest{
 		KeyType: global.KeyType(st.KeyType),
 		Key:     st.KeyAsGs, // TODO: check
 		N4:      N4,         // TODO: storage N4
-	})
+	}, GSNF_CTRL_MSG)
+	return nil
+}
+
+func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error {
+	unit := ctx.Value("unit").(*LdacsUnit)
+	unit.SendPkt(&GSKeyTrans{
+		Key:   unit.KeyAsGs,
+		Nonce: unit.Nonce,
+	}, GSNF_GS_KEY)
 	return nil
 }
 func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
@@ -207,11 +216,14 @@ func InitNewAuthFsm() *LdacsStateFsm {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG1(ctx, e))
 			},
 			// 考虑改成after G1， 因为可能不是每一次转为就绪状态都需要给GS发密钥
-			"before_" + global.AUTH_STAGE_G2.GetString(): func(ctx context.Context, e *fsm.Event) {
-				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG2(ctx, e))
+			"after_" + global.AUTH_STAGE_G1.GetString(): func(ctx context.Context, e *fsm.Event) {
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.afterAuthStateG1(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_G3.GetString(): func(ctx context.Context, e *fsm.Event) {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG3(ctx, e))
+			},
+			"after_" + global.AUTH_STAGE_G3.GetString(): func(ctx context.Context, e *fsm.Event) {
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.afterAuthStateG3(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_UNDEFINED.GetString(): func(ctx context.Context, e *fsm.Event) {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateUndef(ctx, e))
