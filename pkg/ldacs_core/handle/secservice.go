@@ -139,6 +139,10 @@ type AucKeyExec struct {
 	EncID  global.EncID  `ldacs:"name:encid; size:4; type:enum"`
 	N3     []byte        `ldacs:"name:N3; bytes_size: 16; type:fbytes"`
 }
+type GSKeyTrans struct {
+	Key   []byte `ldacs:"name:KEY; type:dbytes"`
+	Nonce []byte `ldacs:"name:NONCE; type:dbytes"`
+}
 
 type KUpdateRemind struct {
 	SGSSac uint16 `ldacs:"name:gs_s_sac; size:12; type:set"`
@@ -237,15 +241,15 @@ func GetKeyHandle(state, ktype string, owner1, owner2 uint32) (unsafe.Pointer, e
 	return handle, nil
 }
 
-func GenerateSharedKey(unit *LdacsUnit) (N2 []byte, err error) {
+func GenerateSharedKey(unit *LdacsUnit) (err error) {
 	st := unit.State
-	N2 = GenerateRandomBytes(16)
 
+	unit.Nonce = GenerateRandomBytes(16)
 	SharedInfo := AucSharedInfo{
 		MacLen: global.MacLen(st.MacLen),
 		AuthID: global.AuthID(st.AuthId),
 		EncID:  global.EncID(st.EncId),
-		N2:     N2,
+		N2:     unit.Nonce,
 		ASSac:  uint16(st.AsSac),
 		GSSac:  uint16(st.GsSac),
 		KeyLen: global.KeyLen(st.KdfLen),
@@ -256,7 +260,7 @@ func GenerateSharedKey(unit *LdacsUnit) (N2 []byte, err error) {
 	unit.HandlerAsSgw, unit.KeyAsGs, err = SGWDeriveKey(util.UAformat(10010), util.UAformat(10086), util.UAformat(10000), uint32(SharedInfo.KeyLen.GetKeyLen()), random)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 	return
 }
