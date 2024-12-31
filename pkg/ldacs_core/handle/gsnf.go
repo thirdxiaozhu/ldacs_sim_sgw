@@ -6,8 +6,26 @@ import (
 	"ldacs_sim_sgw/internal/util"
 )
 
+type GTYPE uint8
+
+const (
+	GSNF_CTRL_MSG GTYPE = 0x00
+	GSNF_GS_KEY   GTYPE = 0x01
+)
+
+func (f GTYPE) GetString() string {
+	return [...]string{
+		"GSNF_CTRL_MSG",
+		"GSNF_GS_KEY",
+	}[f-GSNF_CTRL_MSG]
+}
+
+func (f GTYPE) CheckValid() bool {
+	return f <= GSNF_GS_KEY
+}
+
 type GsnfPkt struct {
-	GType uint8  `ldacs:"name:G_TYPE; size:4; type:set"`
+	GType GTYPE  `ldacs:"name:G_TYPE; size:4; type:set"`
 	ASSac uint16 `ldacs:"name:as_sac; size:12; type:set"`
 	Sdu   []byte `ldacs:"name:Sdu; type:dbytes"`
 }

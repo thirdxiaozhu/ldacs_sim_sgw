@@ -29,6 +29,7 @@ type LdacsUnit struct {
 	HandlerRootKey unsafe.Pointer
 	HandlerAsSgw   unsafe.Pointer
 	KeyAsGs        []byte
+	Nonce          []byte
 }
 
 func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
@@ -133,18 +134,20 @@ func (u *LdacsUnit) TransState(newState global.AuthStateKind) error {
 	return nil
 }
 
-func (u *LdacsUnit) SendPkt(v any) {
+func (u *LdacsUnit) SendPkt(v any, GType GTYPE) {
 	sdu, err := util.MarshalLdacsPkt(v)
 	if err != nil {
 		global.LOGGER.Error("Failed Send", zap.Error(err))
 		return
 	}
 
-	hmac, err := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
-	sdu = append(sdu, hmac...)
+	if GType == GSNF_CTRL_MSG {
+		hmac, _ := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
+		sdu = append(sdu, hmac...)
+	}
 
 	if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
-		GType: 0,
+		GType: GType,
 		ASSac: u.AsSac,
 		Sdu:   sdu,
 	}), u.ConnID); err != nil {

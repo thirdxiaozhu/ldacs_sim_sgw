@@ -21,7 +21,7 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
-	N2, err := GenerateSharedKey(unit)
+	err := GenerateSharedKey(unit)
 	if err != nil {
 		global.LOGGER.Error("Generate Shared key failed.", zap.Error(err))
 		return err
@@ -36,13 +36,18 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 		MacLen: global.MacLen(st.MacLen),
 		AuthID: global.AuthID(st.AuthId),
 		EncID:  global.EncID(st.EncId),
-		N2:     N2,
+		N2:     unit.Nonce,
 		KeyLen: global.KeyLen(st.KdfLen),
-	})
+	}, GSNF_CTRL_MSG)
 
 	return nil
 }
 func (s *LdacsStateFsm) beforeAuthStateG2(ctx context.Context, e *fsm.Event) error {
+	unit := ctx.Value("unit").(*LdacsUnit)
+	unit.SendPkt(&GSKeyTrans{
+		Key:   unit.KeyAsGs,
+		Nonce: unit.Nonce,
+	}, GSNF_GS_KEY)
 	return nil
 }
 func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
