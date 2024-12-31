@@ -12,10 +12,6 @@ const (
 	AUC_RQST     STYPE = 0x41
 	AUC_RESP     STYPE = 0x42
 	AUC_KEY_EXEC STYPE = 0x43
-	KUPDATE_REMIND GTYPE = 0x44 // check : how to handle gtype
-	KUPDATE_REQUEST STYPE = 0x45
-	KUPDATE_RESPONSE STYPE = 0x46
-	KEY_TRANSPORT GTYPE = 0x47 // check : how to handle gtype
 )
 
 func (f STYPE) GetString() string {

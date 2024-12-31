@@ -19,7 +19,8 @@ const (
 	AUTH_STAGE_A1
 	AUTH_STAGE_G1
 	AUTH_STAGE_A2
-	AUTH_STAGE_G2
+	AUTH_STAGE_G2 /* 就绪 */
+	AUTH_STAGE_G3 /* 密钥更新状态 */
 
 	AUTH_STAGE_OFF
 )
@@ -34,6 +35,7 @@ func (f AuthStateKind) GetString() string {
 		"AUTH_STAGE_G1",
 		"AUTH_STAGE_A2",
 		"AUTH_STAGE_G2",
+		"AUTH_STAGE_G3",
 		"AUTH_STAGE_OFF",
 	}[f]
 }
@@ -43,43 +45,41 @@ func (f AuthStateKind) CheckValid() bool {
 }
 
 /*==============密钥更新状态==============*/
-
-type KUpdateStateKind uint16
-
-const (
-	KUPDATE_STAGE_UNDEFINED KUpdateStateKind = iota /* 0 -- most likely accident */
-	KUPDATE_STAGE_DELETING                          /* indicates state is dead but not yet freed */
-
-	/* key update states */
-	KUPDATE_STAGE_A0
-	KUPDATE_STAGE_G0
-	KUPDATE_STAGE_A1
-	KUPDATE_STAGE_G1
-	KUPDATE_STAGE_A2
-	KUPDATE_STAGE_G2
-
-	KUPDATE_STAGE_OFF
-)
-
-func (k KUpdateStateKind) GetString() string {
-	return [...]string{
-		"KUPDATE_STAGE_UNDEFINED",
-		"KUPDATE_STAGE_DELETING",
-		"KUPDATE_STAGE_A0",
-		"KUPDATE_STAGE_G0",
-		"KUPDATE_STAGE_A1",
-		"KUPDATE_STAGE_G1",
-		"KUPDATE_STAGE_A2",
-		"KUPDATE_STAGE_G2",
-		"KUPDATE_STAGE_OFF",
-	}[k]
-}
-
-func (k KUpdateStateKind) CheckValid() bool {
-	return k <= KUPDATE_STAGE_OFF
-}
-
-/* ============================= */
+//
+//type KUpdateStateKind uint16
+//
+//const (
+//	KUPDATE_STAGE_UNDEFINED KUpdateStateKind = iota /* 0 -- most likely accident */
+//	KUPDATE_STAGE_DELETING                          /* indicates state is dead but not yet freed */
+//
+//	/* key update states */
+//	KUPDATE_STAGE_A0
+//	KUPDATE_STAGE_G0
+//	KUPDATE_STAGE_A1
+//	KUPDATE_STAGE_G1
+//	KUPDATE_STAGE_A2
+//	KUPDATE_STAGE_G2
+//
+//	KUPDATE_STAGE_OFF
+//)
+//
+//func (k KUpdateStateKind) GetString() string {
+//	return [...]string{
+//		"KUPDATE_STAGE_UNDEFINED",
+//		"KUPDATE_STAGE_DELETING",
+//		"KUPDATE_STAGE_A0",
+//		"KUPDATE_STAGE_G0",
+//		"KUPDATE_STAGE_A1",
+//		"KUPDATE_STAGE_G1",
+//		"KUPDATE_STAGE_A2",
+//		"KUPDATE_STAGE_G2",
+//		"KUPDATE_STAGE_OFF",
+//	}[k]
+//}
+//
+//func (k KUpdateStateKind) CheckValid() bool {
+//	return k <= KUPDATE_STAGE_OFF
+//}
 
 type STYPE uint8
 
@@ -98,39 +98,13 @@ func (f STYPE) GetString() string {
 		"AUC_KEY_EXEC",
 		"KUPDATE_REQUEST",
 		"KUPDATE_RESPONSE",
-	}[f-STYPE-INVALID] // check：modified
+	}[f-AUC_RQST] // check：modified
 }
 
 func (f STYPE) CheckValid() bool {
 	return f >= AUC_RQST && f <= KUPDATE_RESPONSE
 }
 
-// /*================================*/
-// type GTYPE uint8
-//
-// const (
-//
-//	KUPDATE_REMIND GTYPE = 0x03 // check：检查编码
-//	KUPDATE_REQUEST GTYPE = 0x04
-//	KUPDATE_RESPONSE GTYPE = 0x05
-//	KEY_TRANSPORT GTYPE = 0x06
-//
-// )
-//
-//	func (f G_TYPE) GetString() string {
-//		return [...]string{
-//			"KUPDATE_REMIND",
-//			"KUPDATE_REQUEST".
-//			"KUPDATE_RESPONSE",
-//			"KEY_TRANSPORT",
-//		}[f-GTYPE-INVALID]
-//	}
-//
-//	func (f G_TYPE) CheckValid() bool {
-//		return f >= KEY_TRANSPORT && f <= KUPDATE_REMIND
-//	}
-//
-// /*================================*/
 type PID uint8
 
 const (
