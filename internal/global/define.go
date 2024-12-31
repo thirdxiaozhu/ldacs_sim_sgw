@@ -4,6 +4,7 @@ type LdEnum interface {
 	GetString() string
 	CheckValid() bool
 }
+
 /*================================*/
 
 type AuthStateKind uint16
@@ -40,14 +41,14 @@ func (f AuthStateKind) GetString() string {
 func (f AuthStateKind) CheckValid() bool {
 	return f <= AUTH_STAGE_OFF
 }
-/*==============密钥更新状态==============*/
 
+/*==============密钥更新状态==============*/
 
 type KUpdateStateKind uint16
 
 const (
 	KUPDATE_STAGE_UNDEFINED KUpdateStateKind = iota /* 0 -- most likely accident */
-	KUPDATE_STAGE_DELETING                       /* indicates state is dead but not yet freed */
+	KUPDATE_STAGE_DELETING                          /* indicates state is dead but not yet freed */
 
 	/* key update states */
 	KUPDATE_STAGE_A0
@@ -61,31 +62,32 @@ const (
 )
 
 func (k KUpdateStateKind) GetString() string {
-    return [...]string{
-        "KUPDATE_STAGE_UNDEFINED",
-        "KUPDATE_STAGE_DELETING",
-        "KUPDATE_STAGE_A0",
-        "KUPDATE_STAGE_G0",
-        "KUPDATE_STAGE_A1",
-        "KUPDATE_STAGE_G1",
-        "KUPDATE_STAGE_A2",
-        "KUPDATE_STAGE_G2",
-        "KUPDATE_STAGE_OFF",
-    }[k]
+	return [...]string{
+		"KUPDATE_STAGE_UNDEFINED",
+		"KUPDATE_STAGE_DELETING",
+		"KUPDATE_STAGE_A0",
+		"KUPDATE_STAGE_G0",
+		"KUPDATE_STAGE_A1",
+		"KUPDATE_STAGE_G1",
+		"KUPDATE_STAGE_A2",
+		"KUPDATE_STAGE_G2",
+		"KUPDATE_STAGE_OFF",
+	}[k]
 }
 
 func (k KUpdateStateKind) CheckValid() bool {
-    return k <= KUPDATE_STAGE_OFF
+	return k <= KUPDATE_STAGE_OFF
 }
+
 /* ============================= */
 
 type STYPE uint8
 
 const (
-	AUC_RQST     STYPE = 0x41
-	AUC_RESP     STYPE = 0x42
-	AUC_KEY_EXEC STYPE = 0x43
-	KUPDATE_REQUEST STYPE = 0x44
+	AUC_RQST         STYPE = 0x41
+	AUC_RESP         STYPE = 0x42
+	AUC_KEY_EXEC     STYPE = 0x43
+	KUPDATE_REQUEST  STYPE = 0x44
 	KUPDATE_RESPONSE STYPE = 0x45
 )
 
@@ -100,33 +102,35 @@ func (f STYPE) GetString() string {
 }
 
 func (f STYPE) CheckValid() bool {
-	return f >= AUC_RQST && f <= KUPDATE_RESPONSE 
+	return f >= AUC_RQST && f <= KUPDATE_RESPONSE
 }
 
-/*================================*/
-type GTYPE uint8
-
-const (
-	KUPDATE_REMIND GTYPE = 0x03 // check：检查编码
-	KUPDATE_REQUEST GTYPE = 0x04
-	KUPDATE_RESPONSE GTYPE = 0x05
-	KEY_TRANSPORT GTYPE = 0x06 
-)
-
-func (f G_TYPE) GetString() string {
-	return [...]string{
-		"KUPDATE_REMIND", 
-		"KUPDATE_REQUEST".
-		"KUPDATE_RESPONSE",
-		"KEY_TRANSPORT", 
-	}[f-GTYPE-INVALID]
-}
-
-func (f G_TYPE) CheckValid() bool {
-	return f >= KEY_TRANSPORT && f <= KUPDATE_REMIND 
-}
-/*================================*/
-
+// /*================================*/
+// type GTYPE uint8
+//
+// const (
+//
+//	KUPDATE_REMIND GTYPE = 0x03 // check：检查编码
+//	KUPDATE_REQUEST GTYPE = 0x04
+//	KUPDATE_RESPONSE GTYPE = 0x05
+//	KEY_TRANSPORT GTYPE = 0x06
+//
+// )
+//
+//	func (f G_TYPE) GetString() string {
+//		return [...]string{
+//			"KUPDATE_REMIND",
+//			"KUPDATE_REQUEST".
+//			"KUPDATE_RESPONSE",
+//			"KEY_TRANSPORT",
+//		}[f-GTYPE-INVALID]
+//	}
+//
+//	func (f G_TYPE) CheckValid() bool {
+//		return f >= KEY_TRANSPORT && f <= KUPDATE_REMIND
+//	}
+//
+// /*================================*/
 type PID uint8
 
 const (
@@ -148,6 +152,7 @@ func (f PID) GetString() string {
 func (f PID) CheckValid() bool {
 	return f <= PID_BOTH
 }
+
 /*================================*/
 
 type MacLen uint8
@@ -188,6 +193,7 @@ func (f MacLen) GetMacLen() uint32 {
 		return 0
 	}
 }
+
 /*================================*/
 
 type AuthID uint8
@@ -209,6 +215,7 @@ func (f AuthID) GetString() string {
 func (f AuthID) CheckValid() bool {
 	return f <= AUTHC_AUTH_SM2_WITH_SM3
 }
+
 /*================================*/
 
 type EncID uint8
@@ -236,6 +243,7 @@ func (f EncID) GetString() string {
 func (f EncID) CheckValid() bool {
 	return f <= AUTHC_ENC_SM4_CTR
 }
+
 /*================================*/
 
 type KeyLen uint8
@@ -268,46 +276,22 @@ func (f KeyLen) GetKeyLen() uint {
 		return 0
 	}
 }
-/*================================*/
-
-type ElementType uint8
-
-const (
-	KEY_TRANPORT_AFTER_AKA ElementType = 0x08
-	KEY_UPDATE_KTRANPORT ElementType = 0x09
-	KEY_UPDATE_REMIND ElementType = 0x0c
-)
-
-func (f ElementType) GetString() string {
-	return [...]string{
-		KEY_TRANPORT_AFTER_AKA: "KEY_TRANPORT_AFTER_AKA",
-		KEY_UPDATE_KTRANPORT:   "KEY_UPDATE_KTRANPORT",
-		KEY_UPDATE_REMIND:      "KEY_UPDATE_REMIND",
-	}[f-ELEMENTTYPE-INVALID]
-}
-
-func (f ElementType) CheckValid() bool {
-	return f >= KEY_TRANPORT_AFTER_AKA && f <= KEY_UPDATE_REMIND
-}
-
-/*================================*/
 
 type KeyType uint8
 
 const (
-	MASTER_KEY_AS_GS_128 KeyType = 0x01
+	MASTER_KEY_AS_GS_128  KeyType = 0x01
 	MASTER_KEY_AS_SGW_128 KeyType = 0x02
 	MASTER_KEY_AS_SGW_256 KeyType = 0x03
 )
 
-func (k KeyType)GetString() string {
-    return [...]string{
-        MASTER_KEY_AS_GS_128:    "MASTER_KEY_AS_GS_128",
-        MASTER_KEY_AS_SGW_128:   "MASTER_KEY_AS_SGW_128",
-        MASTER_KEY_AS_SGW_256:   "MASTER_KEY_AS_SGW_256",
-    }[f-KEYTYPE-INVALID]
+func (k KeyType) GetString() string {
+	return [...]string{
+		MASTER_KEY_AS_GS_128:  "MASTER_KEY_AS_GS_128",
+		MASTER_KEY_AS_SGW_128: "MASTER_KEY_AS_SGW_128",
+		MASTER_KEY_AS_SGW_256: "MASTER_KEY_AS_SGW_256",
+	}[k-MASTER_KEY_AS_GS_128]
 }
 func (k KeyType) CheckValid() bool {
-    return k >= MASTER_KEY_AS_GS_128 && k <= MASTER_KEY_AS_SGW_256
+	return k >= MASTER_KEY_AS_GS_128 && k <= MASTER_KEY_AS_SGW_256
 }
-

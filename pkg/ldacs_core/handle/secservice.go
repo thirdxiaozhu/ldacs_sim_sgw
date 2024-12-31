@@ -141,43 +141,34 @@ type AucKeyExec struct {
 }
 
 type KUpdateRemind struct {
-    GType       global.GTYPE  `ldacs:"name:G_TYPE; size:8; type:enum"` 
-    Ver         uint8  `ldacs:"name:VER; size:3; type:set"`
-    ASSac       uint16 `ldacs:"name:as_sac; size:12; type:set"`
-    ElementType global.ElementType `ldacs:"name:Element_Type; size:4; type:enum"` 
-    SGSSac      uint16 `ldacs:"name:gs_s_sac; size:12; type:set"`
-    TGSSAC      uint16 `ldacs:"name:gs_t_sac; size:12; type:set"`
+	SGSSac uint16 `ldacs:"name:gs_s_sac; size:12; type:set"`
+	TGSSAC uint16 `ldacs:"name:gs_t_sac; size:12; type:set"`
 }
 
 type KUpdateRequest struct {
-    SType    global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
-    Ver      uint8   `ldacs:"name:VER; size:3; type:set"` 
-    PID      global.PID   `ldacs:"name:PID; size:2; type:enum"` 
-    ASSac    uint16  `ldacs:"name:as_sac; size:12; type:set"`
-    KeyType  global.KeyType   `ldacs:"name:KEY_TYPE; size:4; type:enum"` 
-    SGSSac   uint16  `ldacs:"name:gs_s_sac; size:12; type:set"`
-    TGSSAC   uint16  `ldacs:"name:gs_t_sac; size:12; type:set"`
-    N4       []byte  `ldacs:"name:N4; bytes_size:16; type:fbytes"`
+	SType   global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
+	Ver     uint8          `ldacs:"name:VER; size:3; type:set"`
+	PID     global.PID     `ldacs:"name:PID; size:2; type:enum"`
+	ASSac   uint16         `ldacs:"name:as_sac; size:12; type:set"`
+	KeyType global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
+	SGSSac  uint16         `ldacs:"name:gs_s_sac; size:12; type:set"`
+	TGSSAC  uint16         `ldacs:"name:gs_t_sac; size:12; type:set"`
+	N4      []byte         `ldacs:"name:N4; bytes_size:16; type:fbytes"`
 }
 
 type KUpdateResponse struct {
-    SType    global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
-    Ver      uint8   `ldacs:"name:VER; size:3; type:set"`
-    PID      global.PID   `ldacs:"name:PID; size:2; type:set"`
-    ASSac    uint16  `ldacs:"name:as_sac; size:12; type:set"`
-    KeyType  global.KeyType   `ldacs:"name:KEY_TYPE; size:4; type:enum"`
-    TGSSAC   uint16  `ldacs:"name:gs_t_sac; size:12; type:set"`
+	SType   global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
+	Ver     uint8          `ldacs:"name:VER; size:3; type:set"`
+	PID     global.PID     `ldacs:"name:PID; size:2; type:set"`
+	ASSac   uint16         `ldacs:"name:as_sac; size:12; type:set"`
+	KeyType global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
+	TGSSAC  uint16         `ldacs:"name:gs_t_sac; size:12; type:set"`
 }
 
 type KUpdateKeyTransport struct {
-    GType          global.GTYPE   `ldacs:"name:G_TYPE; size:8; type:enum"`
-    Ver            uint8   `ldacs:"name:VER; size:3; type:set"`
-    ASSac          uint16  `ldacs:"name:as_sac; size:12; type:set"`
-    ElementType    global.ElementType `ldacs:"name:Element_Type; size:4; type:set"`
-    ElementLength  uint8   `ldacs:"name:Element_Length; size:4; type:enum"`
-    KeyType        global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
-    Key            []byte  `ldacs:"name:KEY; type:dbytes"` 
-    N4             []byte  `ldacs:"name:N4; bytes_size:16; type:fbytes"`
+	KeyType global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
+	Key     []byte         `ldacs:"name:KEY; type:dbytes"`
+	N4      []byte         `ldacs:"name:N4; bytes_size:16; type:fbytes"`
 }
 
 var (
@@ -319,7 +310,7 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 }
 
 // sgw update master key
-func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) (error) {
+func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) error {
 	dbName := global.CONFIG.Sqlite.Dsn()
 	tableName := model.KeyEntity{}.TableName()
 
@@ -332,7 +323,7 @@ func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) (error) {
 
 	err := util.SGWUpdateMasterKey(dbName, tableName, km.KeyID, sgwUa, gstUa, nonce)
 	if err != nil {
-		return  err
+		return err
 	}
 	return nil
 }
