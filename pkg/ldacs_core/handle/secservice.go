@@ -331,3 +331,18 @@ func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) error {
 	}
 	return nil
 }
+
+// QueryKeyValueByOwnerWrapper 是对 QueryKeyValueByOwner 的封装，内部指定 dbName 和 tableName
+func SGWQueryKeyValueByOwner(owner1, owner2 string, keyType KeyType, state State) (*QueryResult, error) {
+	// 获取 dbName 和 tableName
+	dbName := global.CONFIG.Sqlite.Dsn() // 假设这是获取数据库名称的方式
+	tableName := model.KeyEntity{}.TableName() // 假设这是获取表名的方式
+
+	// 调用原始的 QueryKeyValueByOwner 接口
+	result, err := util.QueryKeyValueByOwner(dbName, tableName, owner1, owner2, keyType, state)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query key-value by owner: %w", err)
+	}
+
+	return result, nil
+}

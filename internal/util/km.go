@@ -21,6 +21,31 @@ import (
 @biref key manage API
 */
 
+
+type KeyType int
+type State int
+
+const (
+	ROOT_KEY KeyType = iota
+	MASTER_KEY_AS_SGW
+	MASTER_KEY_AS_GS
+	NH_KEY
+	SESSION_KEY_USR_ENC
+	SESSION_KEY_USR_INT
+	SESSION_KEY_CONTROL_ENC
+	SESSION_KEY_CONTROL_INT
+	GROUP_KEY_BC
+	GROUP_KEY_CC
+)
+const (
+	PRE_ACTIVATION State = iota
+	ACTIVE
+	SUSPENDED
+	DEACTIVATED
+	COMPROMISED
+	DESTROYED
+)
+
 /**************************************************
 *                   根密钥预置                     *
 **************************************************/
@@ -281,6 +306,42 @@ func QueryKeyValue(dbName, tableName, id string) (*QueryResult, error) {
 	}, nil
 }
 
+// QueryKeyValueByOwner 是 C 接口的 Go 封装
+func QueryKeyValueByOwner(dbName, tableName, owner1, owner2 string, keyType KeyType, state State) (*QueryResult, error) {
+	// 将 Go 字符串转换为 C 字符串
+	cDBName := C.CString(dbName)
+	cTableName := C.CString(tableName)
+	cOwner1 := C.CString(owner1)
+	cOwner2 := C.CString(owner2)
+	defer func() {
+		C.free(unsafe.Pointer(cDBName))
+		C.free(unsafe.Pointer(cTableName))
+		C.free(unsafe.Pointer(cOwner1))
+		C.free(unsafe.Pointer(cOwner2))
+	}()
+
+	// 调用 C 函数
+	result := C.query_keyvalue_by_owner(
+		(*C.uint8_t)(unsafe.Pointer(cDBName)),
+		(*C.uint8_t)(unsafe.Pointer(cTableName)),
+		cOwner1,
+		cOwner2,
+		C.enum_KEY_TYPE(keyType),
+		C.enum_STATE(state),
+	)
+	if result == nil {
+		return nil, fmt.Errorf("failed to call query_keyvalue_by_owner")
+	}
+	defer C.free(unsafe.Pointer(result))
+
+	// 将 C 结构体转换为 Go 结构体
+	goResult := &QueryResult{
+		KeyLen: int((*result).key_len), 
+		Key:    C.GoBytes(unsafe.Pointer((*result).key), C.int((*result).key_len)),
+	}
+	return goResult, nil
+}
+
 /**************************************************
 *                   密钥存储                      *
 **************************************************/
@@ -324,9 +385,8 @@ func InstallKey(dbname, tablename string, key []byte, sacAs, sacGs, nonce []byte
 	return nil
 }
 
-// 查询密钥id
 
-// 查询密钥值
+
 
 /**************************************************
 *                   密钥更新                      *

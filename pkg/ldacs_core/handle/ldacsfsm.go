@@ -58,30 +58,45 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
 
+	// generate random N4
 	N4 := GenerateRandomBytes(16)
+
 	// update masterkey kas-gs
-	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4) // TODO: check - parameter source
+	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4) 
 	if err != nil {
 		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
 		return err
 	}
+	
+	// store N4?
 
-	// generate random N4
-
+	// send kupdate request
 	unit.SendPkt(&KUpdateRequest{
-		KeyType: global.KeyType(st.KeyType),
-		Key:     st.KeyAsGs, // TODO: check
-		N4:      N4,         // TODO: storage N4
+		KeyType: global.MASTER_KEY_AS_GS_128,
+		SGSSac: util.UAformat(10000), 
+		TGSSAC: util.UAformat(10001)
+		N4:      N4,         
 	}, GSNF_CTRL_MSG)
 	return nil
 }
 
-func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error { /* 分发密钥 */
 	unit := ctx.Value("unit").(*LdacsUnit)
+
+	// query key value 
+	result, err := SGWQueryKeyValueByOwner(util.UAformat(10010), util.UAformat(10000),util.MASTER_KEY_AS_GS, util.ACTIVE);
+	if err != nil {
+		global.LOGGER.Error("Error querying key-value", zap.Error(err))
+	}
+
+	// query N4 ?
+	
 	unit.SendPkt(&GSKeyTrans{
-		Key:   unit.KeyAsGs,
-		Nonce: unit.Nonce,
+		KeyType: global.MASTER_KEY_AS_GS_128,
+		Key:   result.key,
+		Nonce: N4,
 	}, GSNF_GS_KEY)
+
 	return nil
 }
 func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
