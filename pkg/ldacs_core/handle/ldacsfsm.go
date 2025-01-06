@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
+	//"ldacs_sim_sgw/internal/util"
 )
 
 type LdacsStateFsm struct {
@@ -61,43 +62,49 @@ func (s *LdacsStateFsm) LeaveAuthStateG1(ctx context.Context, e *fsm.Event) erro
 func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
+	//
+	//// generate random N4
+	//N4 := GenerateRandomBytes(16)
+	unit.Nonce = GenerateRandomBytes(16)
 
-	// generate random N4
-	N4 := GenerateRandomBytes(16)
-
+	//
 	// update masterkey kas-gs
-	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4)
+	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10086), util.UAformat(10000), util.UAformat(10087), unit.Nonce)
 	if err != nil {
 		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
 		return err
 	}
-
 	// send kupdate request
 	unit.SendPkt(&KUpdateRequest{
+		SType:   global.KUPDATE_REQUEST,
+		Ver:     st.Ver,
+		PID:     global.PID(st.PID),
+		ASSac:   st.AsSac,
 		KeyType: global.MASTER_KEY_AS_GS_128,
-		SGSSac:  util.UAformat(10000),
-		TGSSAC:  util.UAformat(10001),
-		N4:      N4,
+		SGSSac:  st.GsSac,
+		TGSSAC:  10087,
+		NCC:     10086,
+		N4:      unit.Nonce,
 	}, GSNF_CTRL_MSG)
 	return nil
 }
 
 /* 网关：分发密钥给GS */
 func (s *LdacsStateFsm) LeaveAuthStateG3(ctx context.Context, e *fsm.Event) error {
-	unit := ctx.Value("unit").(*LdacsUnit)
-
-	// query key value
-	result, err := SGWQueryKeyValueByOwner(util.UAformat(10010), util.UAformat(10000), util.MASTER_KEY_AS_GS, util.ACTIVE)
-	if err != nil {
-		global.LOGGER.Error("Error querying key-value", zap.Error(err))
-	}
-
-	unit.SendPkt(&GSKeyTrans{
-		KeyType: global.MASTER_KEY_AS_GS_128,
-		Key:     result.key,
-		N4:      unit.Nonce,
-	}, GSNF_GS_KEY)
-
+	//unit := ctx.Value("unit").(*LdacsUnit)
+	//
+	//// query key value
+	//result, err := SGWQueryKeyValueByOwner(util.UAformat(10010), util.UAformat(10000), util.MASTER_KEY_AS_GS, util.ACTIVE)
+	//if err != nil {
+	//	global.LOGGER.Error("Error querying key-value", zap.Error(err))
+	//}
+	//
+	//unit.SendPkt(&GSKeyTrans{
+	//	KeyType: global.MASTER_KEY_AS_GS_128,
+	//	Key:     result.key,
+	//	N4:      unit.Nonce,
+	//}, GSNF_GS_KEY)
+	//
 	return nil
 }
 func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {

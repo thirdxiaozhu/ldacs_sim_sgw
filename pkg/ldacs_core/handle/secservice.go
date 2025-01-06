@@ -153,10 +153,11 @@ type KUpdateRequest struct {
 	SType   global.STYPE   `ldacs:"name:S_TYPE; size:8; type:enum"`
 	Ver     uint8          `ldacs:"name:VER; size:3; type:set"`
 	PID     global.PID     `ldacs:"name:PID; size:2; type:enum"`
-	ASSac   uint16         `ldacs:"name:as_sac; size:12; type:set"`
+	ASSac   uint16         `ldacs:"name:AS_SAC; size:12; type:set"`
 	KeyType global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
-	SGSSac  uint16         `ldacs:"name:gs_s_sac; size:12; type:set"`
-	TGSSAC  uint16         `ldacs:"name:gs_t_sac; size:12; type:set"`
+	SGSSac  uint16         `ldacs:"name:GS_SAC_SRC; size:12; type:set"`
+	TGSSAC  uint16         `ldacs:"name:GS_SAC_DST; size:12; type:set"`
+	NCC     uint16         `ldacs:"name:NCC; size:16; type:set"`
 	N4      []byte         `ldacs:"name:N4; bytes_size:16; type:fbytes"`
 }
 
@@ -325,24 +326,24 @@ func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) error {
 		Owner2:   util.UAformat(gsUa),
 	})
 
-	err := util.SGWUpdateMasterKey(dbName, tableName, km.KeyID, sgwUa, gstUa, nonce)
+	err = util.SGWUpdateMasterKey(dbName, tableName, km.KeyID, sgwUa, gstUa, nonce)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// QueryKeyValueByOwnerWrapper 是对 QueryKeyValueByOwner 的封装，内部指定 dbName 和 tableName
-func SGWQueryKeyValueByOwner(owner1, owner2 string, keyType KeyType, state State) (*QueryResult, error) {
-	// 获取 dbName 和 tableName
-	dbName := global.CONFIG.Sqlite.Dsn() // 假设这是获取数据库名称的方式
-	tableName := model.KeyEntity{}.TableName() // 假设这是获取表名的方式
-
-	// 调用原始的 QueryKeyValueByOwner 接口
-	result, err := util.QueryKeyValueByOwner(dbName, tableName, owner1, owner2, keyType, state)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query key-value by owner: %w", err)
-	}
-
-	return result, nil
-}
+//// QueryKeyValueByOwnerWrapper 是对 QueryKeyValueByOwner 的封装，内部指定 dbName 和 tableName
+//func SGWQueryKeyValueByOwner(owner1, owner2 string, keyType KeyType, state State) (*QueryResult, error) {
+//	// 获取 dbName 和 tableName
+//	dbName := global.CONFIG.Sqlite.Dsn() // 假设这是获取数据库名称的方式
+//	tableName := model.KeyEntity{}.TableName() // 假设这是获取表名的方式
+//
+//	// 调用原始的 QueryKeyValueByOwner 接口
+//	result, err := util.QueryKeyValueByOwner(dbName, tableName, owner1, owner2, keyType, state)
+//	if err != nil {
+//		return nil, fmt.Errorf("failed to query key-value by owner: %w", err)
+//	}
+//
+//	return result, nil
+//}

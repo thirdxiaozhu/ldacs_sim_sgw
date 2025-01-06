@@ -21,7 +21,6 @@ import (
 @biref key manage API
 */
 
-
 type KeyType int
 type State int
 
@@ -336,7 +335,7 @@ func QueryKeyValueByOwner(dbName, tableName, owner1, owner2 string, keyType KeyT
 
 	// 将 C 结构体转换为 Go 结构体
 	goResult := &QueryResult{
-		KeyLen: int((*result).key_len), 
+		KeyLen: int((*result).key_len),
 		Key:    C.GoBytes(unsafe.Pointer((*result).key), C.int((*result).key_len)),
 	}
 	return goResult, nil
@@ -385,9 +384,6 @@ func InstallKey(dbname, tablename string, key []byte, sacAs, sacGs, nonce []byte
 	return nil
 }
 
-
-
-
 /**************************************************
 *                   密钥更新                      *
 **************************************************/
@@ -401,7 +397,7 @@ func InstallKey(dbname, tablename string, key []byte, sacAs, sacGs, nonce []byte
  * @param[in] gsName 目的GS名字
  * @param[in] nonce 随机数
  */
-func SGWUpdateMasterKey(dbname, tablename, keyID, sgwName, gsName string, nonce []byte) int {
+func SGWUpdateMasterKey(dbname, tablename, keyID, sgwName, gsName string, nonce []byte) error {
 	cDbName := C.CString(dbname)
 	cTableName := C.CString(tablename)
 	cKeyID := C.CString(keyID)
@@ -426,7 +422,10 @@ func SGWUpdateMasterKey(dbname, tablename, keyID, sgwName, gsName string, nonce 
 	C.free(unsafe.Pointer(cSgwName))
 	C.free(unsafe.Pointer(cGsName))
 
-	return int(ret)
+	if ret != C.LD_KM_OK {
+		return fmt.Errorf("failed with error code %d", ret)
+	}
+	return nil
 }
 
 /*
