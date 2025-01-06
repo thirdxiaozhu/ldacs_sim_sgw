@@ -47,7 +47,7 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 }
 
 /* 网关：分发密钥给GS */
-func (s *LdacsStateFsm) afterAuthStateG1(ctx context.Context, e *fsm.Event) error {
+func (s *LdacsStateFsm) LeaveAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 
 	unit.SendPkt(&GSKeyTrans{
@@ -66,36 +66,36 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 	N4 := GenerateRandomBytes(16)
 
 	// update masterkey kas-gs
-	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4) 
+	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10000), util.UAformat(10086), util.UAformat(10001), N4)
 	if err != nil {
 		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
 		return err
 	}
-	
+
 	// send kupdate request
 	unit.SendPkt(&KUpdateRequest{
 		KeyType: global.MASTER_KEY_AS_GS_128,
-		SGSSac: util.UAformat(10000), 
-		TGSSAC: util.UAformat(10001)
-		N4:      N4,         
+		SGSSac:  util.UAformat(10000),
+		TGSSAC:  util.UAformat(10001),
+		N4:      N4,
 	}, GSNF_CTRL_MSG)
 	return nil
 }
 
 /* 网关：分发密钥给GS */
-func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error { 
+func (s *LdacsStateFsm) LeaveAuthStateG3(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 
-	// query key value 
-	result, err := SGWQueryKeyValueByOwner(util.UAformat(10010), util.UAformat(10000),util.MASTER_KEY_AS_GS, util.ACTIVE);
+	// query key value
+	result, err := SGWQueryKeyValueByOwner(util.UAformat(10010), util.UAformat(10000), util.MASTER_KEY_AS_GS, util.ACTIVE)
 	if err != nil {
 		global.LOGGER.Error("Error querying key-value", zap.Error(err))
 	}
-	
+
 	unit.SendPkt(&GSKeyTrans{
 		KeyType: global.MASTER_KEY_AS_GS_128,
-		Key:   result.key,
-		N4: unit.Nonce,
+		Key:     result.key,
+		N4:      unit.Nonce,
 	}, GSNF_GS_KEY)
 
 	return nil
@@ -232,14 +232,14 @@ func InitNewAuthFsm() *LdacsStateFsm {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG1(ctx, e))
 			},
 			// 考虑改成after G1， 因为可能不是每一次转为就绪状态都需要给GS发密钥
-			"after_" + global.AUTH_STAGE_G1.GetString(): func(ctx context.Context, e *fsm.Event) {
-				LdacsFsm.handleErrEvent(ctx, LdacsFsm.afterAuthStateG1(ctx, e))
+			"leave_" + global.AUTH_STAGE_G1.GetString(): func(ctx context.Context, e *fsm.Event) {
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.LeaveAuthStateG1(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_G3.GetString(): func(ctx context.Context, e *fsm.Event) {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateG3(ctx, e))
 			},
-			"after_" + global.AUTH_STAGE_G3.GetString(): func(ctx context.Context, e *fsm.Event) {
-				LdacsFsm.handleErrEvent(ctx, LdacsFsm.afterAuthStateG3(ctx, e))
+			"leave_" + global.AUTH_STAGE_G3.GetString(): func(ctx context.Context, e *fsm.Event) {
+				LdacsFsm.handleErrEvent(ctx, LdacsFsm.LeaveAuthStateG3(ctx, e))
 			},
 			"before_" + global.AUTH_STAGE_UNDEFINED.GetString(): func(ctx context.Context, e *fsm.Event) {
 				LdacsFsm.handleErrEvent(ctx, LdacsFsm.beforeAuthStateUndef(ctx, e))
