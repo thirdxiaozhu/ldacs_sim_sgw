@@ -45,8 +45,11 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 
 	return nil
 }
+
+/* 网关：分发密钥给GS */
 func (s *LdacsStateFsm) afterAuthStateG1(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
+
 	unit.SendPkt(&GSKeyTrans{
 		Key:   unit.KeyAsGs,
 		Nonce: unit.Nonce,
@@ -54,6 +57,7 @@ func (s *LdacsStateFsm) afterAuthStateG1(ctx context.Context, e *fsm.Event) erro
 	return nil
 }
 
+/* 网关：更新主密钥 发送密钥更新请求给AS */
 func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) error {
 	unit := ctx.Value("unit").(*LdacsUnit)
 	st := unit.State
@@ -68,8 +72,6 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 		return err
 	}
 	
-	// store N4?
-
 	// send kupdate request
 	unit.SendPkt(&KUpdateRequest{
 		KeyType: global.MASTER_KEY_AS_GS_128,
@@ -80,7 +82,8 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 	return nil
 }
 
-func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error { /* 分发密钥 */
+/* 网关：分发密钥给GS */
+func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) error { 
 	unit := ctx.Value("unit").(*LdacsUnit)
 
 	// query key value 
@@ -88,13 +91,11 @@ func (s *LdacsStateFsm) afterAuthStateG3(ctx context.Context, e *fsm.Event) erro
 	if err != nil {
 		global.LOGGER.Error("Error querying key-value", zap.Error(err))
 	}
-
-	// query N4 ?
 	
 	unit.SendPkt(&GSKeyTrans{
 		KeyType: global.MASTER_KEY_AS_GS_128,
 		Key:   result.key,
-		Nonce: N4,
+		N4: unit.Nonce,
 	}, GSNF_GS_KEY)
 
 	return nil
