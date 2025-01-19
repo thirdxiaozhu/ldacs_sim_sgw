@@ -2,20 +2,20 @@
 
 <template>
   <div class="flex gap-4 items-center text-sm text-gray-500 justify-center mb-4">
-    <span>Powered by</span>
+    <!-- <span>Powered by</span>
     <span>
       <a
         class="text-gray-800 font-bold"
         href="https://github.com/flipped-aurora/gin-vue-admin"
       >Gin-Vue-Admin</a>
-    </span>
+    </span> -->
     <slot />
-    <span>Copyright</span>
+    <!-- <span>Copyright</span> -->
     <span>
-      <a
+      <!-- <a
         class="text-gray-800 font-bold"
         href="https://github.com/flipped-aurora"
-      >中国民航大学海航科技大厦E304团队</a>
+      >中国民航大学海航科技大厦E304团队</a> -->
       <!--
       >flipped-aurora团队</a>
       -->

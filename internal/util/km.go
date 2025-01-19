@@ -397,30 +397,33 @@ func InstallKey(dbname, tablename string, key []byte, sacAs, sacGs, nonce []byte
  * @param[in] gsName 目的GS名字
  * @param[in] nonce 随机数
  */
-func SGWUpdateMasterKey(dbname, tablename, keyID, sgwName, gsName string, nonce []byte) error {
+func UpdateMasterKey(dbname, tablename, sgwName, gsSrcName, gsDstName, asName string, nonce []byte) error {
 	cDbName := C.CString(dbname)
 	cTableName := C.CString(tablename)
-	cKeyID := C.CString(keyID)
 	cSgwName := C.CString(sgwName)
-	cGsName := C.CString(gsName)
+	cGsSrcName := C.CString(gsSrcName)
+	cGsDstName := C.CString(gsDstName)
+	cAsName := C.CString(asName)
 	cNonce := (*C.uint8_t)(unsafe.Pointer(&nonce[0]))
 	cLenNonce := C.uint16_t(len(nonce))
 
-	ret := C.sgw_update_master_key(
+	ret := C.km_update_masterkey(
 		(*C.uint8_t)(unsafe.Pointer(cDbName)),
 		(*C.uint8_t)(unsafe.Pointer(cTableName)),
-		(*C.uint8_t)(unsafe.Pointer(cKeyID)),
 		(*C.uint8_t)(unsafe.Pointer(cSgwName)),
-		(*C.uint8_t)(unsafe.Pointer(cGsName)),
+		(*C.uint8_t)(unsafe.Pointer(cGsSrcName)),
+		(*C.uint8_t)(unsafe.Pointer(cGsDstName)),
+		(*C.uint8_t)(unsafe.Pointer(cAsName)),
 		cLenNonce,
 		cNonce,
 	)
 
 	C.free(unsafe.Pointer(cDbName))
 	C.free(unsafe.Pointer(cTableName))
-	C.free(unsafe.Pointer(cKeyID))
 	C.free(unsafe.Pointer(cSgwName))
-	C.free(unsafe.Pointer(cGsName))
+	C.free(unsafe.Pointer(cGsSrcName))
+	C.free(unsafe.Pointer(cGsDstName))
+	C.free(unsafe.Pointer(cAsName))
 
 	if ret != C.LD_KM_OK {
 		return fmt.Errorf("failed with error code %d", ret)

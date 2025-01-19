@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="gva-search-box">
+    <!-- <div class="gva-search-box">
       <el-form
         ref="elSearchFormRef"
         :inline="true"
@@ -83,7 +83,7 @@
           >重置</el-button>
         </el-form-item>
       </el-form>
-    </div>
+    </div> -->
     <div class="gva-table-box">
       <div class="gva-btn-list">
         <el-button

@@ -14,7 +14,9 @@ import (
 	"go.uber.org/zap"
 )
 
+const GTYPE_LEN = 4
 const GSNF_HEAD_LEN = 2
+const GSNF_SAC_HEAD_LEN = 4
 
 type LdacsHandler struct {
 	ldacsUnits sync.Map //as_sac <-> ld_u_c_node  map
@@ -63,8 +65,8 @@ func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
 }
 
 func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
-	ctx := context.Background()
 	st := u.State
+	ctx := context.Background()
 	ctx = context.WithValue(ctx, "unit", u)
 	//logger.Warn(u.Fsm.Current())
 	//for i := range gsnfSdu {
@@ -122,7 +124,28 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 			return
 		}
 
-		if err := u.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G3.GetString()); err != nil {
+		ctxG3 := context.Background()
+		ctxG3 = context.WithValue(ctxG3, "unit", u)
+		ctxG3 = context.WithValue(ctxG3, "targetGsSAC", uint16(0xABF))
+		if err := u.Fsm.Fsm.Event(ctxG3, global.AUTH_STAGE_G3.GetString()); err != nil {
+			return
+		}
+	case global.KUPDATE_RESPONSE:
+
+		var kupdResponse KUpdateResponse
+		tail, err := util.UnmarshalLdacsPkt(gsnfSdu, &kupdResponse)
+		if err != nil {
+			global.LOGGER.Error("Unmarshel ldacs error", zap.Error(err))
+			return
+		}
+
+		isSuccess := VerifyHmac(u.HandlerAsSgw, gsnfSdu[:tail], gsnfSdu[tail:], 32)
+		if isSuccess == false {
+			global.LOGGER.Error("Hmac Verify failed")
+			return
+		}
+
+		if err := u.Fsm.Fsm.Event(ctx, global.AUTH_STAGE_G2.GetString()); err != nil {
 			return
 		}
 	}
@@ -168,7 +191,7 @@ func (u *LdacsUnit) SendPkt(v any, GType GTYPE) {
 
 }
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
-	gsnfPkt := ParseGsnfPkt(msg)
+	gsnfPkt := ParseGsnf(msg)
 
 	unit, ok := l.ldacsUnits.Load(gsnfPkt.ASSac)
 	if ok == false {

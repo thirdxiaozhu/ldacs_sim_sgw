@@ -91,7 +91,7 @@
           type="primary"
           icon="plus"
           @click="openDialog"
-        >新增</el-button>
+        >创建根密钥</el-button>
         <el-popover
           v-model:visible="deleteVisible"
           :disabled="!multipleSelection.length"
@@ -125,8 +125,13 @@
         style="width: 100%"
         tooltip-effect="dark"
         :data="tableData"
-        row-key="ID"
+        row-key="id"
+        :tree-props="{
+          children:'children',//子数据加载字段
+          hasChildren:'hasChildren',//判断是否有子数据
+        }"
         @selection-change="handleSelectionChange"
+        :row-class-name="tableRowClassName">
       >
         <el-table-column
           type="selection"
@@ -182,25 +187,25 @@
             </template>
           </el-table-column>
         <el-table-column
-          align="left"
+          align="center"
           label="所有者1"
           prop="owner1"
           width="120"
         />
         <el-table-column
-          align="left"
+          align="center"
           label="所有者2"
           prop="owner2"
           width="120"
         />
         <el-table-column
-          align="left"
+          align="center"
           label="密钥长度"
           prop="key_len"
           width="120"
         />
         <el-table-column
-          align="left"
+          align="center"
           label="密钥状态"
           prop="key_state"
           width="120"
@@ -220,13 +225,13 @@
         </el-table-column>
 
         <el-table-column
-          align="left"
+          align="center"
           label="更新间隔"
           prop="updatecycle"
           width="120"
         />
         <el-table-column
-          align="left"
+          align="center"
           label="操作"
           min-width="120"
         >
@@ -261,7 +266,7 @@
           layout="total, sizes, prev, pager, next, jumper"
           :current-page="page"
           :page-size="pageSize"
-          :page-sizes="[10, 30, 50, 100]"
+          :page-sizes="[10,50,100]"
           :total="total"
           @current-change="handleCurrentChange"
           @size-change="handleSizeChange"
@@ -409,6 +414,14 @@
 <script>
   export default {
     name: 'Key_management',
+    methods: {
+      tableRowClassName({row, rowIndex}) {
+        if (typeof row.col1 === 'ROOT_KEY') {
+          return 'warning-row';
+        } 
+        return '';
+      }
+    },
     data(){
     return{
             options:[{
@@ -491,6 +504,7 @@ import {
 // 全量引入格式化工具 请按需保留
 import { getDictFunc, formatDate, formatBoolean, filterDict, ReturnArrImg, onDownloadFile } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { treeProps } from 'element-plus/es/components/tree-v2/src/virtual-tree';
 import { ref, reactive } from 'vue'
 
 defineOptions({
@@ -616,7 +630,12 @@ const handleCurrentChange = (val) => {
 const getTableData = async() => {
   const table = await getKeyEntityList({ page: page.value, pageSize: pageSize.value, ...searchInfo.value })
   if (table.code === 0) {
-    tableData.value = table.data.list
+    // 筛选出rootkey对应的数据 对象
+    let rootItem = table.data.list.find(v=>v.key_type==='ROOT_KEY')
+    // 将rootkey作为根数据，其他类型数据作为子数据赋值给rootkey里面的children
+    rootItem.children = table.data.list.filter(v=>v.key_type!=='ROOT_KEY')
+    // 最终渲染的数据是一个对象数组 赋值渲染
+    tableData.value = [rootItem]
     total.value = table.data.total
     console.log(tableData.value, total.value)
     page.value = table.data.page
@@ -878,5 +897,11 @@ const methodFilter3 =(value) =>{
 </script>
 
 <style>
+.el-table .warning-row {
+    background: oldlace;
+  }
 
+  .el-table .success-row {
+    background: #f0f9eb;
+  }
 </style>

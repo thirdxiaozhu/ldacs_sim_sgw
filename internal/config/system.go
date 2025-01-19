@@ -10,6 +10,7 @@ type System struct {
 	ForwardAddr  int    `mapstructure:"forward-addr" json:"forward-addr" yaml:"forward-addr"`    // 端口值
 	BackwardAddr int    `mapstructure:"backward-addr" json:"backward-addr" yaml:"backward-addr"` // 端口值
 	SgwUA        uint   `mapstructure:"sgw-ua" json:"sgw-ua" yaml:"sgw-ua"`                      // 端口值
+	ConnectMode  string `mapstructure:"connect-mode" json:"connect-mode" yaml:"connect-mode"`    // 端口值
 }
 
 func GetLinuxDistroCommand() string {

@@ -163,7 +163,7 @@ const toolCards = ref([
   {
     label: '密钥管理',
     icon: 'key',
-    name: 'key_management',
+    name: 'key',
     color: '#5cdbd3',
     bg: 'rgba(92, 219, 211,.3)'
   }

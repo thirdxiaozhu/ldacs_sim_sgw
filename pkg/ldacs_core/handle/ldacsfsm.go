@@ -3,6 +3,7 @@ package handle
 import (
 	"context"
 	"errors"
+	"github.com/hdt3213/godis/lib/logger"
 	"github.com/looplab/fsm"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
@@ -60,18 +61,19 @@ func (s *LdacsStateFsm) LeaveAuthStateG1(ctx context.Context, e *fsm.Event) erro
 
 /* 网关：更新主密钥 发送密钥更新请求给AS */
 func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) error {
+	logger.Warn("========================================")
 	unit := ctx.Value("unit").(*LdacsUnit)
+	targetGs := ctx.Value("targetGsSAC").(uint16)
 	st := unit.State
 	//
 	//// generate random N4
 	//N4 := GenerateRandomBytes(16)
 	unit.Nonce = GenerateRandomBytes(16)
 
-	//
 	// update masterkey kas-gs
-	err := SGWUpdateMK(util.UAformat(10010), util.UAformat(10086), util.UAformat(10000), util.UAformat(10087), unit.Nonce)
+	err := UpdateMasterKey(util.UAformat(10000), util.UAformat(10086), util.UAformat(10087), util.UAformat(10010), unit.Nonce)
 	if err != nil {
-		global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
+		global.LOGGER.Error("UpdateMasterKey failed.", zap.Error(err))
 		return err
 	}
 	// send kupdate request
@@ -82,7 +84,7 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 		ASSac:   st.AsSac,
 		KeyType: global.MASTER_KEY_AS_GS_128,
 		SGSSac:  st.GsSac,
-		TGSSAC:  10087,
+		TGSSAC:  targetGs,
 		NCC:     10086,
 		N4:      unit.Nonce,
 	}, GSNF_CTRL_MSG)
@@ -105,6 +107,7 @@ func (s *LdacsStateFsm) LeaveAuthStateG3(ctx context.Context, e *fsm.Event) erro
 	//	N4:      unit.Nonce,
 	//}, GSNF_GS_KEY)
 	//
+	logger.Warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}}}}}}}}}}}}}}}}}}}}")
 	return nil
 }
 func (s *LdacsStateFsm) afterEvent(ctx context.Context, e *fsm.Event) error {
@@ -176,9 +179,9 @@ func (s *LdacsStateFsm) beforeAuthStateUndef(ctx context.Context, e *fsm.Event) 
 //		st := unit.State
 //
 //		// update masterkey kas-gs
-//		err := SGWUpdateMK(asUa, gsUa, sgwUa, gstUa, nonce) // TODO: check - parameter source
+//		err := UpdateMasterKey(asUa, gsUa, sgwUa, gstUa, nonce) // TODO: check - parameter source
 //		if err != nil {
-//			global.LOGGER.Error("SGWUpdateMK failed.", zap.Error(err))
+//			global.LOGGER.Error("UpdateMasterKey failed.", zap.Error(err))
 //			return err
 //		}
 //

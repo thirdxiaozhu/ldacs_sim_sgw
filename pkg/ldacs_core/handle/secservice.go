@@ -168,6 +168,7 @@ type KUpdateResponse struct {
 	ASSac   uint16         `ldacs:"name:as_sac; size:12; type:set"`
 	KeyType global.KeyType `ldacs:"name:KEY_TYPE; size:4; type:enum"`
 	TGSSAC  uint16         `ldacs:"name:gs_t_sac; size:12; type:set"`
+	NCC     uint16         `ldacs:"name:NCC; size:16; type:set"`
 }
 
 type KUpdateKeyTransport struct {
@@ -315,18 +316,11 @@ func SGWDeriveKey(asUa, gsUa, sgwUa string, keyLen uint32, n []byte) (unsafe.Poi
 }
 
 // sgw update master key
-func SGWUpdateMK(asUa, gsUa, sgwUa, gstUa string, nonce []byte) error {
+func UpdateMasterKey(sgwUa, gssUa, gstUa, asUa string, nonce []byte) error {
 	dbName := global.CONFIG.Sqlite.Dsn()
 	tableName := model.KeyEntity{}.TableName()
 
-	km, err := service.KeyEntitySer.GetKeyEntityByContent(ldacs_sgw_forwardReq.KeyEntitySearch{
-		KeyState: "ACTIVE",
-		KeyType:  "MASTER_KEY_AS_GS",
-		Owner1:   util.UAformat(asUa),
-		Owner2:   util.UAformat(gsUa),
-	})
-
-	err = util.SGWUpdateMasterKey(dbName, tableName, km.KeyID, sgwUa, gstUa, nonce)
+	err := util.UpdateMasterKey(dbName, tableName, sgwUa, gssUa, gstUa, asUa, nonce)
 	if err != nil {
 		return err
 	}
