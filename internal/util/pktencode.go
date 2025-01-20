@@ -73,15 +73,12 @@ func typeFields(t reflect.Type) structFields {
 }
 
 func (e *encodePkt) appendBits(toShift *int, n uint64) {
-	logger.Warn("n:=========", n)
 	for *toShift > (^BITS_PER_BYTE + 1) {
 		if *toShift >= 0 {
 			e.bytes[e.currByte] |= uint8((n >> uint(*toShift)) & COMPLEMENT_8)
-			logger.Warn(e.bytes[e.currByte])
 			e.currByte++
 		} else {
 			e.bytes[e.currByte] |= uint8((n << (^(*toShift) + 1)) & COMPLEMENT_8)
-			logger.Warn(e.bytes[e.currByte])
 		}
 		*toShift -= BITS_PER_BYTE
 	}

@@ -167,7 +167,6 @@ func (c *GscConn) serve(ctx context.Context) {
 
 func SendPkt(pkt []byte, connId uint32) error {
 	// 发送数据前先置为waiting状态，阻止连接被关闭
-	logger.Warn("!!!!!!!!!!!!!!!!!", pkt)
 	if pkt == nil {
 		return errors.New("pkt is null")
 	}

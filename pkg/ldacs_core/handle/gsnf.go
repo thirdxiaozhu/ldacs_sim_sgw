@@ -1,7 +1,6 @@
 package handle
 
 import (
-	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
@@ -45,6 +44,10 @@ type GsnfPkt struct {
 	Sdu   []byte `ldacs:"name:Sdu; type:dbytes"`
 }
 
+type GSSacRespSdu struct {
+	AsSac uint16 `ldacs:"name:as_sac; size:12; type:set"`
+}
+
 type GSNFInitialAsMessage struct {
 	GType   GTYPE  `ldacs:"name:GroundTYPE; size:8; type:set"`
 	Version uint8  `ldacs:"name:Version; size:4; type:set"`
@@ -60,10 +63,6 @@ type GSNFMsgTrans struct {
 	ASSac   uint16 `ldacs:"name:as_sac; size:12; type:set"`
 	Element uint8  `ldacs:"name:Element Type; size:4; type:set"`
 	Sdu     []byte `ldacs:"name:Sdu; type:dbytes"`
-}
-
-type GSSacRespSdu struct {
-	AsSac uint16 `ldacs:"name:as_sac; size:12; type:set"`
 }
 
 func ParseGsnf(msg []byte) (any, error) {
@@ -99,7 +98,6 @@ func ParseGsnf(msg []byte) (any, error) {
 
 func AssembleGsnfPkt(pkt any) []byte {
 	gsnfPdu, err := util.MarshalLdacsPkt(pkt)
-	logger.Warn(pkt, gsnfPdu)
 	if err != nil {
 		global.LOGGER.Error("Failed Assemble Pkt", zap.Error(err))
 		return nil
