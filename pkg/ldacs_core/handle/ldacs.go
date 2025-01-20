@@ -24,6 +24,7 @@ type LdacsHandler struct {
 
 type LdacsUnit struct {
 	AsSac  uint16 `json:"as_sac"`
+	AsUa   uint32
 	GsSac  uint16 `json:"gs_sac"`
 	ConnID uint32
 	State  *model.State
@@ -35,11 +36,12 @@ type LdacsUnit struct {
 	Nonce          []byte
 }
 
-func InitLdacsUnit(connId uint32, asSac uint16) *LdacsUnit {
+func InitLdacsUnit(connId, asUa uint32, asSac uint16) *LdacsUnit {
 	var err error
 	unit := &LdacsUnit{
 		ConnID: connId,
 		AsSac:  asSac,
+		AsUa:   asUa,
 		GsSac:  0xABD,
 		Fsm:    InitNewAuthFsm(),
 		//KUpdateFsm: InitNewKUpdateFsm(), // TODO: check this
@@ -171,40 +173,77 @@ func (u *LdacsUnit) SendPkt(v any, GType GTYPE) {
 		return
 	}
 
-	if GType == GSNF_CTRL_MSG {
-		hmac, _ := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
-		sdu = append(sdu, hmac...)
-	}
+	switch GType {
+	case GSNF_SAC_RESP:
+		if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfSacPkt{
+			GType: uint8(GType),
+			UA:    u.AsUa,
+			Sdu:   sdu,
+		}), u.ConnID); err != nil {
+			global.LOGGER.Error("Failed Send", zap.Error(err))
+			return
+		}
+	case GSNF_SNF_DOWNLOAD, GSNF_GS_KEY_TRANS:
+		if GType == GSNF_SNF_DOWNLOAD {
+			hmac, _ := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
+			sdu = append(sdu, hmac...)
+		}
+		if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
+			GType: uint8(GType),
+			ASSac: u.AsSac,
+			Sdu:   sdu,
+		}), u.ConnID); err != nil {
+			global.LOGGER.Error("Failed Send", zap.Error(err))
+			return
+		}
 
-	if err = backward_module.SendPkt(AssembleGsnfPkt(&GsnfPkt{
-		GType: GType,
-		ASSac: u.AsSac,
-		Sdu:   sdu,
-	}), u.ConnID); err != nil {
-		global.LOGGER.Error("Failed Send", zap.Error(err))
+		if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), base64.StdEncoding.EncodeToString(sdu)); err != nil {
+			return
+		}
+	default:
 		return
 	}
-
-	if err = service.AuditAsRawSer.NewAuditRaw(u.AsSac, int(global.OriFl), base64.StdEncoding.EncodeToString(sdu)); err != nil {
-		return
-	}
-
 }
 func (l *LdacsHandler) Serve(msg []byte, connId uint32) {
-	gsnfPkt := ParseGsnf(msg)
-
-	unit, ok := l.ldacsUnits.Load(gsnfPkt.ASSac)
-	if ok == false {
-		unit = InitLdacsUnit(connId, gsnfPkt.ASSac)
-		l.ldacsUnits.Store(gsnfPkt.ASSac, unit)
-	}
-
-	ldacsUnitPtr := unit.(*LdacsUnit)
-	ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
-
-	if err := service.AuditAsRawSer.NewAuditRaw(gsnfPkt.ASSac, int(global.OriRl), base64.StdEncoding.EncodeToString(gsnfPkt.Sdu)); err != nil {
+	gsnfMsg, err := ParseGsnf(msg)
+	if err != nil {
+		global.LOGGER.Error("Serve Failure", zap.Error(err))
 		return
 	}
+
+	switch gsnfMsg.(type) {
+	case *GsnfPkt:
+		gsnfPkt := gsnfMsg.(*GsnfPkt)
+
+		unit, ok := l.ldacsUnits.Load(gsnfPkt.ASSac)
+		if ok == false {
+			return
+		}
+
+		ldacsUnitPtr := unit.(*LdacsUnit)
+		ldacsUnitPtr.HandleMsg(gsnfPkt.Sdu)
+
+		if err := service.AuditAsRawSer.NewAuditRaw(gsnfPkt.ASSac, int(global.OriRl), base64.StdEncoding.EncodeToString(gsnfPkt.Sdu)); err != nil {
+			return
+		}
+	case *GsnfSacPkt:
+		gsnfSacPkt := gsnfMsg.(*GsnfSacPkt)
+		var sac uint16 = 1234
+
+		unit, ok := l.ldacsUnits.Load(sac)
+		if ok == false {
+			unit = InitLdacsUnit(connId, gsnfSacPkt.UA, sac)
+			l.ldacsUnits.Store(sac, unit)
+		} else {
+			return
+		}
+
+		ldacsUnitPtr := unit.(*LdacsUnit)
+		ldacsUnitPtr.SendPkt(&GSSacRespSdu{AsSac: sac}, GSNF_SAC_RESP)
+
+	default:
+	}
+
 }
 
 func (l *LdacsHandler) Close(id uint32) {

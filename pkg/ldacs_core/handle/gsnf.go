@@ -1,6 +1,7 @@
 package handle
 
 import (
+	"github.com/hdt3213/godis/lib/logger"
 	"go.uber.org/zap"
 	"ldacs_sim_sgw/internal/global"
 	"ldacs_sim_sgw/internal/util"
@@ -15,8 +16,6 @@ const (
 	GSNF_SNF_UPLOAD   GTYPE = 0x03
 	GSNF_SNF_DOWNLOAD GTYPE = 0x04
 	GSNF_GS_KEY_TRANS GTYPE = 0x05
-	GSNF_CTRL_MSG     GTYPE = 0x00
-	GSNF_GS_KEY       GTYPE = 0x01
 )
 
 func (f GTYPE) GetString() string {
@@ -27,23 +26,21 @@ func (f GTYPE) GetString() string {
 		"GS_SNF_UPLOAD",
 		"GS_SNF_DOWNLOAD",
 		"GSNF_GS_KEY_TRANS",
-		"GSNF_CTRL_MSG",
-		"GSNF_GS_KEY",
-	}[f-GSNF_CTRL_MSG]
+	}[f-GSNF_SAC_RQST]
 }
 
 func (f GTYPE) CheckValid() bool {
-	return f <= GSNF_GS_KEY
+	return f <= GSNF_GS_KEY_TRANS
 }
 
 type GsnfSacPkt struct {
-	GType GTYPE  `ldacs:"name:G_TYPE; size:4; type:set"`
-	UA    uint16 `ldacs:"name:UA; size:28; type:set"`
+	GType uint8  `ldacs:"name:G_TYPE; size:4; type:set"`
+	UA    uint32 `ldacs:"name:UA; size:28; type:set"`
 	Sdu   []byte `ldacs:"name:Sdu; type:dbytes"`
 }
 
 type GsnfPkt struct {
-	GType GTYPE  `ldacs:"name:G_TYPE; size:4; type:set"`
+	GType uint8  `ldacs:"name:G_TYPE; size:4; type:set"`
 	ASSac uint16 `ldacs:"name:as_sac; size:12; type:set"`
 	Sdu   []byte `ldacs:"name:Sdu; type:dbytes"`
 }
@@ -65,10 +62,13 @@ type GSNFMsgTrans struct {
 	Sdu     []byte `ldacs:"name:Sdu; type:dbytes"`
 }
 
-func ParseGsnf(msg []byte) any {
+type GSSacRespSdu struct {
+	AsSac uint16 `ldacs:"name:as_sac; size:12; type:set"`
+}
+
+func ParseGsnf(msg []byte) (any, error) {
 	switch global.CONFIG.System.ConnectMode {
 	case "GS":
-
 		switch msg[0] >> (util.BITS_PER_BYTE - GTYPE_LEN) & (0xFF >> (util.BITS_PER_BYTE - GTYPE_LEN)) {
 		case byte(GSNF_SAC_RQST):
 			gsnfSacMsg := GsnfSacPkt{
@@ -76,28 +76,30 @@ func ParseGsnf(msg []byte) any {
 			}
 			_, err := util.UnmarshalLdacsPkt(msg, &gsnfSacMsg)
 			if err != nil {
-				return nil
+				return nil, err
 			}
-			return &gsnfSacMsg
+			return &gsnfSacMsg, nil
 		case byte(GSNF_SNF_DOWNLOAD):
 			gsnfMsg := GsnfPkt{
 				Sdu: make([]byte, len(msg)-GSNF_HEAD_LEN),
 			}
 			_, err := util.UnmarshalLdacsPkt(msg, &gsnfMsg)
 			if err != nil {
-				return nil
+				return nil, err
 			}
-			return &gsnfMsg
+			return &gsnfMsg, nil
 		}
 	case "GSC":
-		return nil
+		return nil, nil
 	default:
-		return nil
+		return nil, nil
 	}
+	return nil, nil
 }
 
-func AssembleGsnfPkt(pkt *GsnfPkt) []byte {
+func AssembleGsnfPkt(pkt any) []byte {
 	gsnfPdu, err := util.MarshalLdacsPkt(pkt)
+	logger.Warn(pkt, gsnfPdu)
 	if err != nil {
 		global.LOGGER.Error("Failed Assemble Pkt", zap.Error(err))
 		return nil

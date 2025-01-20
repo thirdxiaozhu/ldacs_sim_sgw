@@ -43,7 +43,7 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 		EncID:  global.EncID(st.EncId),
 		N2:     unit.Nonce,
 		KeyLen: global.KeyLen(st.KdfLen),
-	}, GSNF_CTRL_MSG)
+	}, GSNF_SNF_DOWNLOAD)
 
 	return nil
 }
@@ -55,7 +55,7 @@ func (s *LdacsStateFsm) LeaveAuthStateG1(ctx context.Context, e *fsm.Event) erro
 	unit.SendPkt(&GSKeyTrans{
 		Key:   unit.KeyAsGs,
 		Nonce: unit.Nonce,
-	}, GSNF_GS_KEY)
+	}, GSNF_GS_KEY_TRANS)
 	return nil
 }
 
@@ -87,7 +87,7 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 		TGSSAC:  targetGs,
 		NCC:     10086,
 		N4:      unit.Nonce,
-	}, GSNF_CTRL_MSG)
+	}, GSNF_SNF_DOWNLOAD)
 	return nil
 }
 

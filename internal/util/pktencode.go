@@ -73,19 +73,21 @@ func typeFields(t reflect.Type) structFields {
 }
 
 func (e *encodePkt) appendBits(toShift *int, n uint64) {
+	logger.Warn("n:=========", n)
 	for *toShift > (^BITS_PER_BYTE + 1) {
 		if *toShift >= 0 {
 			e.bytes[e.currByte] |= uint8((n >> uint(*toShift)) & COMPLEMENT_8)
+			logger.Warn(e.bytes[e.currByte])
 			e.currByte++
 		} else {
 			e.bytes[e.currByte] |= uint8((n << (^(*toShift) + 1)) & COMPLEMENT_8)
+			logger.Warn(e.bytes[e.currByte])
 		}
 		*toShift -= BITS_PER_BYTE
 	}
 }
 
 func (e *encodePkt) detachBits(toShift *int, n *uint64, preUnavil int) {
-
 	var specific uint8
 
 	for *toShift > (^BITS_PER_BYTE + 1) {
@@ -156,7 +158,6 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 			case "enum":
 				if fv.Interface() != nil {
 					if ldenum, ok := fv.Interface().(global.LdEnum); ok {
-						//fmt.Println(ldenum.CheckValid(), ldenum, fv.Interface())
 						if ldenum.CheckValid() == false {
 							return &UnsupportedValueError{v, f.name}
 						}
@@ -166,8 +167,8 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 			default:
 
 			}
-
 			e.appendBits(&toShift, n)
+			logger.Warn(e.bytes[:e.currByte], e.currByte)
 			bitsize += sz
 
 		case "fbytes":
@@ -246,7 +247,8 @@ func (se structEncoder) decode(e *encodePkt, v reflect.Value) error {
 		case "dbytes":
 			sz := uint64(len(fv.Bytes()))
 			if sz == 0 {
-				return &UnsupportedValueError{v, "0"}
+				//return &UnsupportedValueError{v, "0"}
+				continue
 			}
 			if bitsize%BITS_PER_BYTE != 0 {
 				// Pad
