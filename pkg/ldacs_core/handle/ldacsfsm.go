@@ -43,7 +43,7 @@ func (s *LdacsStateFsm) beforeAuthStateG1(ctx context.Context, e *fsm.Event) err
 		EncID:  global.EncID(st.EncId),
 		N2:     unit.Nonce,
 		KeyLen: global.KeyLen(st.KdfLen),
-	}, GSNF_SNF_DOWNLOAD)
+	}, GSNF_SNF_UPLOAD)
 
 	return nil
 }
@@ -87,7 +87,7 @@ func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) err
 		TGSSAC:  targetGs,
 		NCC:     10086,
 		N4:      unit.Nonce,
-	}, GSNF_SNF_DOWNLOAD)
+	}, GSNF_SNF_UPLOAD)
 	return nil
 }
 

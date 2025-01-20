@@ -168,22 +168,23 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 
 			}
 			e.appendBits(&toShift, n)
-			logger.Warn(e.bytes[:e.currByte], e.currByte)
 			bitsize += sz
 
 		case "fbytes":
 			sz := uint64(f.bytesSize)
 			if bitsize%BITS_PER_BYTE != 0 {
-				// Pad
+				// Pad and unaligned bit set 0
 				e.currByte++
+				bitsize = 0
 			}
 			copy(e.bytes[e.currByte:], fv.Bytes()[:sz])
 
 			e.currByte += sz
 		case "dbytes":
 			if bitsize%BITS_PER_BYTE != 0 {
-				// Pad
+				// Pad and unaligned bit set 0
 				e.currByte++
+				bitsize = 0
 			}
 			copy(e.bytes[e.currByte:], fv.Bytes()[:])
 
@@ -192,6 +193,10 @@ func (se structEncoder) encode(e *encodePkt, v reflect.Value) error {
 		default:
 
 		}
+	}
+	logger.Warn(e.bytes[:e.currByte], e.currByte, bitsize)
+	if bitsize%BITS_PER_BYTE != 0 {
+		e.currByte++
 	}
 
 	return nil

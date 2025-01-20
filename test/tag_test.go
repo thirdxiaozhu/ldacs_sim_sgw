@@ -53,12 +53,6 @@ type AucRqst struct {
 	Ver   uint8  `ldacs:"name:VER; size:3; type:set"`
 	PID   PID    `ldacs:"name:PID; size:2; type:enum"`
 	N1    []byte `ldacs:"name:N1; bytes_size: 3; type:fbytes"`
-	//N1 []byte `ldacs:"name:N1; type:dbytes"`
-	//ASSac  uint16 `ldacs:"required;minlength:8"`
-	//GSSac  uint16 `ldacs:"required;minlength:8"`
-	//MacLen uint8  `ldacs:"required;minlength:8"`
-	//AuthID uint8  `ldacs:"required;minlength:8"`
-	//EncID  uint8  `ldacs:"required;minlength:8"`
 }
 
 func TestTag(t *testing.T) {
@@ -79,7 +73,7 @@ func TestTag(t *testing.T) {
 	logger.Warn("Marshaled:", bytes)
 
 	rqst2 := AucRqst{
-		N1: make([]byte, 3),
+		//N1: make([]byte, 3),
 	}
 	_, err = util.UnmarshalLdacsPkt(bytes, &rqst2)
 	if err != nil {

@@ -183,8 +183,8 @@ func (u *LdacsUnit) SendPkt(v any, GType GTYPE) {
 			global.LOGGER.Error("Failed Send", zap.Error(err))
 			return
 		}
-	case GSNF_SNF_DOWNLOAD, GSNF_GS_KEY_TRANS:
-		if GType == GSNF_SNF_DOWNLOAD {
+	case GSNF_SNF_UPLOAD, GSNF_GS_KEY_TRANS:
+		if GType == GSNF_SNF_UPLOAD {
 			hmac, _ := util.CalcHMAC(u.HandlerAsSgw, sdu, global.MacLen(u.State.MacLen).GetMacLen())
 			sdu = append(sdu, hmac...)
 		}
