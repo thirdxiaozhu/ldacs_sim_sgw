@@ -61,7 +61,6 @@ func (s *LdacsStateFsm) LeaveAuthStateG1(ctx context.Context, e *fsm.Event) erro
 
 /* 网关：更新主密钥 发送密钥更新请求给AS */
 func (s *LdacsStateFsm) beforeAuthStateG3(ctx context.Context, e *fsm.Event) error {
-	logger.Warn("========================================")
 	unit := ctx.Value("unit").(*LdacsUnit)
 	targetGs := ctx.Value("targetGsSAC").(uint16)
 	st := unit.State

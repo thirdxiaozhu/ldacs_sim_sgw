@@ -70,11 +70,6 @@ func (u *LdacsUnit) HandleMsg(gsnfSdu []byte) {
 	st := u.State
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, "unit", u)
-	//logger.Warn(u.Fsm.Current())
-	//for i := range gsnfSdu {
-	//	fmt.Printf("%02x ", gsnfSdu[i])
-	//}
-	//fmt.Println()
 
 	switch global.STYPE(gsnfSdu[0]) {
 	case global.AUC_RQST:
